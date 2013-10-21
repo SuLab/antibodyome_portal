@@ -1,0 +1,14 @@
+.qq-upload-button {
+    background: transparent;
+    overflow: visible;
+    width: 117px;
+}
+.qq-upload-button-hover {
+    background: transparent;
+}
+.qq-upload-list li {
+    margin-bottom: 5px;
+}
+.qq-upload-list li.qq-upload-success {
+    background-color: #81CF84;
+}
