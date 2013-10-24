@@ -15,27 +15,25 @@ $(document).ready(function () {
             showButton: true
         },
 
-        chunking: {
-            enabled: true,
-            partSize: 2000000
-        },
-
         autoUpload: false,
         
         text: {
             uploadButton: '<a href="#" class="btn btn-default btn-success"> <span class="glyphicon glyphicon-plus"></span> Select Files</a>'
         },
+
+        chunking: {
+            enabled: true,
+            partSize: 100*1024*1024
+        },
         
         resume: {
-            enable: true
+            enabled: true
         },
 
         validation: {
             itemLimit: 5,
             sizeLimit: 2*1024*1024*1024
         },
-        
-        editFilename: true,
 
     });
 
