@@ -26,3 +26,7 @@ body {
 .bs-docs-nav .navbar-brand {
     color: #fff;
 }
+
+.user {
+    line-height: 3.6;
+}

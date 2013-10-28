@@ -18,7 +18,7 @@
     </head>
     <body>
         <!--begin navbar-->
-        <div class="navbar navbar-inverse navbar-fixed-top bs-docs-nav">
+        <div class="navbar navbar-default navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -39,6 +39,9 @@
                         <li>
                             <a href="#about">About</a>
                         </li>
+                        <li>
+                            <a id="user" href="#contact" data-toggle="modal" data-target="#myModal">login</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -51,9 +54,7 @@
                 <div>
                     <div id="manual-fine-uploader"></div>
                     <div class="upload-delete">
-                        <a href="javascript:;" id="triggerUpload" class="btn btn-primary active" role="button">
-                            <span class="glyphicon glyphicon-upload"></span> Upload
-                        </a>
+                        <a href="javascript:;" id="triggerUpload" class="btn btn-primary active" role="button"> <span class="glyphicon glyphicon-upload"></span> Upload </a>
 
                         <div id="delete" class="btn btn-danger">
                             <span class="glyphicon glyphicon-trash"></span> Delete
@@ -61,6 +62,11 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+        <!-- /container -->
+
+        <div class="container">
             <hr>
 
             <footer>
@@ -69,7 +75,6 @@
                 </p>
             </footer>
         </div>
-        <!-- /container -->
 
         <script src="http://code.jquery.com/jquery-latest.js"></script>
         <script src="3rd/bs3/js/bootstrap.min.js"></script>

@@ -15,9 +15,7 @@
 
     </head>
     <body>
-
-        <!--============================================================-->
-        <div class="navbar navbar-inverse navbar-fixed-top bs-docs-nav">
+        <div class="navbar navbar-default navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -33,22 +31,20 @@
                             <a href="#">Home</a>
                         </li>
                         <li>
-                            <a href="Upload.html">Upload</a>
+                            <a href="upload.html">Upload</a>
                         </li>
                         <li>
-                            <a href="#contact">About</a>
+                            <a href="#about">About</a>
+                        </li>
+                        <li class="user">
+                            <a id="user-login" href="#contact">login</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
-        <!--end of navbar-->
-
         <div class="jumbotron">
-            <!-- Jumbotron -->
             <div class="container">
-                <!-- container -->
-
                 <div class="row">
                     <div class="col-lg-3"></div>
                     <div class="col-lg-6">
@@ -58,11 +54,10 @@
                                 <button type="button" class="btn btn-default">
                                     <span class="glyphicon glyphicon-search"></span> Search
                                 </button> </span>
-                            <!--<span class="input-group-addon glyphicon glyphicon-search" ></span>-->
-                        </div><!-- /input-group -->
-                    </div><!-- /.col-lg-6 -->
+                        </div>
+                    </div>
                     <div class="col-lg-3"></div>
-                </div><!-- /.row -->
+                </div>
                 <p align="center">
                     Or
                 </p>
@@ -71,11 +66,10 @@
                         Click To Upload
                     </button>
                 </div>
-            </div><!-- End of container -->
-        </div><!--End of Jumbotron -->
+            </div>
+        </div>
 
         <div class="container">
-            <!-- Example row of columns -->
             <div class="row" style="p">
                 <div class="col-lg-4" >
                     <div class="panel panel-default">
@@ -118,34 +112,125 @@
                 </div>
             </div>
 
-            <hr>
-
+        </div>
+        <hr>
+        <div class="container">
             <footer>
                 <p>
                     &copy; Company 2013
                 </p>
             </footer>
         </div>
-        <!-- /container -->
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+
+        <div class="modal fade" id="my-login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="bs-example">
+                            <ul class="nav nav-tabs" style="margin-bottom: 15px;">
+                                <li class="active">
+                                    <a href="#login" data-toggle="tab">Login</a>
+                                </li>
+                                <li>
+                                    <a href="#register" data-toggle="tab">Register</a>
+                                </li>
+                            </ul>
+                            <div id="myTabContent" class="tab-content">
+                                <div class="tab-pane fade active in" id="login">
+                                    <div class="well">
+                                        <form class="bs-example form-horizontal">
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label for="username" class="col-lg-2 control-label">Username</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="text" class="form-control" id="username" placeholder="Username">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="password" class="col-lg-2 control-label">Password</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="password" class="form-control" id="password" placeholder="Password">
+                                                        <div class="checkbox">
+                                                            <label>
+                                                                <input type="checkbox">
+                                                                Remember me</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="alert alert-danger hide" id="blank-login">
+                                                    username or password can not be blank
+                                                </div>
+                                                <div class="alert alert-danger hide" id="error-login">
+                                                    Wrong username or password, please try again
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-lg-10 col-lg-offset-2">
+                                                        <button class="btn btn-default" data-dismiss="modal">
+                                                            Cancel
+                                                        </button>
+                                                        <button  class="btn btn-primary" id="login-button">
+                                                            Login
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="register">
+                                    <div class="well">
+                                        <form class="bs-example form-horizontal">
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label for="inputUsername" class="col-lg-2 control-label">Username</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="text" class="form-control" id="inputUsername" placeholder="Username">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="text" class="form-control" id="inputEmail" placeholder="Email">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="inputPassword" class="col-lg-2 control-label">Password</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="inputConfirm" class="col-lg-2 control-label">Confirm</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="password" class="form-control" id="inputConfirm" placeholder="Password">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-lg-10 col-lg-offset-2">
+                                                        <button class="btn btn-default">
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            Register
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="https://code.jquery.com/jquery.js"></script>
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/jquery-cookie/jquery.cookie.js"></script>
+        <script src="js/jquery-session/jquery.session.js"></script>
         <script src="3rd/bs3/js/bootstrap.min.js"></script>
-
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $("#upload-btn").mouseover(function() {
-                    $("#upload-btn").css("background-color", 'gray');
-                });
-                $("#upload-btn").mouseout(function() {
-                    $("#upload-btn").css("background-color", 'gainsboro');
-                });
-                $("#upload-btn").click(function() {
-                    window.location.href = 'upload.html';
-                });
-            });
-        </script>
-
+        <script src="js/home.js"></script>
     </body>
 </html>
 
