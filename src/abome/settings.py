@@ -1,6 +1,5 @@
 # Django settings for abome project.
 import os
-from settings_private import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -160,3 +159,11 @@ LOGGING = {
         },
     }
 }
+
+from settings_private import *
+
+if DEBUG:
+    try:
+        from settings_dev import *
+    except ImportError:
+        pass
