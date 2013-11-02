@@ -30,3 +30,17 @@ body {
 .user {
     line-height: 3.6;
 }
+
+.register-title {
+    margin-top: 0px;
+    color: #56787a;
+}
+
+.auth:hover{
+    text-decoration: none;
+}
+
+#social-auth{
+    color: #696B6D;
+    font-weight: bold;
+}

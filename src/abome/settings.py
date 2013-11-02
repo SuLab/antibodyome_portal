@@ -1,6 +1,9 @@
 # Django settings for abome project.
 import os
 
+SESSION_COOKIE_AGE = 1209600 # two weeks
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -73,7 +76,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(os.path.dirname(__file__), "../../web-app"),
-    os.path.join(os.path.dirname(__file__), "/registration/templates"),
+    os.path.join(os.path.dirname(__file__), "/auth/templates"),
 )
 
 # List of finder classes that know how to find static files in
@@ -115,6 +118,15 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.contrib.messages.context_processors.messages',
+)
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -126,9 +138,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-	'django_extensions',
-	
-    'registration',    
+    'social.apps.django_app.default',
+    'django_extensions',
+    'auth',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -161,6 +173,7 @@ LOGGING = {
 }
 
 from settings_private import *
+from settings_auth import *
 
 if DEBUG:
     try:

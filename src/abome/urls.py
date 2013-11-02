@@ -17,7 +17,8 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
     url(r'^upload/', include('upload.urls')),
-    url(r'^registration/', include('registration.urls')),
+    url(r'^auth/', include('auth.urls')),
+    url(r'', include('social.apps.django_app.urls', namespace='social')),
 )
 
 urlpatterns += static.static(settings.STATIC_URL, document_root = settings.STATIC_ROOT )
