@@ -6,6 +6,7 @@
         <!-- Bootstrap -->
         <link href="3rd/bs3/css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="css/abome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="3rd/font-awesome/css/font-awesome.min.css">
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -37,7 +38,8 @@
                             <a href="#about">About</a>
                         </li>
                         <li class="user">
-                            <a id="user-login" href="#contact">Login</a>
+                            <a id="user-login" href="#">Login</a>
+                            <div class="login-user-name"></div>
                         </li>
                     </ul>
                 </div>
@@ -62,9 +64,9 @@
                     Or
                 </p>
                 <div align="center" >
-                    <button id="upload-btn" type="button" class="btn btn-default" >
+                    <a class="btn btn-default" href="upload.html" >
                         Click To Upload
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -138,21 +140,21 @@
                             <div id="myTabContent" class="tab-content">
                                 <div class="tab-pane fade active in" id="login">
                                     <div class="well">
-                                        <form class="bs-example form-horizontal">
+                                        <form class="form-horizontal">
                                             <fieldset>
                                                 <div class="form-group">
                                                     <label for="username" class="col-lg-2 control-label">Username</label>
                                                     <div class="col-lg-10">
-                                                        <input type="text" class="form-control" id="username" placeholder="Username">
+                                                        <input type="text" name="username" class="form-control" id="username" placeholder="Username">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="password" class="col-lg-2 control-label">Password</label>
                                                     <div class="col-lg-10">
-                                                        <input type="password" class="form-control" id="password" placeholder="Password">
+                                                        <input type="password" name="password" class="form-control" id="password" placeholder="Password">
                                                         <div class="checkbox">
                                                             <label>
-                                                                <input type="checkbox">
+                                                                <input type="checkbox" checked="checked" class="remembered">
                                                                 Remember me</label>
                                                         </div>
                                                     </div>
@@ -163,60 +165,88 @@
                                                 <div class="alert alert-danger hide" id="error-login">
                                                     Wrong username or password, please try again
                                                 </div>
-                                                <div class="form-group">
-                                                    <div class="col-lg-10 col-lg-offset-2">
-                                                        <button class="btn btn-default" data-dismiss="modal">
-                                                            Cancel
-                                                        </button>
-                                                        <button  class="btn btn-primary" id="login-button">
-                                                            Login
-                                                        </button>
-                                                    </div>
-                                                </div>
                                             </fieldset>
                                         </form>
+                                        <div>
+                                            <button class="btn btn-default" data-dismiss="modal">
+                                                Cancel
+                                            </button>
+                                            <button  class="btn btn-primary" id="login-button">
+                                                Login
+                                            </button>
+                                        </div>
+                                        <br/>
+                                        <div id="social-auth">Or you can login in with:
+                                            <a href="/auth/login/twitter/" class="auth" > <i class="fa fa-twitter fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/facebook/" class="auth" > <i class="fa fa-facebook fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/google/" class="auth" > <i class="fa fa-google-plus fa-lg"></i></a>&nbsp;&nbsp;
+                                        </div>
+                                        <br/>
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="register">
-                                    <div class="well">
-                                        <form class="bs-example form-horizontal">
+                                    <form class="form-horizontal" id="register-form">
+                                        <div class="well">
+                                            <h4 class="register-title">Required</h4>
                                             <fieldset>
                                                 <div class="form-group">
                                                     <label for="inputUsername" class="col-lg-2 control-label">Username</label>
                                                     <div class="col-lg-10">
-                                                        <input type="text" class="form-control" id="inputUsername" placeholder="Username">
+                                                        <input type="text" class="form-control" name="username" id="id_username" placeholder="Username" data-validation="length server" data-validation-length="3-30" data-validation-url="/auth/check_username/">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="inputEmail" class="col-lg-2 control-label">Email</label>
                                                     <div class="col-lg-10">
-                                                        <input type="text" class="form-control" id="inputEmail" placeholder="Email">
+                                                        <input type="text" class="form-control" id="id_email" name="email" placeholder="Email" data-validation="email">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="inputPassword" class="col-lg-2 control-label">Password</label>
                                                     <div class="col-lg-10">
-                                                        <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                                                        <input type="password" class="form-control" id="id_password1" name="password1" placeholder="Password" data-validation="length" data-validation-length="min6">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="inputConfirm" class="col-lg-2 control-label">Confirm</label>
                                                     <div class="col-lg-10">
-                                                        <input type="password" class="form-control" id="inputConfirm" placeholder="Password">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="col-lg-10 col-lg-offset-2">
-                                                        <button class="btn btn-default">
-                                                            Cancel
-                                                        </button>
-                                                        <button type="submit" class="btn btn-primary">
-                                                            Register
-                                                        </button>
+                                                        <input type="password" class="form-control" id="id_password2" name="password2" placeholder="Password" data-validation="custom-confirm">
                                                     </div>
                                                 </div>
                                             </fieldset>
-                                        </form>
+                                        </div>
+                                        <div class="well">
+                                            <h4 class="register-title">Optional</h4>
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label for="inputFirsename" class="col-lg-2 control-label">FirstName</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="text" class="form-control" id="id_first_name" name="first_name" placeholder="First Name">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="inputLastname" class="col-lg-2 control-label">LastName</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="text" class="form-control" id="id_last_name" name="last_name" placeholder="Last Name">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="inputAffiliation" class="col-lg-2 control-label">Affiliation</label>
+                                                    <div class="col-lg-10">
+                                                        <input type="text" class="form-control" name="affiliation" id="id_affiliation">
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </form>
+                                    <div class="alert alert-danger hide" id="error-register">
+                                        register error, plese try again.
+                                    </div>
+                                    <div align="right">
+                                        <button class="btn btn-default" data-dismiss="modal">
+                                            cancel
+                                        </button>
+                                        <button class="btn btn-primary" id="register-button">
+                                            register
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -225,11 +255,11 @@
                 </div>
             </div>
         </div>
-
         <script src="https://code.jquery.com/jquery.js"></script>
         <script src="3rd/jquery-cookie/jquery.cookie.js"></script>
         <script src="3rd/jquery-session/jquery.session.js"></script>
         <script src="3rd/bs3/js/bootstrap.min.js"></script>
+        <script src="3rd/form-validator/jquery.form-validator.min.js"></script>
         <script src="js/home.js"></script>
     </body>
 </html>
