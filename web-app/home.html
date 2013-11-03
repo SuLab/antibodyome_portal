@@ -41,6 +41,17 @@
                             <a id="user-login" href="#">Login</a>
                             <div class="login-user-name"></div>
                         </li>
+                        <li class="dropdown hide" id="usernav" >
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="userinfo">User <span class="caret"></span></a>
+                            <ul class="dropdown-menu" aria-labelledby="userinfo" id="user-dropdown">
+                                <li>
+                                    <a tabindex="-1" href="#">Setting</a>
+                                </li>
+                                <li>
+                                    <a tabindex="-1" href="/auth/accounts/logout/">Logout</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -64,9 +75,7 @@
                     Or
                 </p>
                 <div align="center" >
-                    <a class="btn btn-default" href="upload.html" >
-                        Click To Upload
-                    </a>
+                    <a class="btn btn-default" href="upload.html" > Click To Upload </a>
                 </div>
             </div>
         </div>
@@ -176,8 +185,8 @@
                                             </button>
                                         </div>
                                         <br/>
-                                        <div id="social-auth">Or you can login in with:
-                                            <a href="/auth/login/twitter/" class="auth" > <i class="fa fa-twitter fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/facebook/" class="auth" > <i class="fa fa-facebook fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/google/" class="auth" > <i class="fa fa-google-plus fa-lg"></i></a>&nbsp;&nbsp;
+                                        <div id="social-auth">
+                                            Or you can login in with: <a href="/auth/login/twitter/" class="auth" > <i class="fa fa-twitter fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/facebook/" class="auth" > <i class="fa fa-facebook fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/google/" class="auth" > <i class="fa fa-google-plus fa-lg"></i></a>&nbsp;&nbsp;
                                         </div>
                                         <br/>
                                     </div>
