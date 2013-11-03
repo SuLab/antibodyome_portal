@@ -1,4 +1,4 @@
-# Amazon S3 configure
+#create settings_private.py according to this file and set your secrets
 AMAZON_STORAGE = {
     'ACCESS_KEY' : "",
     'SECRET_KEY' : "",
