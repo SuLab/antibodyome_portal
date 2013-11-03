@@ -1,9 +1,9 @@
 # Amazon S3 configure
 AMAZON_STORAGE = {
-    'ACCESS_KEY' : "AKIAIMPLN6YTZVD5Q3TA",
-    'SECRET_KEY' : "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",
-    'BUCKET_NAME' : 'abome-test',
-    'MAX_SIZE' : 1024*1024*1024*2
+    'ACCESS_KEY' : "",
+    'SECRET_KEY' : "",
+    'BUCKET_NAME' : '',
+    'MAX_SIZE' : 0
 }
 
 #third auth configure
