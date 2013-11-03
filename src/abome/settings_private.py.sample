@@ -1,8 +1,0 @@
-# Amazon S3 configure
-AMAZON_STORAGE = {
-    'ACCESS_KEY' : "<aws access key>",
-    'SECRET_KEY' : "<aws secret key>",
-    'BUCKET_NAME' : '<bucket name>',
-    'MAX_SIZE' : 1024*1024*1024*2
-}
-
