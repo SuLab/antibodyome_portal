@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-
+from social.apps.django_app.default.models import UserSocialAuth
 from auth.forms import RegistrationForm
 LOGIN_SUCCESS = 1
 LOGIN_FAILURE = 0
@@ -42,6 +42,7 @@ def register(request):
             auth_login(request, user)
             response = HttpResponse(json.dumps(data), content_type="application/json")
             response.set_cookie('username', username, max_age=60*60*24*14)
+            response.set_cookie('usertype', 'custom')
         else:
             data['status'] = REGISTER_FAILURE
             response = HttpResponse(json.dumps(data), content_type="application/json")
@@ -60,8 +61,10 @@ def login(request):
         response = HttpResponse(json.dumps(data), content_type="application/json")
         if remembered=='true':
             response.set_cookie('username', username, max_age=60*60*24*14)
+            response.set_cookie('usertype', 'custom')
         else:
             response.set_cookie('username', username)
+            response.set_cookie('usertype', 'custom')
     else:
         data['status'] = LOGIN_FAILURE
         response = HttpResponse(json.dumps(data), content_type="application/json")
@@ -77,16 +80,19 @@ def done(request):
     """Login complete view, displays user data"""
     #scope = ' '.join(GooglePlusAuth.DEFAULT_SCOPE)
     #import pdb;pdb.set_trace()
+    u = User.objects.get(username=request.user)
+    p = UserSocialAuth.objects.get(user = u)
     response = HttpResponseRedirect("/web-app/home.html")
     response.set_cookie("username",request.user.username)
+    response.set_cookie("usertype", p.provider)
     print request.user.username
+
     #response.set_cookie("email",request.user.email)
     #response.set_cookie("first_name",request.user.first_name)
     return response
 
 def signup_email(request):
     return render_to_response('email_signup.html', {}, RequestContext(request))
-
 
 def validation_sent(request):
     return render_to_response('validation_sent.html', {

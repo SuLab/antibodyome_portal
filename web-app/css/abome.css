@@ -44,3 +44,8 @@ body {
     color: #696B6D;
     font-weight: bold;
 }
+
+#user-dropdown{
+    min-width: 105px;
+}
+
