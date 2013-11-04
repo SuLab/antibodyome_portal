@@ -5,7 +5,6 @@ from django.contrib.auth.forms import UserCreationForm
 attrs_dict = { 'class': 'required' }
 
 class RegistrationForm(UserCreationForm):
-
     email = forms.CharField(max_length=50, required=True, widget=forms.TextInput());
     first_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput());
     last_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput());

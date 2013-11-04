@@ -11,5 +11,5 @@ urlpatterns = patterns('',
     url(r'^signup-email/', 'auth.views.signup_email'),
     url(r'^email-sent/', 'auth.views.validation_sent'),
     url(r'^done/$', 'auth.views.done', name='done'),
-    url(r'^email/$', 'auth.views.require_email', name='require_email'),
+    #url(r'^email/$', 'auth.views.require_email', name='require_email'),
 )

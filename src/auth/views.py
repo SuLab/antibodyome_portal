@@ -29,6 +29,7 @@ def check_username(request):
     return response
 
 def register(request):
+    import pdb;pdb.set_trace()
     data = {}
     if request.method == 'POST':
         user_form = RegistrationForm(request.POST)
@@ -42,7 +43,7 @@ def register(request):
             auth_login(request, user)
             response = HttpResponse(json.dumps(data), content_type="application/json")
             response.set_cookie('username', username, max_age=60*60*24*14)
-            response.set_cookie('usertype', 'custom')
+            response.set_cookie('usertype', 'laptop')
         else:
             data['status'] = REGISTER_FAILURE
             response = HttpResponse(json.dumps(data), content_type="application/json")
@@ -61,10 +62,10 @@ def login(request):
         response = HttpResponse(json.dumps(data), content_type="application/json")
         if remembered=='true':
             response.set_cookie('username', username, max_age=60*60*24*14)
-            response.set_cookie('usertype', 'custom')
+            response.set_cookie('usertype', 'laptop')
         else:
             response.set_cookie('username', username)
-            response.set_cookie('usertype', 'custom')
+            response.set_cookie('usertype', 'laptop')
     else:
         data['status'] = LOGIN_FAILURE
         response = HttpResponse(json.dumps(data), content_type="application/json")
@@ -75,34 +76,33 @@ def logout(request):
     response = HttpResponseRedirect("/web-app/home.html")
     response.delete_cookie('username')
     return response
+
 @login_required
 def done(request):
     """Login complete view, displays user data"""
-    #scope = ' '.join(GooglePlusAuth.DEFAULT_SCOPE)
-    #import pdb;pdb.set_trace()
-    u = User.objects.get(username=request.user)
-    p = UserSocialAuth.objects.get(user = u)
+    localuser = User.objects.get(username=request.user)
+    socialuser = UserSocialAuth.objects.get(user = localuser)
     response = HttpResponseRedirect("/web-app/home.html")
-    response.set_cookie("username",request.user.username)
-    response.set_cookie("usertype", p.provider)
-    print request.user.username
+    response.set_cookie("username",request.user.username.encode("utf-8"))
+    response.set_cookie("usertype", socialuser.provider.split("-")[0])
 
-    #response.set_cookie("email",request.user.email)
-    #response.set_cookie("first_name",request.user.first_name)
     return response
-
-def signup_email(request):
-    return render_to_response('email_signup.html', {}, RequestContext(request))
 
 def validation_sent(request):
     return render_to_response('validation_sent.html', {
         'email': request.session.get('email_validation_address')
     }, RequestContext(request))
 
+
+def signup_email(request):
+    return render_to_response('email_signup.html', {}, RequestContext(request))
+
+'''
 def require_email(request):
     if request.method == 'POST':
         request.session['saved_email'] = request.POST.get('email')
         backend = request.session['partial_pipeline']['backend']
         return redirect('social:complete', backend=backend)
     return HttpResponseRedirect("/web-app/email.html")
+'''
 
