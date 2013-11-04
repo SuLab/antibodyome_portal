@@ -6,7 +6,6 @@
         <!-- Bootstrap -->
         <link href="3rd/bs3/css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="css/abome.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="3rd/font-awesome/css/font-awesome.min.css">
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -186,7 +185,7 @@
                                         </div>
                                         <br/>
                                         <div id="social-auth">
-                                            Or you can login in with: <a href="/auth/login/twitter/" class="auth" > <i class="fa fa-twitter fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/facebook/" class="auth" > <i class="fa fa-facebook fa-lg"></i></a>&nbsp;&nbsp; <a href="/auth/login/google/" class="auth" > <i class="fa fa-google-plus fa-lg"></i></a>&nbsp;&nbsp;
+                                            Or you can login in with: <a href="/auth/login/twitter/" class="auth" > <img class="background-img" src="./3rd/icon/twitter-24.png"></a>&nbsp;&nbsp; <a href="/auth/login/facebook/" class="auth" > <img class="background-img" src="./3rd/icon/facebook-24.png"></a>&nbsp;&nbsp; <a href="/auth/login/google-oauth2/" class="auth" > <img class="background-img" src="./3rd/icon/google-24.png"></a>&nbsp;&nbsp;<a href="/auth/login/yahoo/" class="auth" > <img class="background-img" src="./3rd/icon/yahoo-24.png"></a>
                                         </div>
                                         <br/>
                                     </div>
@@ -199,7 +198,7 @@
                                                 <div class="form-group">
                                                     <label for="inputUsername" class="col-lg-2 control-label">Username</label>
                                                     <div class="col-lg-10">
-                                                        <input type="text" class="form-control" name="username" id="id_username" placeholder="Username" data-validation="length server" data-validation-length="3-30" data-validation-url="/auth/check_username/">
+                                                        <input type="text" class="form-control" name="username" id="id_username" placeholder="3-30 characters. Letters, digits and @/./+/-/_ only." data-validation="length server" data-validation-length="3-30" data-validation-url="/auth/check_username/">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
