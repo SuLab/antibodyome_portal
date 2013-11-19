@@ -12,3 +12,6 @@
 .qq-upload-list li.qq-upload-success {
     background-color: #81CF84;
 }
+#sample{
+    display: none;
+}

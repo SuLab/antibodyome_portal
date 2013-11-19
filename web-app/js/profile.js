@@ -1,3 +1,4 @@
+$("#navbar").load("navbar.html");
 //data for profile_v
 var vvalue = new Array();
 var varray = new Array();
