@@ -1,3 +1,4 @@
+$("#navbar").load("navbar.html");
 //some value of plot
 var line1 = [14, 32, 41, 44, 40];
 var line2 = [10, 20, 30, 40, 50];

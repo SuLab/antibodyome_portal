@@ -29,7 +29,6 @@ def check_username(request):
     return response
 
 def register(request):
-    import pdb;pdb.set_trace()
     data = {}
     if request.method == 'POST':
         user_form = RegistrationForm(request.POST)
@@ -43,7 +42,7 @@ def register(request):
             auth_login(request, user)
             response = HttpResponse(json.dumps(data), content_type="application/json")
             response.set_cookie('username', username, max_age=60*60*24*14)
-            response.set_cookie('usertype', 'laptop')
+            response.set_cookie('usertype', 'me', max_age=60*60*24*14)
         else:
             data['status'] = REGISTER_FAILURE
             response = HttpResponse(json.dumps(data), content_type="application/json")
@@ -62,10 +61,11 @@ def login(request):
         response = HttpResponse(json.dumps(data), content_type="application/json")
         if remembered=='true':
             response.set_cookie('username', username, max_age=60*60*24*14)
-            response.set_cookie('usertype', 'laptop')
+            response.set_cookie('usertype', 'me', max_age=60*60*24*14)
         else:
+            request.session.set_expiry(0)
             response.set_cookie('username', username)
-            response.set_cookie('usertype', 'laptop')
+            response.set_cookie('usertype', 'me',max_age=60*60*24*14)
     else:
         data['status'] = LOGIN_FAILURE
         response = HttpResponse(json.dumps(data), content_type="application/json")
@@ -84,7 +84,7 @@ def done(request):
     socialuser = UserSocialAuth.objects.get(user = localuser)
     response = HttpResponseRedirect("/web-app/home.html")
     response.set_cookie("username",request.user.username.encode("utf-8"))
-    response.set_cookie("usertype", socialuser.provider.split("-")[0])
+    response.set_cookie("usertype", socialuser.provider.split("-")[0],max_age=60*60*24*14)
 
     return response
 
