@@ -2,10 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django_extensions.db.fields import AutoSlugField
 import jsonfield
+from django.core.serializers import serialize
+
 
 class ProjectManager(models.Manager):
     def get_by_natual_key(self, user, name):
         return self.get(user=user, name=name)
+
 
 class Project(models.Model):
     objects = ProjectManager()
@@ -18,9 +21,34 @@ class Project(models.Model):
     lastmodified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now=True)
     slug = AutoSlugField(populate_from='title')
-    status = models.IntegerField(null=False, default=0)
+    STATUS_OPTIONS = (
+        (0, 'editing'),
+        (1, 'ready'),
+        (2, 'analyzing'),
+        (3, 'analyzed'),
+        (4, 'analyze failed'),
+    )
+    status = models.IntegerField(null=False, default=0, choices=STATUS_OPTIONS)
+    ready = models.BooleanField(default=False)
+
     def natual_key(self):
         return (self.user, self.name)
+
+    @property
+    def samples(self):
+        return self.sample_set.all()
+        samples = self.sample_set.all()
+        samples_dict = serialize('json',samples)
+        return samples_dict
+
+    @property
+    def manifest(self):
+        attribute_key_list = ['id','organism','title','summary','metadata', 'status', 'samples']
+        entity_dict = {}
+        for key in attribute_key_list:
+            entity_dict[key] = self.__getattribute__(key)
+        return entity_dict
+
 
 class Sample(models.Model):
     #id = models.CharField(max_length=20, primary_key=True)
@@ -31,4 +59,4 @@ class Sample(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     lastmodified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now=True)
-    status = models.IntegerField(null=False, default=0)
+    status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
