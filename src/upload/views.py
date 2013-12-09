@@ -14,6 +14,9 @@ from django.views.decorators.http import require_http_methods
 CREATE_SUCCESS = 1
 CREATE_FAILURE = 0
 
+SUCCESS = 1
+FAILURE = 0
+
 S3 = None
 
 try:
@@ -86,7 +89,6 @@ def make_response(status=200, content=None):
     return response
 
 def create_project(request):
-
     user = request.user
     content = simplejson.loads(request.body)
     data = {}
@@ -115,9 +117,10 @@ def create_sample(request, id):
 
 @require_http_methods(["POST"])
 def submit_analyze(request, pk):
-    try:        
-        p = Project.objects.get(pk=pk)        
-        p.status = 1        
+    try:
+        p = Project.objects.get(pk=pk)
+        p.status = 1
+        p.ready = True
         p.save()
         return HttpResponse('ok', content_type="application/json")
     except Exception, e:
@@ -151,5 +154,3 @@ class ProjectDetail(AbomeDetailView):
         s_qs = Sample.objects.filter(project=p)
         p_j['samples'] = list(s_qs.values())
         return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), content_type="application/json")
-
-

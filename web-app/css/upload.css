@@ -69,3 +69,7 @@
        -o-animation: progress-bar-stripes 2s linear infinite;
           animation: progress-bar-stripes 2s linear infinite;
 }
+
+.project_next ,.project_prev {
+  cursor: pointer;
+}

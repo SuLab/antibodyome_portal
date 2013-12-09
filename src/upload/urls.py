@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
     url(r'^sign-policy', views.handle_s3_POST, name="sign-policy-form-POST"),
-    url(r'^create-project', views.create_project, name="create-project"),
+    url(r'^create-project/', views.create_project, name="create-project"),
     url(r'^create-sample/(?P<id>\d+)', views.create_sample, name="create-sample"),
     url(r'^project/(?P<pk>\d+)/$', views.ProjectDetail.as_view(), name="project-detail"),
     url(r'^project-list/$', views.ProjectList.as_view(), name="project-list"),

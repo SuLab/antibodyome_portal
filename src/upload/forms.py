@@ -6,4 +6,4 @@ from upload.models import Project
 class ProjectForm(ModelForm):
 	class Meta:
 		model = Project
-		fields = ('title', 'organism', 'summary')
+		fields = ('title','permission','organism', 'summary')
