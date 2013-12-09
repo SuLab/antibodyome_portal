@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 #from upload.analysis import Analysis
 
 import threading
-from django.conf import settings 
+from django.conf import settings
 #settings.configure()
 import time
 from rpyc.utils.ssh import SshContext
@@ -16,42 +16,39 @@ from django.contrib.auth import models
 
 
 class Analysis(threading.Thread):
-    
-    
     def __init__(self):
         '''
             "interval" is search time interval
         '''
         threading.Thread.__init__(self)
         self.SLEEP_TIME = 10
-        self.stop = False                
+        self.stop = False
         self.status = None
         self.conn = None
-        
+
     def setup_remote_host(self):
-        
-        sshctx = SshContext("54.200.130.110", user = "ubuntu", keyfile = r"/home/jinxf/ABOME/abome_github/abome/jsetc_dev.pem")#modify the keyfile to your own keyfile path
+        sshctx = SshContext("54.200.130.110", user = "ubuntu", keyfile = settings.SSH_KEY_PATH)#modify the keyfile to your own keyfile path
         self.conn = rpyc.ssh_connect(sshctx, 18861,config={"allow_public_attrs": True})
-        print self.conn.root.status()        
+        print self.conn.root.status()
         self.conn.root.set_stdout(sys.stdout)
-        self.conn.root.prepare_workers()        
-     
+        #block until machine ready
+        self.conn.root.prepare_workers()
+
     def close_remote_host(self):
-        if self.conn is not None:    
+        if self.conn is not None:
             self.conn.root.terminate_workers()
             self.conn.root.reset_stdout()
             self.conn.close()
-        
+
     def get_analysis_target(self):
-        return None
         try:
-            p = Project.objects.filter(status=0,ready=1).earliest('created')
-        except ObjectDoesNotExist:
+            p = Project.objects.filter(status=1,ready=1).earliest('created')
+        except Project.DoesNotExist:
             return None
         return p
-        
+
     def do_analysis(self, p):
-        
+
         samples= p.sample_set.all()
         if samples is not None:
             # project in analyzing status
@@ -63,7 +60,7 @@ class Analysis(threading.Thread):
                 s.status = Project.STATUS_OPTIONS[2][0]
                 s.save()
                 # update local status
-                self.status = (p.id, s.id, 0)
+                self.status = [p.id, s.id, 0]
                 try:
                     key = str("s3:"+s.filename)
                     # Start analysis sample's3:raw_data/2064_g1.fasta.gz'
@@ -71,44 +68,42 @@ class Analysis(threading.Thread):
                 except Exception,e:
                     s.status = Project.STATUS_OPTIONS[4][0]
                     s.save()
-                    continue                
-                
+                    continue
+
                 while True:
                     pro = ab.check_progress(job_id)
                     if len(pro) == 1 and pro[0][0] == u'SUCCESS':
                         print "progress bar 100%"
                         s.status = Project.STATUS_OPTIONS[3][0]
-                        self.status[2] = 100   
+                        self.status[2] = 100
                         s.save()
                         break
                     else:
-                        print "progress bar " + str(int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)) + "%"                        
-                        self.status[2] = int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)                    
+                        print "progress bar " + str(int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)) + "%"
+                        self.status[2] = int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)
                     # sleep a while before next check
                     time.sleep(self.SLEEP_TIME)
-                    
+
             # all sample finished, determine project analyze result
             p.status = Project.STATUS_OPTIONS[3][0]
             for s in samples:
                 if s.status == Project.STATUS_OPTIONS[4][0]:
                     p.status = Project.STATUS_OPTIONS[4][0]
             p.save()
-            
+
     def get_status(self):
         return self.status
 
     def run(self):
-        print "thread run" 
-        self.setup_remote_host()               
+        self.setup_remote_host()
         while not self.stop:
             target = self.get_analysis_target()
-            if target is not None:                
+            if target is not None:
                 self.do_analysis(target)
-            print 'sleep'
             time.sleep(self.SLEEP_TIME)
         self.close_remote_host()
 
-    def stop(self):        
+    def stop(self):
         self.stop = True
 
 

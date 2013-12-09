@@ -1,6 +1,47 @@
 var page=1;
+var id=-1;
+
+function acquire_project_data(){
+	var data = {
+        'title': $("#project-form #project-title").val(),
+        'permission': $("#project-form #select-permission").val(),
+        'organism': $("#project-form #select-organism").val(),
+        'metadata': $("#project-form #platform").val(),
+        'slug': $("#project-form #keywords").val(),
+        'summary': $("#project-form #summary").val(),
+        'samples':[]
+    }
+
+    $('.sample-form').each(function(){
+        data.samples.push(
+            {
+                'name': $(this).find('#sample-name').val(),
+                'description': $(this).find('#sample-description').val(),
+                'filename': $(this).closest('li').find('.qq-upload-file').text()
+            }
+        );
+    });
+    return data;
+}
 
 $(document).ready(function() {
+
+	var url=window.location.toString();
+    var str="";
+    var str_value="";
+    if(url.indexOf("?")!=-1){
+        var ary=url.split("?")[1].split("&");
+        for(var i in ary){
+            str=ary[i].split("=")[0];
+            if (str == "id") {
+                id = decodeURI(ary[i].split("=")[1]);
+                $('#edit_or_new').text('Edit');
+                $('.submit-btn').removeClass('disabled');
+                renderProjectDetail(id);
+            }
+        }
+    }
+
 	renderProjectList(page);
 
     $('#manual-fine-uploader').fineUploaderS3({
@@ -35,7 +76,7 @@ $(document).ready(function() {
         },
     })
     $('.qq-upload-button').css('border-bottom','none');
-    $('.qq-progress-bar').css('height','5px');
+    $('.qq-progress-bar').css('height','3px');
     $('#manual-fine-uploader').on('submitted',function(id, name) {
         console.log(name)
         $(".qq-upload-list li").last().append($("#sample-detail").html());
@@ -60,62 +101,30 @@ $(document).ready(function() {
     $.validate({});
 
     $('#triggerUpload').click(function() {
-        var title = $("#project-form #project-title").val();
-        var organism = $("#project-form #select").val();
-        var metadata = $("#project-form #platform").val();
-        var slug = $("#project-form #keywords").val();
-        var summary = $("#project-form #summary").val();
-        var data = {
-            'title': title,
-            'organism': organism,
-            'metadata': metadata,
-            'slug': slug,
-            'summary': summary,
-        }
-        data_json = JSON.stringify(data);
-        $.post(
-            "/upload/create-project",
-            data_json,
-            function(res){
-                if(res.status) {
-                    $('#project-form').attr('data', res.project_id);
-                    name_list = []
-                    description_list = []
-                    filename_list = []
-                    sample_list = []
-                    $('.qq-upload-list .sample-form').each(function(){
-                        var name = $(this).find('#sample-name').val();
-                        var description = $(this).find('#sample-description').val();
-                        var filename = $(this).closest('li').find('.qq-upload-file').text();
-                        // name_list.push(name);
-                        // description_list.push(description);
-                        // filename_list.push(filename);
-                        sample_list.push(
-                            {
-                                'name': name,
-                                'description': description,
-                                'filename': filename
-                            }
-                        )
-                    });
-
-                    var id = res.project_id;
-                    // var data = {
-                    //     'sample_list': sample_list,
-                    //     'id': id
-                    // }
-                    console.log(data)
-                    data_json = JSON.stringify(sample_list);
-                    $.post(
-                        "/upload/create-sample/"+id,
-                        data_json,
-                        function(res){
-                            console.log(res);
-                            $('#triggerUpload').attr('disabled','disabled');
-                            $('#start-analysis').removeClass('hide');
-                    });
-                }
-        });
+        var data = acquire_project_data();
+        if (id==-1)
+	    {
+	        $.post(
+	            "/upload/create-project/",
+	            JSON.stringify(data),
+	            function(res){
+	                if(res.status) {
+	                    $('#project-form').attr('data', res.project_id);
+	                }
+	        });
+	    }
+	    else
+	    {
+	    	data.id = id;
+			$.post(
+	            "/upload/update-project/"+id+"/",
+	            JSON.stringify(data),
+	            function(res){
+	                if(res.status) {
+	                    $('#project-form').attr('data', res.project_id);
+	                }
+	        });
+	    }
         // $('#manual-fine-uploader').fineUploaderS3('uploadStoredFiles');
     });
 
@@ -189,21 +198,19 @@ function renderProjectList(page){
 }
 
 
-function renderProjectDetail(obj){
-    var id = $(obj).attr('id')
-    console.log(id)
+function renderProjectDetail(id){
     $.get(
         "/upload/project/"+id+'/',
         function(res){
             console.log(res.metadata)
-            $('.project-hint').html('<i class="icon-align-left"></i> Detail');
             $('#project-title').val(res.title);
-            $('.project-select').val(res.organism);
+            $('#select-permission').val(res.permission);
+            $('#select-organism').val(res.organism);
             $('#platform').val(res.metadata);
             $('#keywords').val(res.slug);
             $('#summary').val(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#sample-list-detail').html(html2);
-            $('.disabled').attr('disabled','disabled');
         });
 }
+

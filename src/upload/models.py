@@ -28,6 +28,11 @@ class Project(models.Model):
         (3, 'analyzed'),
         (4, 'analyze failed'),
     )
+    PERMISSION_OPTIONS = (
+        (0, 'public'),
+        (1, 'private'),
+    )
+    permission = models.IntegerField(null=False, default=0, choices=PERMISSION_OPTIONS)
     status = models.IntegerField(null=False, default=0, choices=STATUS_OPTIONS)
     ready = models.BooleanField(default=False)
 

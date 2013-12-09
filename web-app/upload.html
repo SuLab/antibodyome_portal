@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                	<h4 class='project-hint'><i class="icon-pencil"></i> New</h4>
+                	<h4 class='project-hint'><i class="icon-pencil"></i> <span id='edit_or_new'>New</span></h4>
                     <form id="project-form" method="post" class="well form-horizontal">
                         <div class="form-group">
                             <label for="project-title" class="col-md-2 control-label">Project title:</label>
@@ -43,9 +43,19 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label for="project-permission" class="col-md-2 control-label">permission:</label>
+                            <div class="col-md-2">
+                                <select class="form-control project-select disabled " id="select-permission" name="permission">
+                                    <option value="0">public</option>
+                                    <option value="1">private</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8"></div>
+                        </div>
+                        <div class="form-group">
                             <label for="select" class="col-md-2 control-label">Organism:</label>
                             <div class="col-md-2">
-                                <select class="form-control project-select disabled " id="select" name="organism">
+                                <select class="form-control project-select disabled " id="select-organism" name="organism">
                                     <option value="Human">Human</option>
                                     <option value="Mouse">Mouse</option>
                                     <option value="Monkey">Monkey</option>
@@ -78,15 +88,15 @@
                                     <div id="manual-fine-uploader"></div>
                                 </div>
                             </fieldset>
-                            <div class="form-group">
-                                <div class="col-md-4 col-md-offset-4">
-                                    <a href="javascript:;" id="triggerUpload" class="submit-btn btn btn-default disabled" role="button"> <span class="glyphicon glyphicon-upload "></span> Submit </a>
-                                    <div id="start-analysis" class="btn btn-default hide">
-                                        Start analysis
-                                    </div>
-                                </div>
-                            </div>
                         </div>
+                        <div class="form-group">
+	                        <div class="col-md-4 col-md-offset-4">
+	                            <a href="javascript:;" id="trigger	Upload" class="submit-btn btn btn-default disabled" role="button"> <span class="glyphicon glyphicon-upload "></span> Submit </a>
+	                            <div id="start-analysis" class="btn btn-default hide">
+	                                Start analysis
+	                            </div>
+	                        </div>
+	                    </div>
                     </form>
                 </div>
             </div>
@@ -115,7 +125,7 @@
             <h4><i class=' icon-briefcase'></i> History</h4>
             <div class="list-group">
             	{{each(i,project) projects}}
-            		<a href="javascript:void(0)" class="list-group-item" id="${project.id}" onclick="renderProjectDetail(this)">
+            		<a href="/web-app/project_detail.html?id=${project.id}" class="list-group-item" id="${project.id}">
             			<h5>${project.title}</h5>
             			<h6>${project.created}</h6>
             		</a>
@@ -128,33 +138,32 @@
         </script>
 
         <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
-
-                    {{each(i,sample) samples}}
-                        <!-- <form  method="post" class="form-horizontal sample-form"> -->
-                            <!-- <i class='icon-upload-alt'></i><i> ${sample.filename}</i> -->
-                            <div class="form-group">
-                                <label for="sample-start" class="col-md-2 control-label"><i class='icon-upload-alt'></i> Sample ${i}</label>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-file" class="col-md-2 control-label">File:</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control disabled" id="sample-name" value="${sample.filename}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-name" class="col-md-2 control-label">Name:</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control disabled" id="sample-name" value="${sample.name}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-description" class="col-md-2 control-label">Description:</label>
-                                <div class="col-md-10">
-                                    <textarea class="form-control disabled" name="description" rows="3" id="sample-description">${sample.description}</textarea>
-                                </div>
-                            </div>
-                        <!-- </form> -->
-                    {{/each}}
+	        {{each(i,sample) samples}}
+	            <!-- <form  method="post" class="form-horizontal sample-form"> -->
+	                <!-- <i class='icon-upload-alt'></i><i> ${sample.filename}</i> -->
+	                <div class="form-group">
+	                    <label for="sample-start" class="col-md-2 control-label"><i class='icon-upload-alt'></i> Sample ${i+1}</label>
+	                </div>
+	                <div class="form-group">
+	                    <label for="sample-file" class="col-md-2 control-label">File:</label>
+	                    <div class="col-md-10">
+	                        <input type="text" class="form-control disabled" id="sample-name" value="${sample.filename}">
+	                    </div>
+	                </div>
+	                <div class="form-group">
+	                    <label for="sample-name" class="col-md-2 control-label">Name:</label>
+	                    <div class="col-md-10">
+	                        <input type="text" class="form-control disabled" id="sample-name" value="${sample.name}">
+	                    </div>
+	                </div>
+	                <div class="form-group">
+	                    <label for="sample-description" class="col-md-2 control-label">Description:</label>
+	                    <div class="col-md-10">
+	                        <textarea class="form-control disabled" name="description" rows="3" id="sample-description">${sample.description}</textarea>
+	                    </div>
+	                </div>
+	            <!-- </form> -->
+	        {{/each}}
 
         </script>
         <script>
