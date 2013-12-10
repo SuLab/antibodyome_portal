@@ -39,6 +39,9 @@
 .project-show-detail.active {
     background-color: #eee;
 }
+.qq-upload-list li {
+  background: #8FC078;
+}
 
 .qq-progress-bar {
   float: left;
@@ -72,4 +75,12 @@
 
 .project_next ,.project_prev {
   cursor: pointer;
+}
+
+#sample-list-detail {
+  margin-left: 140px;
+}
+
+#sample-list-detail label{
+  font-weight: normal;
 }

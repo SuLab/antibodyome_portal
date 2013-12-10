@@ -12,7 +12,7 @@ function acquire_project_data(){
         'samples':[]
     }
 
-    $('.sample-form').each(function(){
+    $('.edit-project .sample-form').each(function(){
         data.samples.push(
             {
                 'name': $(this).find('#sample-name').val(),
@@ -78,12 +78,14 @@ $(document).ready(function() {
     $('.qq-upload-button').css('border-bottom','none');
     $('.qq-progress-bar').css('height','3px');
     $('#manual-fine-uploader').on('submitted',function(id, name) {
-        console.log(name)
+        if(!$('.qq-upload-list').hasClass('well')){
+            $('.qq-upload-list').addClass('well');
+        }
         $(".qq-upload-list li").last().append($("#sample-detail").html());
         $(".qq-upload-list li").last().append('<div class="sample-name-div name_'+name+' hide"></div>');
 
         if(name%2) {
-            $(".qq-upload-list li").last().css('background','#eee');
+            $(".qq-upload-list li").last().css('background','#c0e0b1');
         }
         $.validate({});
 
@@ -102,29 +104,15 @@ $(document).ready(function() {
 
     $('#triggerUpload').click(function() {
         var data = acquire_project_data();
-        if (id==-1)
-	    {
-	        $.post(
-	            "/upload/create-project/",
-	            JSON.stringify(data),
-	            function(res){
-	                if(res.status) {
-	                    $('#project-form').attr('data', res.project_id);
-	                }
-	        });
-	    }
-	    else
-	    {
-	    	data.id = id;
-			$.post(
-	            "/upload/update-project/"+id+"/",
-	            JSON.stringify(data),
-	            function(res){
-	                if(res.status) {
-	                    $('#project-form').attr('data', res.project_id);
-	                }
-	        });
-	    }
+        $.post(
+            "/upload/create-project/",
+            JSON.stringify(data),
+            function(res){
+                if(res.status) {
+                    // $('#project-form').attr('data', res.project_id);
+                    window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                }
+        });
         // $('#manual-fine-uploader').fineUploaderS3('uploadStoredFiles');
     });
 
@@ -202,7 +190,6 @@ function renderProjectDetail(id){
     $.get(
         "/upload/project/"+id+'/',
         function(res){
-            console.log(res.metadata)
             $('#project-title').val(res.title);
             $('#select-permission').val(res.permission);
             $('#select-organism').val(res.organism);
