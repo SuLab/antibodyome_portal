@@ -32,84 +32,72 @@
             	<h4>
 	            	<span class="project-button"><a href='upload.html'><i class="icon-reply"></i> Back</a></span>
 	            	<span class="project-button"><a id='edit-project' href='javascript:void(0)'><i class="icon-pencil"></i> Edit</a></span>
+                    <div id="analyze" class="btn btn-default" style="margin-left: 50px;">
+                    </div>
             	</h4>
-                <form id="project-form" method="post" class="well form-horizontal">
-                    <div class="form-group">
-                        <label for="project-title" class="col-md-2 control-label">Project title:</label>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control disabled" id="project-title" name="title">
-                        </div>
+                <div >
+                    <div >
+                        <p class="project_label">Project title: </p>
+                        <p class="project_content" id="project-title"></p>
                     </div>
-                    <div class="form-group">
-                        <label for="project-permission" class="col-md-2 control-label">permission:</label>
-                    	<div class="col-md-10">
-                        	<input type="text" class="form-control disabled" id="select-permission" name="permission">
-                    	</div>
+                    <div >
+                        <p class="project_label">permission: </p>
+                        <p class="project_content" id="select-permission"></p>
                     </div>
-                    <div class="form-group">
-                        <label for="select" class="col-md-2 control-label">Organism:</label>
-                        <div class="col-md-10">
-                        	<input type="text" class="form-control disabled" id="select-organism" name="organism">
-                    	</div>
+                    <div >
+                        <p class="project_label">Organism: </p>
+                        <p class="project_content" id="select-organism"></p>
                     </div>
-                    <div class="form-group">
-                        <label for="platform" class="col-md-2 control-label">Platform:</label>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control disabled " id="platform" name="metadata" >
-                        </div>
+                    <div >
+                        <p class="project_label">Platform: </p>
+                        <p class="project_content" id="platform"></p>
                     </div>
-                    <div class="form-group">
-                        <label for="keywords" class="col-md-2 control-label">Keywords:</label>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control disabled " id="keywords" name="slug">
-                        </div>
+                    <div >
+                        <p class="project_label">Keywords: </p>
+                        <p class="project_content" id="keywords"></p>
                     </div>
-
-                    <div class="form-group">
-                        <label for="summary" class="col-md-2 control-label">Summary:</label>
-                        <div class="col-md-10">
-                            <textarea class="form-control disabled " name="summary" rows="3" id="summary"></textarea>
-                        </div>
+                    <div >
+                        <p class="project_label">Summary: </p>
+                        <p class="project_content" id="summary"></p>
                     </div>
-                    <div class="form-group">
-                        <label for="Samples" class="col-md-2 control-label">Samples:</label>
-                        <br/><br/>
-                        <div id="sample-list-detail" class="well">
-                        </div>
+                    <div >
+                        <p class="project_label">Samples: </p>
                     </div>
-                </form>
+                    <div id="sample-list-detail" class="pull-left"></div>
+                </div>
             </div>
         </div>
 
         <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
+            <div >
+                <p ><i class='icon-upload-alt'></i> Sample 0</p>
+                <div>
+                    <p class="sample_label">File: </p>
+                    <p class="sample_content">dd</p>
+                </div>
+            </div>
 
-                    {{each(i,sample) samples}}
-                        <!-- <form  method="post" class="form-horizontal sample-form"> -->
-                            <!-- <i class='icon-upload-alt'></i><i> ${sample.filename}</i> -->
-                            <div class="form-group">
-                                <label for="sample-start" class="col-md-2 control-label"><i class='icon-upload-alt'></i> Sample ${i}</label>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-file" class="col-md-2 control-label">File:</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control disabled" id="sample-name" value="${sample.filename}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-name" class="col-md-2 control-label">Name:</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control disabled" id="sample-name" value="${sample.name}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-description" class="col-md-2 control-label">Description:</label>
-                                <div class="col-md-10">
-                                    <textarea class="form-control disabled" name="description" rows="3" id="sample-description">${sample.description}</textarea>
-                                </div>
-                            </div>
-                        <!-- </form> -->
-                    {{/each}}
-
+            {{each(i,sample) samples}}
+                <p ><i class='icon-upload-alt'></i> Sample 0</p>
+                <div >
+                    <div>
+                        <p class="sample_label">File: </p>
+                        <p class="sample_content">dd</p>
+                    </div>
+                </div>
+                <div >
+                    <p class="sample_label">File: </p>
+                    <p class="sample_content" id="summary">${sample.filename}</p>
+                </div>
+                <div >
+                    <p class="sample_label">Name: </p>
+                    <p class="sample_content" id="sample-name">${sample.filename}</p>
+                </div>
+                <div >
+                    <p class="sample_label">Description: </p>
+                    <p class="sample_content" id="sample-description">${sample.description}</p>
+                </div>
+            {{/each}}
         </script>
         <script>
         	$("#navbar").load("navbar.html");

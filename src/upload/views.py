@@ -89,14 +89,21 @@ def make_response(status=200, content=None):
     return response
 
 def create_project(request):
+    # import pdb;pdb.set_trace()
     user = request.user
     content = simplejson.loads(request.body)
     data = {}
+    samples = content['samples']
     project = Project(owner=user)
     projectform = ProjectForm(content, instance=project)
     if projectform.is_valid():
         projectform.save()
         data['status'] = CREATE_SUCCESS
+        for sample in samples:
+            try:
+                Sample(project_id=project.id, name=sample['name'], filename=sample['filename'], description=sample['description']).save()
+            except:
+                data['status'] = CREATE_FAILURE
         data['project_id'] = project.id
     else:
         data['status'] = CREATE_FAILURE
