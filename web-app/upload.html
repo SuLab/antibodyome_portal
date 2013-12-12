@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Upload</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="css/fineuploader.css" rel="stylesheet">
+        <link href="3rd/bs3/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <script src="3rd/jquery/jquery-1.10.2.min.js"></script>
+        <script src="3rd/jquery/jquery.tmpl.js"></script>
+        <script src="3rd/jquery-cookie/jquery.cookie.js"></script>
+        <script src="3rd/jquery-session/jquery.session.js"></script>
+        <script src="3rd/form-validator/jquery.form-validator.min.js"></script>
+        <script src="3rd/bs3/js/bootstrap.min.js"></script>
+		<link href="http://www.bootcss.com/p/font-awesome/assets/css/font-awesome.min.css" rel="stylesheet">
+        <script src="js/fine_up_load.js"></script>
+		<script src="js/upload.js"></script>
+		<link href="css/upload.css" rel="stylesheet">
+    </head>
+    <body>
+
+        <script>
+            if ($.cookie()['username'] == 'null' || $.cookie()['username'] == undefined) {
+                location.href = "home.html";
+            }
+        </script>
+        <!--begin navbar-->
+        <div id="navbar"></div>
+        <div class="container upload_main">
+        <div class="row edit-project">
+                <div class="col-md-2">
+                    <div class="bs-sidebar">
+                        <div id="project-list"></div>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                	<h4 class='project-hint'><i class="icon-pencil"></i> <span id='edit_or_new'>New</span></h4>
+                    <form id="project-form" method="post" class="well form-horizontal">
+                        <div class="form-group">
+                            <label for="project-title" class="col-md-2 control-label">Project title:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control disabled" id="project-title" name="title" placeholder="Project title" data-validation="required" data-validation-error-msg="* required">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-permission" class="col-md-2 control-label">Permission:</label>
+                            <div class="col-md-2">
+                                <select class="form-control project-select disabled " id="select-permission" name="permission">
+                                    <option value="0">Public</option>
+                                    <option value="1">Private</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="select" class="col-md-2 control-label">Organism:</label>
+                            <div class="col-md-2">
+                                <select class="form-control project-select disabled " id="select-organism" name="organism">
+                                    <option value="Human">Human</option>
+                                    <option value="Mouse">Mouse</option>
+                                    <option value="Monkey">Monkey</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="platform" class="col-md-2 control-label">Platform:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control disabled " id="platform" name="metadata" placeholder="platform" data-validation="required"  data-validation-error-msg="* required">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="keywords" class="col-md-2 control-label">Keywords:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control disabled " id="keywords" name="slug" placeholder="keywords" data-validation="required" data-validation-error-msg="* required">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="summary" class="col-md-2 control-label">Summary:</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control disabled " name="summary" rows="3" id="summary" data-validation="required" data-validation-error-msg="* required"></textarea>
+                            </div>
+                        </div>
+                        <div id="sample-list-detail">
+                            <fieldset >
+                                <div>
+                                    <div id="manual-fine-uploader"></div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="form-group">
+	                        <div class="col-md-4 col-md-offset-4">
+	                            <a href="javascript:;" id="triggerUpload" class="submit-btn btn btn-default disabled" role="button"> <span class="glyphicon glyphicon-upload "></span> Submit </a>
+	                            <div id="start-analysis" class="btn btn-default hide">
+	                                Start analysis
+	                            </div>
+	                        </div>
+	                    </div>
+                    </form>
+                </div>
+            </div>
+        <div class="hide well" id="sample-detail">
+            <button type="button" class="close delete-sample" aria-hidden="true">&times;</button>
+            <form  method="post" class="form-horizontal sample-form">
+                <hr>
+                <div class="form-group">
+                    <label for="sample-name" class="col-md-2 control-label">name:</label>
+                    <div class="col-md-10">
+                        <input type="text" name="name" data-validation="required" data-validation-error-msg="This field is not allowed to be blank" class="form-control sample-name" id="sample-name" name="sample-name" placeholder="sample name (required)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sample-description" class="col-md-2 control-label">description:</label>
+                    <div class="col-md-10">
+                        <textarea class="form-control sample-description" name="description" rows="3" id="sample-description" data-validation="required" data-validation-error-msg="This field is not allowed to be blank"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="row" id="project-container"></div>
+
+        <script type="text/x-jquery-tmpl" id="project-list-tmpl">
+            <h4><i class=' icon-briefcase'></i> History</h4>
+            <div class="list-group">
+            	{{each(i,project) projects}}
+            		<a href="/web-app/project_detail.html?id=${project.id}" class="list-group-item" id="${project.id}">
+            			<h5>${project.title}</h5>
+            			<h6>${project.created}</h6>
+            		</a>
+            	{{/each}}
+            </div>
+            <div style='margin-top: 20px'>
+                <span class='project_prev' style='float:left; display: none'><i class='icon-double-angle-left'></i> prev</span>
+                <span class='project_next' style='float:right; display: none'>next <i class='icon-double-angle-right'></i></span>
+            </div>
+        </script>
+
+        <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
+	        {{each(i,sample) samples}}
+	            <!-- <form  method="post" class="form-horizontal sample-form"> -->
+	                <!-- <i class='icon-upload-alt'></i><i> ${sample.filename}</i> -->
+	                <div class="form-group">
+	                    <label for="sample-start" class="col-md-2 control-label"><i class='icon-upload-alt'></i> Sample ${i+1}</label>
+	                </div>
+	                <div class="form-group">
+	                    <label for="sample-file" class="col-md-2 control-label">File:</label>
+	                    <div class="col-md-10">
+	                        <input type="text" class="form-control disabled" id="sample-name" value="${sample.filename}">
+	                    </div>
+	                </div>
+	                <div class="form-group">
+	                    <label for="sample-name" class="col-md-2 control-label">Name:</label>
+	                    <div class="col-md-10">
+	                        <input type="text" class="form-control disabled" id="sample-name" value="${sample.name}">
+	                    </div>
+	                </div>
+	                <div class="form-group">
+	                    <label for="sample-description" class="col-md-2 control-label">Description:</label>
+	                    <div class="col-md-10">
+	                        <textarea class="form-control disabled" name="description" rows="3" id="sample-description">${sample.description}</textarea>
+	                    </div>
+	                </div>
+	            <!-- </form> -->
+	        {{/each}}
+
+        </script>
+        <script>
+        	$("#navbar").load("navbar.html");
+        </script>
+    </body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Antibodyome</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Bootstrap -->
+        <link href="3rd/bs3/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <!-- <link href="3rd/font-awsome/css/font-awesome.min.css" rel="stylesheet"> -->
+        <link href="http://www.bootcss.com/p/font-awesome/assets/css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/abome.css" rel="stylesheet">
+        <script src="3rd/jquery/jquery-1.10.2.min.js"></script>
+        <script src="3rd/jquery-cookie/jquery.cookie.js"></script>
+        <script src="3rd/jquery-session/jquery.session.js"></script>
+        <script src="3rd/bs3/js/bootstrap.min.js"></script>
+        <script src="3rd/form-validator/jquery.form-validator.min.js"></script>
+    </head>
+    <body>
+        <div id="navbar"></div>
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-md-offset-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default">
+                                    <i class="icon-search"></i> Search
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- <p align="center">
+                    Or
+                </p>
+                <div align="center" >
+                    <a class="btn btn-default upload-btn" style="cursor: pointer;" > Click To Upload </a>
+                </div> -->
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row" style="p">
+                <div class="col-lg-4" >
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">News update</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas class="canvas_box" id="myCanvas1" width="300" height="250"></canvas>
+                            <p>
+                                <a class="btn btn-default" href="#">View more &raquo;</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">User guides</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas class="canvas_box" id="myCanvas2" width="300" height="250"></canvas>
+                            <p>
+                                <a class="btn btn-default" href="#">View more &raquo;</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Protocols</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas class="canvas_box" id="myCanvas3" width="300" height="250"></canvas>
+                            <p>
+                                <a class="btn btn-default" href="#">View more &raquo;</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <hr>
+        <div class="container">
+            <footer>
+                <p>
+                    &copy; Company 2013
+                </p>
+            </footer>
+        </div>
+        <script>
+        	$("#navbar").load("navbar.html");
+        </script>
+    </body>
+</html>
+
