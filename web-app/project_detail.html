@@ -32,84 +32,59 @@
             	<h4>
 	            	<span class="project-button"><a href='upload.html'><i class="icon-reply"></i> Back</a></span>
 	            	<span class="project-button"><a id='edit-project' href='javascript:void(0)'><i class="icon-pencil"></i> Edit</a></span>
+                    <div id="analyze" class="btn btn-primary " style="margin-left: 10px;">
+                    </div>
             	</h4>
-                <form id="project-form" method="post" class="well form-horizontal">
-                    <div class="form-group">
-                        <label for="project-title" class="col-md-2 control-label">Project title:</label>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control disabled" id="project-title" name="title">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="project-permission" class="col-md-2 control-label">permission:</label>
-                    	<div class="col-md-10">
-                        	<input type="text" class="form-control disabled" id="select-permission" name="permission">
-                    	</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="select" class="col-md-2 control-label">Organism:</label>
-                        <div class="col-md-10">
-                        	<input type="text" class="form-control disabled" id="select-organism" name="organism">
-                    	</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="platform" class="col-md-2 control-label">Platform:</label>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control disabled " id="platform" name="metadata" >
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="keywords" class="col-md-2 control-label">Keywords:</label>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control disabled " id="keywords" name="slug">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="summary" class="col-md-2 control-label">Summary:</label>
-                        <div class="col-md-10">
-                            <textarea class="form-control disabled " name="summary" rows="3" id="summary"></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="Samples" class="col-md-2 control-label">Samples:</label>
-                        <br/><br/>
-                        <div id="sample-list-detail" class="well">
-                        </div>
-                    </div>
-                </form>
+            	<table class="table table-bordered" style='white-space: normal;word-wrap: break-word;word-break: break-all;'>
+            		<th style='background-color: rgb(226, 233, 253)'>Title</th>
+            		<tr>
+	            		<td id="project-title"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Permission</th>
+            		<tr>
+            			<td id="select-permission"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Organism</th>
+            		<tr>
+	            		<td id="select-organism"></td>
+	            	</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Platform</th>
+            		<tr>
+	            		<td id="platform"></td>
+	            	</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Keywords</th>
+            		<tr>
+            			<td id="keywords"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Summary</th>
+            		<tr>
+	            		<td id="summary"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Samples</th>
+            		<tr>
+	            		<td id="samples"></td>
+            		</tr>
+            	</table>
             </div>
         </div>
 
         <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
-
-                    {{each(i,sample) samples}}
-                        <!-- <form  method="post" class="form-horizontal sample-form"> -->
-                            <!-- <i class='icon-upload-alt'></i><i> ${sample.filename}</i> -->
-                            <div class="form-group">
-                                <label for="sample-start" class="col-md-2 control-label"><i class='icon-upload-alt'></i> Sample ${i}</label>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-file" class="col-md-2 control-label">File:</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control disabled" id="sample-name" value="${sample.filename}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-name" class="col-md-2 control-label">Name:</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control disabled" id="sample-name" value="${sample.name}">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sample-description" class="col-md-2 control-label">Description:</label>
-                                <div class="col-md-10">
-                                    <textarea class="form-control disabled" name="description" rows="3" id="sample-description">${sample.description}</textarea>
-                                </div>
-                            </div>
-                        <!-- </form> -->
-                    {{/each}}
-
+            {{each(i,sample) samples}}
+            <div  class="well well-sm">
+                <dl class="dl">
+                    <dt>Name:</dt>
+                    <dd id="sample-name">${sample.name}</dd>
+                </dl>
+                <dl class="dl">
+                    <dt>Description:</dt>
+                    <dd id="sample-description">${sample.description}</dd>
+                </dl>
+                <dl class="dl" >
+                	<dt>File:</dt>
+                    <dd id="summary">${sample.filename}</dd>
+                </dl>
+            </div>
+            {{/each}}
         </script>
         <script>
         	$("#navbar").load("navbar.html");
