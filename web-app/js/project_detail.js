@@ -17,24 +17,67 @@ $(document).ready(function() {
     $('#edit-project').bind('click', function(){
     	window.location.href = 'upload.html?id='+id;
     });
+
+    $('#analyze').click(function() {
+        // var id = $('#project-form').attr('data');
+        var self = $(this);
+        $.ajax({
+            url:"/upload/project-analysis/"+id+'/',
+            type:'POST',
+            data:null,
+            dataType: 'application/json',
+            timeout: 1000,
+            success: function(res)
+            {},
+            error: function(res)
+            {
+                if(res.status)
+                {
+                    self.text("Waiting for analyzing...");
+                    self.addClass('disabled');
+                }
+            }
+        });
+    });
+
 });
 
 
 function renderProjectDetail(id){
-    // var id = $(obj).attr('id')
-    // console.log(id)
     $.get(
         "/upload/project/"+id+'/',
         function(res){
-            console.log(res.metadata)
-            $('#project-title').val(res.title);
-            $('#select-permission').val(res.permission);
-            $('#select-organism').val(res.organism);
-            $('#platform').val(res.metadata);
-            $('#keywords').val(res.slug);
-            $('#summary').val(res.summary);
+            var analyze = $("#analyze");
+            switch (res.status) {
+                case 0:
+                    analyze.text("Start analyze");
+                    break;
+                case 1:
+                    analyze.text("Waiting for analyzing...");
+                    analyze.addClass('disabled');
+                    break;
+                case 2:
+                    analyze.text("Analyzing...");
+                    analyze.addClass('disabled');
+                    break;
+                case 3:
+                    analyze.text("Analyzed");
+                    analyze.addClass('disabled');
+                    break;
+                case 4:
+                    analyze.text("Analyze failed");
+                    analyze.addClass('disabled');
+            }
+            $('#project-title').text(res.title);
+            var p_name = (res.permission==0? 'public':'private');
+            $('#select-permission').text(p_name);
+            $('#select-organism').text(res.organism);
+            $('#platform').text(res.metadata);
+            $('#keywords').text(res.slug);
+            $('#summary').text(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
-            $('#sample-list-detail').html(html2);
+            $('#samples').html(html2);
             $('.disabled').attr('disabled','disabled');
+
         });
 }
