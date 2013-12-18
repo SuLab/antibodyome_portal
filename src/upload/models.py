@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django_extensions.db.fields import AutoSlugField
 import jsonfield
 from django.core.serializers import serialize
-
+import datetime
 
 class ProjectManager(models.Manager):
     def get_by_natual_key(self, user, name):
@@ -19,7 +19,7 @@ class Project(models.Model):
     summary = models.TextField(blank=True)
     metadata = jsonfield.JSONField()
     lastmodified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     slug = AutoSlugField(populate_from='title')
     STATUS_OPTIONS = (
         (0, 'editing'),
@@ -63,5 +63,6 @@ class Sample(models.Model):
     filename = models.CharField(max_length=500)
     timestamp = models.DateTimeField(auto_now_add=True)
     lastmodified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    uuid = models.CharField(max_length=40)
     status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
