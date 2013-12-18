@@ -1,5 +1,7 @@
-var page=1;
-var id=-1;
+var page = 1;
+var id = -1;
+var key = 'all';
+var bucket_name = 'abome-test';
 
 function acquire_project_data(){
 	var data = {
@@ -11,16 +13,30 @@ function acquire_project_data(){
         'summary': $("#project-form #summary").val(),
         'samples':[]
     }
+    $('.edit-project .sample-form').each(function(i){
+        filename = ''
+        if (id==-1) {
+            var filename = $(this).closest('li').find('.qq-upload-file').text();
+        }
+        else {
+            var filename = $("#sample-file-name").attr("value");
+            if (filename==undefined) {
+                filename = $(this).closest('li').find('.qq-upload-file').text();
+            }
+            // console.log(filename);
 
-    $('.edit-project .sample-form').each(function(){
+        }
         data.samples.push(
             {
                 'name': $(this).find('#sample-name').val(),
                 'description': $(this).find('#sample-description').val(),
-                'filename': $(this).closest('li').find('.qq-upload-file').text()
+                'filename': filename,
+                'id': $(this).find('#sample-name').attr('data'),
+                'uuid': $(this).next().attr('data')
             }
         );
     });
+    console.log(data)
     return data;
 }
 
@@ -42,7 +58,7 @@ $(document).ready(function() {
         }
     }
 
-	renderProjectList(page);
+	renderProjectList(page, key);
 
     $('#manual-fine-uploader').fineUploaderS3({
         request : {
@@ -51,6 +67,17 @@ $(document).ready(function() {
         },
         signature : {
             endpoint : "/upload/sign-policy"
+        },
+        objectProperties: {
+            key: function(fileId) {
+                var filename = $("#manual-fine-uploader").fineUploader("getName", fileId);
+                var filename_temp = filename.split('.');
+                var Suffix = filename_temp[filename_temp.length-1];
+                var uuid = guid();
+                var key = uuid;
+                $('.name_'+fileId).attr('data',key);
+                return key;
+            }
         },
         retry : {
             showButton : true
@@ -66,10 +93,10 @@ $(document).ready(function() {
         resume : {
             enabled : true
         },
-        deleteFile: {
-            enabled: true,
-            endpoint: "/upload/delete-file"
-        },
+        // deleteFile: {
+        //     enabled: true,
+        //     endpoint: "/upload/delete-file"
+        // },
         validation : {
             itemLimit : 5,
             sizeLimit : 2 * 1024 * 1024 * 1024
@@ -104,39 +131,47 @@ $(document).ready(function() {
 
     $('#triggerUpload').click(function() {
         var data = acquire_project_data();
-        $.post(
-            "/upload/create-project/",
-            JSON.stringify(data),
-            function(res){
-                if(res.status) {
+        if (id==-1) {
+            $.post(
+                "/upload/create-project/",
+                JSON.stringify(data),
+                function(res){
                     // $('#project-form').attr('data', res.project_id);
                     window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
-                }
-        });
+            });
+        }
+        else {
+            $.post(
+                '/upload/update-project/'+id,
+                JSON.stringify(data),
+                function(res){
+                    window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                })
+        }
         // $('#manual-fine-uploader').fineUploaderS3('uploadStoredFiles');
     });
 
 
-    $('#start-analysis').click(function() {
-        var id = $('#project-form').attr('data');
-        $.ajax({
-            url:"/upload/project-analysis/"+id+'/',
-            type:'POST',
-            data:null,
-			dataType: 'application/json',
-			timeout: 1000,
-            success: function(res)
-            	{},
-            error: function(res)
-	            {
-	                if(res.status)
-	                {
-	                    var html = $("#project-tmpl").tmpl({'projects': res.projects});
-	                    $('.edit-project').addClass('hide');
-	                    $('#project-container').html(html);
-	                }
-	            }});
-    });
+   //  $('#start-analysis').click(function() {
+   //      var id = $('#project-form').attr('data');
+   //      $.ajax({
+   //          url:"/upload/project-analysis/"+id+'/',
+   //          type:'POST',
+   //          data:null,
+			// dataType: 'application/json',
+			// timeout: 1000,
+   //          success: function(res)
+   //          	{},
+   //          error: function(res)
+	  //           {
+	  //               if(res.status)
+	  //               {
+	  //                   var html = $("#project-tmpl").tmpl({'projects': res.projects});
+	  //                   $('.edit-project').addClass('hide');
+	  //                   $('#project-container').html(html);
+	  //               }
+	  //           }});
+   //  });
 
 
     $('#manual-fine-uploader').on('complete', function(id, name){
@@ -157,31 +192,42 @@ $(document).ready(function() {
         }
     });
 
-
-    $('.add-project').click(function(){
-        window.location.reload();
+    $('.select-key').click(function(){
+        renderProjectList(page, $(this).attr('data'));
     });
+
 
 });
 
+function delete_sample(self) {
+    var parent = $(self).closest('.sample-form');
+    // var uuid = parent.find("#sample-file-name").attr('data');
+    var id = parent.find("#sample-name").attr('data');
+    $.get(
+        "/upload/delete-sample/"+id,
+        function(res){
+            console.log('fds')
+            parent.remove();
+    });
+}
 
-
-function renderProjectList(page){
+function renderProjectList(page, key){
 	$.get(
-	"/upload/project-list/?page="+page,
-	function(res){
-	    var html = $("#project-list-tmpl").tmpl({'projects': res.detail});
-	    $('#project-list').html(html);
-	    if(res.prev == true)
-	    {
-	    	$('.project_prev').css('display', 'block');
-	    	$('.project_prev').click(function(){renderProjectList(page-1);});
-	    }
-	    if(res.next == true)
-	    {
-	    	$('.project_next').css('display', 'block');
-	    	$('.project_next').click(function(){renderProjectList(page+1);});
-	    }
+	"/upload/project-list/?page="+page+'&key='+key,
+	function(res) {
+        var html = $("#project-list-tmpl").tmpl({'projects': res.detail});
+        $('#project-list').html(html);
+        key = $('#select-key-group').find('.active').attr('data');
+        if(res.prev == true)
+        {
+            $('.project_prev').css('display', 'block');
+            $('.project_prev').click(function(){renderProjectList(page-1, key);});
+        }
+        if(res.next == true)
+        {
+            $('.project_next').css('display', 'block');
+            $('.project_next').click(function(){renderProjectList(page+1, key);});
+        }
     });
 }
 
@@ -198,6 +244,20 @@ function renderProjectDetail(id){
             $('#summary').val(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#sample-list-detail').html(html2);
+            $('.sample-file-name').attr("disabled","disabled");
+            $(".del-sample").click(function(){
+                delete_sample(this);
+            });
         });
 }
 
+function s4() {
+  return Math.floor((1 + Math.random()) * 0x10000)
+             .toString(16)
+             .substring(1);
+};
+
+function guid() {
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+         s4() + '-' + s4() + s4() + s4();
+}

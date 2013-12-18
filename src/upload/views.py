@@ -3,13 +3,13 @@ import base64, hmac, hashlib, json
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
 from upload.forms import ProjectForm
 from upload.models import Project, Sample
 from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
+from django.db.models.query_utils import Q
 
 CREATE_SUCCESS = 1
 CREATE_FAILURE = 0
@@ -90,34 +90,69 @@ def make_response(status=200, content=None):
 
 def create_project(request):
     user = request.user
-    content = simplejson.loads(request.body)
+    content = json.loads(request.body)
     data = {}
-    samples = content['samples']
+    sample_contents = content['samples']
     project = Project(owner=user)
     projectform = ProjectForm(content, instance=project)
     if projectform.is_valid():
         projectform.save()
         data['status'] = CREATE_SUCCESS
-        for sample in samples:
+        for sample_content in sample_contents:
             try:
-                Sample(project_id=project.id, name=sample['name'], filename=sample['filename'], description=sample['description']).save()
-            except:
+                print project.id
+                print sample_content
+                Sample(project_id=project.id, name=sample_content['name'], uuid=sample_content['uuid'], \
+                  filename=sample_content['filename'], description=sample_content['description']).save()
+                
+            except Exception, e:
                 data['status'] = CREATE_FAILURE
+                print e
         data['project_id'] = project.id
     else:
         data['status'] = CREATE_FAILURE
     response = HttpResponse(json.dumps(data), content_type="application/json")
     return response
 
-def create_sample(request, id):
-    contents = simplejson.loads(request.body)
+
+def update_project(request, id):
+    user = request.user
+    content = json.loads(request.body)
     data = {}
-    for content in contents:
-        try:
-            Sample(project_id=id, name=content['name'], filename=content['filename'], description=content['description']).save()
-        except:
-            data['status'] = CREATE_FAILURE
+    sample_contents = content['samples']
+    p = Project.objects.get(pk=id)            
+
     data['status'] = CREATE_SUCCESS
+    for sc in sample_contents:
+        try:
+            if 'id' in sc:
+                try:
+                    sample = Sample.objects.get(id=sc['id'])
+                except Sample.DoesNotExist:
+                    sample = None
+            else:
+                sample = Sample(project_id=p.id, uuid=sc['uuid'], filename=sc['filename'])
+            sample.name = sc['name']
+            sample.description = sc['description']
+            sample.save()
+        except Exception as e:
+            raise e
+            data['status'] = CREATE_FAILURE
+    data['project_id'] = p.id
+    content.pop('samples')
+    p.__dict__.update(content)
+    p.save()
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+def delete_sample(request, id):
+    data = {}
+    try:
+        sample = Sample.objects.get(pk=id)
+        sample.delete()
+        data['status'] = SUCCESS
+    except:
+        sample = None
+        data['status'] = FAILURE
     response = HttpResponse(json.dumps(data), content_type="application/json")
     return response
 
@@ -139,14 +174,24 @@ class ProjectList(AbomeListView):
 
     model = Project
 
+    def get_queryset(self):
+        key = self.request.GET.get('key')
+        user = self.request.user
+        if key == 'all':            
+            qs = Project.objects.filter(Q(owner=user)|Q(permission=1)).order_by('-lastmodified')
+            return qs
+        elif key == 'owner':            
+            qs = Project.objects.filter(owner=user).order_by('-created')
+            return qs
+
     def render_to_response(self, context):
+
         res = {
           'detail': context['object_list'],
           'prev': context['page_obj'].has_previous(),
           'next': context['page_obj'].has_next()
         }
         return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
-
 
 class ProjectDetail(AbomeDetailView):
 
@@ -157,6 +202,6 @@ class ProjectDetail(AbomeDetailView):
 
         p = context['object']
         p_j = json.loads(serialize('json',[p])[1:-1])['fields']
-        s_qs = Sample.objects.filter(project=p)
+        s_qs = Sample.objects.filter(project=p).order_by('created')
         p_j['samples'] = list(s_qs.values())
         return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), content_type="application/json")

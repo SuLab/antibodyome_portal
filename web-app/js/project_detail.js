@@ -15,7 +15,7 @@ $(document).ready(function() {
         }
     }
     $('#edit-project').bind('click', function(){
-    	window.location.href = 'upload.html?id='+id;
+    	window.location.href = 'project_edit.html?id='+id;
     });
 
     $('#analyze').click(function() {
