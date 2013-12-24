@@ -62,10 +62,11 @@ class Analysis(threading.Thread):
                 # update local status
                 self.status = [p.id, s.id, 0]
                 try:
-                    key = str("s3:"+s.filename)
+                    key = str("s3:"+s.uuid)
                     # Start analysis sample's3:raw_data/2064_g1.fasta.gz'
                     job_id = ab.run_igblast(infile = key)
-                except Exception,e:
+                except Exception as e:
+                    raise e
                     s.status = Project.STATUS_OPTIONS[4][0]
                     s.save()
                     continue

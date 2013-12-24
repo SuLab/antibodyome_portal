@@ -104,13 +104,14 @@ def create_project(request):
                 print sample_content
                 Sample(project_id=project.id, name=sample_content['name'], uuid=sample_content['uuid'], \
                   filename=sample_content['filename'], description=sample_content['description']).save()
-                
             except Exception, e:
                 data['status'] = CREATE_FAILURE
+                data['error'] = "Create Sample error! please try again."
                 print e
         data['project_id'] = project.id
     else:
         data['status'] = CREATE_FAILURE
+        data['error'] = "Create Project error! please try again."
     response = HttpResponse(json.dumps(data), content_type="application/json")
     return response
 
@@ -120,7 +121,7 @@ def update_project(request, id):
     content = json.loads(request.body)
     data = {}
     sample_contents = content['samples']
-    p = Project.objects.get(pk=id)            
+    p = Project.objects.get(pk=id)
 
     data['status'] = CREATE_SUCCESS
     for sc in sample_contents:
@@ -138,10 +139,15 @@ def update_project(request, id):
         except Exception as e:
             raise e
             data['status'] = CREATE_FAILURE
+            data['error'] = "Edit Sample error! please try again."
     data['project_id'] = p.id
     content.pop('samples')
     p.__dict__.update(content)
-    p.save()
+    try:
+        p.save()
+    except Exception as e:
+        data['status'] = CREATE_FAILURE
+        data['error'] = "Edit Project error! please try again."
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 def delete_sample(request, id):
@@ -153,6 +159,7 @@ def delete_sample(request, id):
     except:
         sample = None
         data['status'] = FAILURE
+        data['error'] = "Delete Sample error! please try again."
     response = HttpResponse(json.dumps(data), content_type="application/json")
     return response
 
