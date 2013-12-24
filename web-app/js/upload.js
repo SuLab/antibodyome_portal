@@ -116,8 +116,9 @@ $(document).ready(function() {
         }
         $.validate({});
 
-        $('.delete-sample').click(function(){
+        $('.del-sample').click(function(){
             $(this).closest('li').remove();
+            delete_sample(this);
         });
 
         var name_div = $('.qq-upload-list .name_'+name);
@@ -136,8 +137,15 @@ $(document).ready(function() {
                 "/upload/create-project/",
                 JSON.stringify(data),
                 function(res){
-                    // $('#project-form').attr('data', res.project_id);
-                    window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+
+                    if(res.status) {
+                        window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                    }
+                    else {
+                        $('.error-tips').removeClass('hide');
+                        $(".error-tips p").text(res.error);
+                    }
+                    $('#project-form').attr('data', res.project_id);
             });
         }
         else {
@@ -145,7 +153,13 @@ $(document).ready(function() {
                 '/upload/update-project/'+id,
                 JSON.stringify(data),
                 function(res){
-                    window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                    if (res.status) {
+                        window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                    }
+                    else {
+                        $('.error-tips').removeClass('hide');
+                        $(".error-tips p").text(res.error);
+                    }
                 })
         }
         // $('#manual-fine-uploader').fineUploaderS3('uploadStoredFiles');
@@ -206,8 +220,13 @@ function delete_sample(self) {
     $.get(
         "/upload/delete-sample/"+id,
         function(res){
-            console.log('fds')
-            parent.remove();
+            if(res.status) {
+                parent.remove();
+            }
+            else {
+                $('.error-delete').removeClass('hide');
+                $(".error-delete p").text(res.error);
+            }
     });
 }
 
