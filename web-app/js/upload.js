@@ -234,7 +234,7 @@ function renderProjectList(page, key){
 	$.get(
 	"/upload/project-list/?page="+page+'&key='+key,
 	function(res) {
-        var html = $("#project-list-tmpl").tmpl({'projects': res.detail});
+        var html = $("#project-list-tmpl").tmpl({'projects': res.detail, 'count': res.count});
         $('#project-list').html(html);
         key = $('#select-key-group').find('.active').attr('data');
         if(res.prev == true)

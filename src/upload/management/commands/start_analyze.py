@@ -1,19 +1,16 @@
-from django.core.management.base import BaseCommand
-#from placeholders import *
-
-#from upload.analysis import Analysis
-
+import signal
 import threading
-from django.conf import settings
-#settings.configure()
 import time
+import sys
 from rpyc.utils.ssh import SshContext
 import rpyc
-import sys
-from django.core.exceptions import ObjectDoesNotExist
-from upload.models import Project
-from django.contrib.auth import models
 
+from django.contrib.auth import models
+from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.core.exceptions import ObjectDoesNotExist
+
+from upload.models import Project
 
 class Analysis(threading.Thread):
     def __init__(self):
@@ -32,24 +29,29 @@ class Analysis(threading.Thread):
         print self.conn.root.status()
         self.conn.root.set_stdout(sys.stdout)
         #block until machine ready
+
+    def prepare_workers(self):
         self.conn.root.prepare_workers()
+
+    def finish_workers(self):
+        self.conn.root.terminate_workers()
 
     def close_remote_host(self):
         if self.conn is not None:
-            self.conn.root.terminate_workers()
             self.conn.root.reset_stdout()
             self.conn.close()
 
     def get_analysis_target(self):
+        # import pdb;pdb.set_trace()
         try:
             p = Project.objects.filter(status=1,ready=1).earliest('created')
         except Project.DoesNotExist:
-            return None
+            p= None
         return p
 
     def do_analysis(self, p):
-
-        samples= p.sample_set.all()
+        # import pdb;pdb.set_trace()
+        samples= p.sample_set.filter(status=1)
         if samples is not None:
             # project in analyzing status
             p.status = Project.STATUS_OPTIONS[2][0]
@@ -97,12 +99,21 @@ class Analysis(threading.Thread):
 
     def run(self):
         self.setup_remote_host()
+        self.prepare_workers()
         while not self.stop:
-            target = self.get_analysis_target()
+            target = self.get_analysis_target()            
             if target is not None:
                 self.do_analysis(target)
             time.sleep(self.SLEEP_TIME)
+        self.finish_workers()
         self.close_remote_host()
+
+    def signal_handler(self, signal, frame):
+        print 'You pressed Ctrl+C!'
+        self.stop = True
+
+    def catch_sinal(self):
+        signal.signal(signal.SIGINT, self.signal_handler)
 
     def stop(self):
         self.stop = True

@@ -2,7 +2,7 @@
 import base64, hmac, hashlib, json
 
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from upload.forms import ProjectForm
 from upload.models import Project, Sample
@@ -122,40 +122,48 @@ def update_project(request, id):
     data = {}
     sample_contents = content['samples']
     p = Project.objects.get(pk=id)
-
-    data['status'] = CREATE_SUCCESS
-    for sc in sample_contents:
+    if user == p.owner:
+        data['status'] = CREATE_SUCCESS
+        for sc in sample_contents:
+            try:
+                if 'id' in sc:
+                    try:
+                        sample = Sample.objects.get(id=sc['id'])
+                    except Sample.DoesNotExist:
+                        sample = None
+                else:
+                    sample = Sample(project_id=p.id, uuid=sc['uuid'], filename=sc['filename'])
+                    p.status = 1
+                    p.save()
+                sample.name = sc['name']
+                sample.description = sc['description']
+                sample.save()
+            except Exception as e:
+                raise e
+                data['status'] = CREATE_FAILURE
+                data['error'] = "Edit Sample error! please try again."
+        data['project_id'] = p.id
+        content.pop('samples')
+        p.__dict__.update(content)
         try:
-            if 'id' in sc:
-                try:
-                    sample = Sample.objects.get(id=sc['id'])
-                except Sample.DoesNotExist:
-                    sample = None
-            else:
-                sample = Sample(project_id=p.id, uuid=sc['uuid'], filename=sc['filename'])
-            sample.name = sc['name']
-            sample.description = sc['description']
-            sample.save()
+            p.save()
         except Exception as e:
-            raise e
             data['status'] = CREATE_FAILURE
-            data['error'] = "Edit Sample error! please try again."
-    data['project_id'] = p.id
-    content.pop('samples')
-    p.__dict__.update(content)
-    try:
-        p.save()
-    except Exception as e:
-        data['status'] = CREATE_FAILURE
-        data['error'] = "Edit Project error! please try again."
-    return HttpResponse(json.dumps(data), content_type="application/json")
+            data['error'] = "Edit Project error! please try again."
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+        return HttpResponseForbidden()
 
 def delete_sample(request, id):
+    user = request.user
     data = {}
     try:
         sample = Sample.objects.get(pk=id)
-        sample.delete()
-        data['status'] = SUCCESS
+        if sample.project.owner == user:
+            sample.delete()
+            data['status'] = SUCCESS
+        else:
+            return HttpResponseForbidden()
     except:
         sample = None
         data['status'] = FAILURE
@@ -185,18 +193,19 @@ class ProjectList(AbomeListView):
         key = self.request.GET.get('key')
         user = self.request.user
         if key == 'all':            
-            qs = Project.objects.filter(Q(owner=user)|Q(permission=1)).order_by('-lastmodified')
-            return qs
+            qs = Project.objects.filter(Q(owner=user)|Q(permission=0)).order_by('-lastmodified')
         elif key == 'owner':            
             qs = Project.objects.filter(owner=user).order_by('-created')
-            return qs
+        self.queryset = qs
+        return qs        
 
     def render_to_response(self, context):
 
         res = {
           'detail': context['object_list'],
           'prev': context['page_obj'].has_previous(),
-          'next': context['page_obj'].has_next()
+          'next': context['page_obj'].has_next(),
+          'count': self.queryset.count()
         }
         return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
 
