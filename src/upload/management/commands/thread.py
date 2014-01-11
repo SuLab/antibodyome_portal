@@ -1,11 +1,9 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.db import models
-#from placeholders import *
-import os
+from django.core.management.base import BaseCommand
 from upload.threadTest import *
 
+
 class Command(BaseCommand):
-     def handle(self, *args, **options):
+    def handle(self, *args, **options):
         #thread1 = Analysis(1)
         #thread1.start()
         try:
@@ -15,5 +13,3 @@ class Command(BaseCommand):
         else:
             thread1 = Analysis(interval)
             thread1.start()
-        #print int(args[0])
-

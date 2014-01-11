@@ -5,7 +5,8 @@ import views
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Examples:
     # url(r'^$', 'abome.views.home', name='home'),
     # url(r'^abome/', include('abome.foo.urls')),

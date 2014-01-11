@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, include, url, static
-from django.contrib.auth.views import login, logout
+from django.conf.urls import patterns, include, url
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'', include('social.apps.django_app.urls', namespace='social')),
     url(r'^login/$', 'auth.views.login'),
     url(r'^accounts/logout/$', 'auth.views.logout'),

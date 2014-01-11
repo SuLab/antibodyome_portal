@@ -1,9 +1,9 @@
 #create settings_private.py according to this file and set your secrets
 AMAZON_STORAGE = {
-    'ACCESS_KEY' : "",
-    'SECRET_KEY' : "",
-    'BUCKET_NAME' : '',
-    'MAX_SIZE' : 0
+    'ACCESS_KEY': "",
+    'SECRET_KEY': "",
+    'BUCKET_NAME': '',
+    'MAX_SIZE': 0
 }
 
 #third auth configure

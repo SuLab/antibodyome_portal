@@ -68,6 +68,9 @@ function renderProjectDetail(id){
                     analyze.text("Analyze failed");
                     analyze.addClass('disabled');
             }
+            if (res.user!=res.owner) {
+                $("#edit-project").hide();
+            }
             $('#project-title').text(res.title);
             var p_name = (res.permission==0? 'public':'private');
             $('#select-permission').text(p_name);

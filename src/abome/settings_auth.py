@@ -2,7 +2,7 @@ from settings import TEMPLATE_CONTEXT_PROCESSORS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
-TEMPLATE_CONTEXT_PROCESSORS += (    
+TEMPLATE_CONTEXT_PROCESSORS += (
     'social.apps.django_app.context_processors.backends',
 )
 
@@ -45,4 +45,3 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details'
 )
-
