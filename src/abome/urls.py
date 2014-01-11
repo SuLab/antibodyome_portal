@@ -1,12 +1,12 @@
 from django.conf.urls import patterns, include, url, static
-import upload
 from abome import settings
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Examples:
     # url(r'^$', 'abome.views.home', name='home'),
     # url(r'^abome/', include('abome.foo.urls')),
@@ -21,4 +21,4 @@ urlpatterns = patterns('',
     url(r'', include('social.apps.django_app.urls', namespace='social auth')),
 )
 
-urlpatterns += static.static(settings.STATIC_URL, document_root = settings.STATIC_ROOT )
+urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

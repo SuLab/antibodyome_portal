@@ -1,7 +1,7 @@
-#create settings_dev.py and put your local settings in it, like below.  
+#create settings_dev.py and put your local settings in it, like below.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'abome',                      # Or path to database file if using sqlite3.
         'USER': 'jxf',                      # Not used with sqlite3.
         'PASSWORD': '123456',                  # Not used with sqlite3.

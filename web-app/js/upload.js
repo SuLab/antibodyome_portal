@@ -231,30 +231,36 @@ function delete_sample(self) {
 }
 
 function renderProjectList(page, key){
-	$.get(
-	"/upload/project-list/?page="+page+'&key='+key,
-	function(res) {
-        var html = $("#project-list-tmpl").tmpl({'projects': res.detail, 'count': res.count});
-        $('#project-list').html(html);
-        key = $('#select-key-group').find('.active').attr('data');
-        if(res.prev == true)
-        {
-            $('.project_prev').css('display', 'block');
-            $('.project_prev').click(function(){renderProjectList(page-1, key);});
-        }
-        if(res.next == true)
-        {
-            $('.project_next').css('display', 'block');
-            $('.project_next').click(function(){renderProjectList(page+1, key);});
+	$.ajax({
+    	url:"/upload/project-list/?page="+page+'&key='+key,
+    	type:'GET',
+        success:function(res) {
+            var html = $("#project-list-tmpl").tmpl({'projects': res.detail, 'count': res.count});
+            $('#project-list').html(html);
+            key = $('#select-key-group').find('.active').attr('data');
+            if(res.prev == true)
+            {
+                $('.project_prev').css('display', 'block');
+                $('.project_prev').click(function(){renderProjectList(page-1, key);});
+            }
+            if(res.next == true)
+            {
+                $('.project_next').css('display', 'block');
+                $('.project_next').click(function(){renderProjectList(page+1, key);});
+            }
+        },
+        error: function(){
+            $('#my-login-modal').modal('show');
         }
     });
 }
 
 
 function renderProjectDetail(id){
-    $.get(
-        "/upload/project/"+id+'/',
-        function(res){
+    $.ajax({
+        url:"/upload/project/"+id+'/',
+        type:'GET',
+        success:function(res){
             $('#project-title').val(res.title);
             $('#select-permission').val(res.permission);
             $('#select-organism').val(res.organism);
@@ -266,8 +272,12 @@ function renderProjectDetail(id){
             $('.sample-file-name').attr("disabled","disabled");
             $(".del-sample").click(function(){
                 delete_sample(this);
-            });
-        });
+            })
+        },
+        error: function(){
+            $('#my-login-modal').modal('show');
+        }
+    });
 }
 
 function s4() {
