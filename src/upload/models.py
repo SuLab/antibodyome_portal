@@ -64,5 +64,5 @@ class Sample(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     lastmodified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-    uuid = models.CharField(max_length=40)
+    uuid = models.CharField(max_length=256)
     status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
