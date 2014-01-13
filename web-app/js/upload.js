@@ -2,6 +2,7 @@ var page = 1;
 var id = -1;
 var key = 'all';
 var bucket_name = 'abome-test';
+var uid = null;
 
 function acquire_project_data(){
 	var data = {
@@ -73,8 +74,9 @@ $(document).ready(function() {
                 var filename = $("#manual-fine-uploader").fineUploader("getName", fileId);
                 var filename_temp = filename.split('.');
                 var Suffix = filename_temp[filename_temp.length-1];
-                var uuid = guid();
-                var key = uuid;
+                if (uid == null)
+                	uid = guid();
+                var key = uid+'/'+filename;
                 $('.name_'+fileId).attr('data',key);
                 return key;
             }
