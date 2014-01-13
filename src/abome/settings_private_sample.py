@@ -21,3 +21,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 #yahoo
 SOCIAL_AUTH_YAHOO_OAUTH_KEY = ''
 SOCIAL_AUTH_YAHOO_OAUTH_SECRET = ''
+
+RPYC_TUNNEL = {
+    'host': '<rpyc_host>',
+    'user': '<user>',
+    'keyfile': '<path_to_keyfile>'
+}
+
+RPYC_PORT = 18861
