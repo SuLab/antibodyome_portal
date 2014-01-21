@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Project</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="css/fineuploader.css" rel="stylesheet">
+        <link href="3rd/bs3/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <script src="3rd/jquery/jquery-1.10.2.min.js"></script>
+        <script src="3rd/jquery/jquery.tmpl.js"></script>
+        <script src="3rd/jquery-cookie/jquery.cookie.js"></script>
+        <script src="3rd/jquery-session/jquery.session.js"></script>
+        <script src="3rd/form-validator/jquery.form-validator.min.js"></script>
+        <script src="3rd/bs3/js/bootstrap.min.js"></script>
+		<link href="http://www.bootcss.com/p/font-awesome/assets/css/font-awesome.min.css" rel="stylesheet">
+        <!-- <script src="js/fine_up_load.js"></script> -->
+		<script src="js/project_detail.js"></script>
+		<link href="css/upload.css" rel="stylesheet">
+    </head>
+    <body>
+
+        <script>
+            if ($.cookie()['username'] == 'null' || $.cookie()['username'] == undefined) {
+                location.href = "home.html";
+            }
+        </script>
+        <!--begin navbar-->
+        <div id="navbar"></div>
+        <div class="container upload_main">
+        <div class="row edit-project">
+            <div class="col-md-10 col-md-offset-1">
+            	<h4>
+	            	<span class="project-button"><a href='upload.html'><i class="icon-reply"></i> Back</a></span>
+	            	<span class="project-button"><a id='edit-project' href='#'><i class="icon-pencil"></i> Edit</a></span>
+                    <div id="analyze" class="btn btn-primary " style="margin-left: 10px;">
+                    </div>
+            	</h4>
+            	<table class="table table-bordered" style='white-space: normal;word-wrap: break-word;word-break: break-all;'>
+            		<th style='background-color: rgb(226, 233, 253)'>Title</th>
+            		<tr>
+	            		<td id="project-title"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Permission</th>
+            		<tr>
+            			<td id="select-permission"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Organism</th>
+            		<tr>
+	            		<td id="select-organism"></td>
+	            	</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Platform</th>
+            		<tr>
+	            		<td id="platform"></td>
+	            	</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Keywords</th>
+            		<tr>
+            			<td id="keywords"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Summary</th>
+            		<tr>
+	            		<td id="summary"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Samples</th>
+            		<tr>
+	            		<td id="samples"></td>
+            		</tr>
+            	</table>
+            </div>
+        </div>
+
+        <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
+            {{each(i,sample) samples}}
+            <div  class="well well-sm">
+                <dl class="dl">
+                    <dt>Name:</dt>
+                    <dd id="sample-name">${sample.name}</dd>
+                </dl>
+                <dl class="dl">
+                    <dt>Description:</dt>
+                    <dd id="sample-description">${sample.description}</dd>
+                </dl>
+                <dl class="dl" >
+                	<dt>File:</dt>
+                    <dd id="summary">${sample.filename}</dd>
+                </dl>
+            </div>
+            {{/each}}
+        </script>
+        <script>
+        	$("#navbar").load("navbar.html");
+        </script>
+    </body>
+</html>
