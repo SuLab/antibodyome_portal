@@ -5,12 +5,13 @@ var bucket_name = 'abome-test';
 var uid = null;
 
 function acquire_project_data(){
+
 	var data = {
         'title': $("#project-form #project-title").val(),
         'permission': $("#project-form #select-permission").val(),
         'organism': $("#project-form #select-organism").val(),
-        'metadata': $("#project-form #platform").val(),
-        'slug': $("#project-form #keywords").val(),
+        'platform': $("#project-form #platform").val(),
+        'keywords': $("#project-form #keywords").val(),
         'summary': $("#project-form #summary").val(),
         'samples':[]
     }

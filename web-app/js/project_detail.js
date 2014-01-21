@@ -72,11 +72,12 @@ function renderProjectDetail(id){
                 $("#edit-project").hide();
             }
             $('#project-title').text(res.title);
+            var meta = JSON.parse(res.metadata);
             var p_name = (res.permission==0? 'public':'private');
             $('#select-permission').text(p_name);
             $('#select-organism').text(res.organism);
-            $('#platform').text(res.metadata);
-            $('#keywords').text(res.slug);
+            $('#platform').text(meta['platform']);
+            $('#keywords').text(meta['keywords']);
             $('#summary').text(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#samples').html(html2);

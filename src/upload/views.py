@@ -7,7 +7,6 @@ import json
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
-from upload.forms import ProjectForm
 from upload.models import Project, Sample
 from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder
 from django.core.serializers import serialize
@@ -99,17 +98,20 @@ def make_response(status=200, content=None):
 def create_project(request):
     user = request.user
     content = json.loads(request.body)
-    data = {}
     sample_contents = content['samples']
-    project = Project(owner=user)
-    projectform = ProjectForm(content, instance=project)
-    if projectform.is_valid():
-        projectform.save()
+    project = Project(owner=user) 
+    meta = {'platform':content['platform'], 'keywords':content['keywords']}
+    content.pop('platform')
+    content.pop('keywords')    
+    project.__dict__.update(content)
+    project.metadata = meta
+    data = {}
+    try:
+        print project
+        project.save()
         data['status'] = CREATE_SUCCESS
         for sample_content in sample_contents:
             try:
-                print project.id
-                print sample_content
                 Sample(
                     project_id=project.id,
                     name=sample_content['name'],
@@ -121,11 +123,11 @@ def create_project(request):
                 data['error'] = "Create Sample error! please try again."
                 print e
         data['project_id'] = project.id
-    else:
+    except:
         data['status'] = CREATE_FAILURE
         data['error'] = "Create Project error! please try again."
-    response = HttpResponse(json.dumps(data), content_type="application/json")
-    return response
+
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 def update_project(request, id):
