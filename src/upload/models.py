@@ -12,14 +12,14 @@ class ProjectManager(models.Manager):
 
 class Project(models.Model):
     objects = ProjectManager()
-    #id = models.CharField(max_length=20, primary_key=True)    
+    #id = models.CharField(max_length=20, primary_key=True)
     owner = models.ForeignKey(User)
     organism = models.CharField(max_length=50)
     title = models.CharField(max_length=500)
     summary = models.TextField(blank=True)
     metadata = jsonfield.JSONField()
     lastmodified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     slug = AutoSlugField(populate_from='title')
     STATUS_OPTIONS = (
         (0, 'editing'),
@@ -39,16 +39,19 @@ class Project(models.Model):
     def natual_key(self):
         return (self.user, self.name)
 
+    def __str__(self):
+        return '"{}" by "{}"'.format(self.title, self.owner.username)
+
     @property
     def samples(self):
         return self.sample_set.all()
         samples = self.sample_set.all()
-        samples_dict = serialize('json',samples)
+        samples_dict = serialize('json', samples)
         return samples_dict
 
     @property
     def manifest(self):
-        attribute_key_list = ['id','organism','title','summary','metadata', 'status', 'samples']
+        attribute_key_list = ['id', 'organism', 'title', 'summary', 'metadata', 'status', 'samples']
         entity_dict = {}
         for key in attribute_key_list:
             entity_dict[key] = self.__getattribute__(key)
@@ -63,5 +66,9 @@ class Sample(models.Model):
     filename = models.CharField(max_length=500)
     timestamp = models.DateTimeField(auto_now_add=True)
     lastmodified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    uuid = models.CharField(max_length=256)
     status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
+
+    def __str__(self):
+        return '"{}" for project "{}"'.format(self.name, self.project.title)

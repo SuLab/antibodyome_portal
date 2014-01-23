@@ -13,11 +13,9 @@ from django.http import HttpResponse
 #  while remove these field: {"pk": x, "model": "xxx", }
 
 class ComplexEncoder(JSONEncoder):
-
-
-    def default(self,obj):
-        if isinstance(obj,Model):
-            return json.loads(serialize('json',[obj])[1:-1])['fields']
+    def default(self, obj):
+        if isinstance(obj, Model):
+            return json.loads(serialize('json', [obj])[1:-1])['fields']
         if isinstance(obj, QuerySet):
             obj = obj.values()
             obj = list(obj)
@@ -26,40 +24,34 @@ class ComplexEncoder(JSONEncoder):
             return obj.strftime('%Y-%m-%d %H:%M')
         elif isinstance(obj, datetime.date):
             return obj.strftime('%Y-%m-%d')
-        if hasattr(obj, 'isoformat'):            
+        if hasattr(obj, 'isoformat'):
             return obj.isoformat()
-        return json.JSONEncoder.default(self,obj)
+        return json.JSONEncoder.default(self, obj)
 
     def jsonBack(self, json):
         if json[0] == '[':
-            return deserialize('json',json)
+            return deserialize('json', json)
         else:
-            return deserialize('json','[' + json +']')
-        
+            return deserialize('json', '[' + json + ']')
 
 
 class AbomeListView(BaseListView):
     """
         list view that returns JSON data
     """
-    
-    
     paginate_by = 5
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponse('login please', content_type="application/json", status=401)
         return super(AbomeListView, self).get(request, *args, **kwargs)
-    
+
+
 class AbomeDetailView(BaseDetailView):
     """
         detail view that returns JSON data
     """
-    
-
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponse('login please', content_type="application/json", status=401)
         return super(AbomeDetailView, self).get(request, *args, **kwargs)
-        
-

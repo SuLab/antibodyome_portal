@@ -31,72 +31,59 @@
             <div class="col-md-10 col-md-offset-1">
             	<h4>
 	            	<span class="project-button"><a href='upload.html'><i class="icon-reply"></i> Back</a></span>
-	            	<span class="project-button"><a id='edit-project' href='javascript:void(0)'><i class="icon-pencil"></i> Edit</a></span>
-                    <div id="analyze" class="btn btn-default" style="margin-left: 50px;">
+	            	<span class="project-button"><a id='edit-project' href='#'><i class="icon-pencil"></i> Edit</a></span>
+                    <div id="analyze" class="btn btn-primary " style="margin-left: 10px;">
                     </div>
             	</h4>
-                <div >
-                    <div >
-                        <p class="project_label">Project title: </p>
-                        <p class="project_content" id="project-title"></p>
-                    </div>
-                    <div >
-                        <p class="project_label">permission: </p>
-                        <p class="project_content" id="select-permission"></p>
-                    </div>
-                    <div >
-                        <p class="project_label">Organism: </p>
-                        <p class="project_content" id="select-organism"></p>
-                    </div>
-                    <div >
-                        <p class="project_label">Platform: </p>
-                        <p class="project_content" id="platform"></p>
-                    </div>
-                    <div >
-                        <p class="project_label">Keywords: </p>
-                        <p class="project_content" id="keywords"></p>
-                    </div>
-                    <div >
-                        <p class="project_label">Summary: </p>
-                        <p class="project_content" id="summary"></p>
-                    </div>
-                    <div >
-                        <p class="project_label">Samples: </p>
-                    </div>
-                    <div id="sample-list-detail" class="pull-left"></div>
-                </div>
+            	<table class="table table-bordered" style='white-space: normal;word-wrap: break-word;word-break: break-all;'>
+            		<th style='background-color: rgb(226, 233, 253)'>Title</th>
+            		<tr>
+	            		<td id="project-title"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Permission</th>
+            		<tr>
+            			<td id="select-permission"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Organism</th>
+            		<tr>
+	            		<td id="select-organism"></td>
+	            	</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Platform</th>
+            		<tr>
+	            		<td id="platform"></td>
+	            	</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Keywords</th>
+            		<tr>
+            			<td id="keywords"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Summary</th>
+            		<tr>
+	            		<td id="summary"></td>
+            		</tr>
+            		<th style='background-color: rgb(226, 233, 253)'>Samples</th>
+            		<tr>
+	            		<td id="samples"></td>
+            		</tr>
+            	</table>
             </div>
         </div>
 
         <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
-            <div >
-                <p ><i class='icon-upload-alt'></i> Sample 0</p>
-                <div>
-                    <p class="sample_label">File: </p>
-                    <p class="sample_content">dd</p>
-                </div>
-            </div>
-
             {{each(i,sample) samples}}
-                <p ><i class='icon-upload-alt'></i> Sample 0</p>
-                <div >
-                    <div>
-                        <p class="sample_label">File: </p>
-                        <p class="sample_content">dd</p>
-                    </div>
-                </div>
-                <div >
-                    <p class="sample_label">File: </p>
-                    <p class="sample_content" id="summary">${sample.filename}</p>
-                </div>
-                <div >
-                    <p class="sample_label">Name: </p>
-                    <p class="sample_content" id="sample-name">${sample.filename}</p>
-                </div>
-                <div >
-                    <p class="sample_label">Description: </p>
-                    <p class="sample_content" id="sample-description">${sample.description}</p>
-                </div>
+            <div  class="well well-sm">
+                <dl class="dl">
+                    <dt>Name:</dt>
+                    <dd id="sample-name">${sample.name}</dd>
+                </dl>
+                <dl class="dl">
+                    <dt>Description:</dt>
+                    <dd id="sample-description">${sample.description}</dd>
+                </dl>
+                <dl class="dl" >
+                	<dt>File:</dt>
+                    <dd id="summary">${sample.filename}</dd>
+                </dl>
+            </div>
             {{/each}}
         </script>
         <script>

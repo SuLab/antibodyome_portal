@@ -1,14 +1,14 @@
 from django import forms
-from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 
-attrs_dict = { 'class': 'required' }
+attrs_dict = {'class': 'required'}
+
 
 class RegistrationForm(UserCreationForm):
-    email = forms.CharField(max_length=50, required=True, widget=forms.TextInput());
-    first_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput());
-    last_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput());
-    affiliation = forms.CharField(max_length=150, required=False, widget=forms.TextInput());
+    email = forms.CharField(max_length=50, required=True, widget=forms.TextInput())
+    first_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput())
+    last_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput())
+    affiliation = forms.CharField(max_length=150, required=False, widget=forms.TextInput())
     #checkbox
  #   tou = forms.BooleanField(widget=forms.CheckboxInput(attrs=attrs_dict));
 #    signup_ann = forms.BooleanField(widget=forms.CheckboxInput(), initial=True, required=False);
@@ -30,12 +30,11 @@ class RegistrationForm(UserCreationForm):
     #         email = self.cleaned_data['email']
     #         return email
 
-
     def save(self):
         user = super(RegistrationForm, self).save()
         #now create user profile
         profile = user.profile_set.create(user=user)
-        affiliation = self.cleaned_data.get('affiliation','')
+        affiliation = self.cleaned_data.get('affiliation', '')
         if affiliation:
             profile.affiliation = affiliation
         profile.save()
