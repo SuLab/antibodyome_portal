@@ -23,8 +23,8 @@ class Analysis(threading.Thread):
         self.conn = None
 
     def setup_remote_host(self):
-        sshctx = SshContext("54.200.130.110", user="ubuntu", keyfile=settings.SSH_KEY_PATH)  # modify the keyfile to your own keyfile path
-        self.conn = rpyc.ssh_connect(sshctx, 18861, config={"allow_public_attrs": True})
+        sshctx = SshContext(**settings.RPYC_TUNNEL)
+        self.conn = rpyc.ssh_connect(sshctx, settings.RPYC_PORT, config={"allow_public_attrs": True})
         print self.conn.root.status()
         #log = open("script.log", "w+")
         #self.conn.root.set_stdout(sys.stdout)
