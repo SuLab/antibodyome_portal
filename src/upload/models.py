@@ -39,6 +39,9 @@ class Project(models.Model):
     def natual_key(self):
         return (self.user, self.name)
 
+    def __str__(self):
+        return '"{}" by "{}"'.format(self.title, self.owner.username)
+
     @property
     def samples(self):
         return self.sample_set.all()
@@ -66,3 +69,6 @@ class Sample(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     uuid = models.CharField(max_length=256)
     status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
+
+    def __str__(self):
+        return '"{}" for project "{}"'.format(self.name, self.project.title)
