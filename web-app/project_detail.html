@@ -70,7 +70,7 @@
 
         <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
             {{each(i,sample) samples}}
-            <div  class="well well-sm">
+            <div  class="well well-sm sample-detail" id="${sample.id}" style="cursor: pointer;">
                 <dl class="dl">
                     <dt>Name:</dt>
                     <dd id="sample-name">${sample.name}</dd>

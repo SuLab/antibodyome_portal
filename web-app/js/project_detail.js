@@ -82,6 +82,10 @@ function renderProjectDetail(id){
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#samples').html(html2);
             $('.disabled').attr('disabled','disabled');
+            $('.sample-detail').click(function(){
+                var id = $(this).attr('id');
+                window.location.href = '/web-app/profile.html?id='+id;
+            });
 
         });
 }

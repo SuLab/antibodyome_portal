@@ -25,4 +25,5 @@ urlpatterns = patterns(
     url(r'^project-list/$', views.ProjectList.as_view(), name="project-list"),
     url(r'^project-analysis/(?P<pk>\d+)/$', views.submit_analyze, name="project-submit-analyze"),
     url(r'^delete-file/(?P<key>.+)$', views.delete_s3_file, name="delete-s3-file"),
+    url(r'^sample-ab/(?P<id>\d+)/$', views.sample_ab, name="sample-ab"),
 )

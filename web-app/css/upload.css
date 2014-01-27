@@ -106,3 +106,6 @@
   word-break: break-all;
 }
 
+.sample-detail:hover{
+  background-color: #E4E2FA;
+}
