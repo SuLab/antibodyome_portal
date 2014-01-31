@@ -72,7 +72,14 @@ function renderProjectDetail(id){
                 $("#edit-project").hide();
             }
             $('#project-title').text(res.title);
-            var meta = JSON.parse(res.metadata);
+            if(typeof(res.metadata)=='string')
+            {
+            	meta = JSON.parse(res.metadata);
+            }
+            else
+            {
+            	meta = res.metadata;
+            }
             var p_name = (res.permission==0? 'public':'private');
             $('#select-permission').text(p_name);
             $('#select-organism').text(res.organism);

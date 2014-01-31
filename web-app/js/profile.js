@@ -29,6 +29,15 @@ $(document).ready(function() {
         return results[1] || 0;
     }
     var id = $.urlParam('id');
+
+    $.get('/upload/random-ab/'+id, function(res){
+    	var html='';
+		$.each(res, function(i, e){
+			html+='<a href="abome_ab.html?sample='+id+'&ab='+e+'">ab'+i+'  </a>';
+		});
+		$('.random_list').html(html);
+    });
+
     $.get('/upload/sample-ab/'+id, function(res){
         console.log(res);
         v_count = res.variable;
@@ -38,7 +47,6 @@ $(document).ready(function() {
         setPlotAndSidebarValue();
         setPlot();
     });
-
 
 });
 
@@ -97,8 +105,7 @@ function setPlot() {
             },
             shadow : false,
             rendererOptions : {
-                //barPadding : 8, //设置同一分类两个柱状条之间的距离（px）
-                //barMargin : 10, //设置不同分类的两个柱状条之间的距离（px）（同一个横坐标表点上）
+                barPadding : 2, //设置同一分类两个柱状条之间的距离（px）
                 barDirection : 'horizontal', //设置柱状图显示的方向：垂直显示和水平显示
                 //，默认垂直显示 vertical or horizontal.
                 barWidth : 10, // 设置柱状图中每个柱状条的宽度

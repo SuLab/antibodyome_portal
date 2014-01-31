@@ -11,7 +11,6 @@ from django.http import HttpResponse
 
 #  an encoder that processes model, queryset by using serialize(),
 #  while remove these field: {"pk": x, "model": "xxx", }
-
 class ComplexEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Model):
@@ -22,7 +21,7 @@ class ComplexEncoder(JSONEncoder):
             return json.loads(json.dumps(obj, cls=ComplexEncoder))
         if isinstance(obj, datetime.datetime):
             return obj.strftime('%Y-%m-%d %H:%M')
-        elif isinstance(obj, datetime.date):
+        if isinstance(obj, datetime.date):
             return obj.strftime('%Y-%m-%d')
         if hasattr(obj, 'isoformat'):
             return obj.isoformat()
