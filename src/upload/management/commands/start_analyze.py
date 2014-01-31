@@ -58,15 +58,15 @@ class Analysis(threading.Thread):
             p.save()
             ab = self.conn.root
             for s in samples:
-                # sample in analyzing status
-                s.status = Project.STATUS_OPTIONS[2][0]
-                s.save()
                 # update local status
                 self.status = [p.id, s.id, 0]
                 try:
                     key = str("s3:"+s.uuid)
                     # Start analysis sample's3:raw_data/2064_g1.fasta.gz'
                     job_id = ab.run_igblast(infile=key)
+                    s.job_id = job_id
+                    s.status = Project.STATUS_OPTIONS[2][0]
+                    s.save()
                 except Exception as e:
                     raise e
                     s.status = Project.STATUS_OPTIONS[4][0]

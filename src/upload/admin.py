@@ -1,6 +1,7 @@
 from django.contrib import admin
 from upload.models import Project, Sample
 
+
 class ProjectAdmin(admin.ModelAdmin):
     # ...
     list_display = ('owner', 'title', 'created')
