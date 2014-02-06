@@ -7,6 +7,8 @@ var ab_template = (["",
     '<h5> prod: {{prod}}</h5>',
     '<h5> chain: {{chain}}</h5>',
 
+    '<a href="/upload/ab-detail?sample={{sample_id}}&ab={{_id}}" class="json_link">json</a>',
+
 "</div>",
 
 '<h2>Gene</h2>',
@@ -201,6 +203,7 @@ $(document).ready(function() {
 	    	res['join_muts_nt'] = res['join_muts_nt']['muts'];
 	    	res['v_muts_aa'] = res['v_muts_aa']['muts'];
 			res['var_muts_nt'] = res['var_muts_nt']['muts'];
+            res['sample_id'] = sample;
 	    	$('.antibody_container').html(Mustache.to_html(ab_template, res));
 	    }
 	);
