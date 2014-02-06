@@ -1,6 +1,6 @@
 from rpyc.utils.ssh import SshContext
 import rpyc
-from abome import settings
+from django.conf import settings
 import json
 
 remote_root = None
@@ -22,7 +22,8 @@ class RemoteRoot(object):
     def __init__(self, x=0):
         try:
             print 'connect to remote'
-            sshctx = SshContext("54.200.130.110", user="ubuntu", keyfile=settings.SSH_KEY_PATH)
+            #sshctx = SshContext("54.200.130.110", user="ubuntu", keyfile=settings.SSH_KEY_PATH)
+            sshctx = SshContext(**settings.RPYC_TUNNEL)
             self.conn = rpyc.ssh_connect(sshctx, 18861, config={"allow_public_attrs": True})
         except Exception, e:
             print e
