@@ -6,7 +6,6 @@ var ab_template = (["",
     '<h5> seq_id: {{seq_id}}</h5>',
     '<h5> prod: {{prod}}</h5>',
     '<h5> chain: {{chain}}</h5>',
-    '<h5> nr_seq: {{nr_seq}}</h5>',
 
 "</div>",
 
@@ -50,6 +49,11 @@ var ab_template = (["",
 
 '</tbody>',
 "</table>",
+
+'<h2>Alignment</h2>',
+"<pre>",
+"{{alignment}}",
+"</pre>",
 
     '<h2>Sequences</h2>',
     '<div class="panel panel-default">',
