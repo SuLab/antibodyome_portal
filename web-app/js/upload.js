@@ -10,7 +10,7 @@ function acquire_project_data(){
         'title': $("#project-form #project-title").val(),
         'permission': $("#project-form #select-permission").val(),
         'organism': $("#project-form #select-organism").val(),
-        'platform': $("#project-form #platform").val(),
+        'platform': $("#project-form #select-platform").val(),
         'keywords': $("#project-form #keywords").val(),
         'summary': $("#project-form #summary").val(),
         'samples':[]
@@ -267,7 +267,7 @@ function renderProjectDetail(id){
             $('#project-title').val(res.title);
             $('#select-permission').val(res.permission);
             $('#select-organism').val(res.organism);
-            $('#platform').val(res.metadata);
+            $('#select-platform').val(res.metadata);
             $('#keywords').val(res.slug);
             $('#summary').val(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
