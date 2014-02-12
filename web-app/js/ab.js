@@ -56,28 +56,35 @@ var ab_template = (["",
         '<li class="list-group-item">',
 
     '<div class="progress">',
-        '<div class="progress-bar progress-bar-success" style="width: 33.333%">',
+        '{{#v_gene}}',
+        '<div class="progress-bar progress-bar-success" style="width:{{_vdj_width.v}}">',
             '<div class="vdjbox_inner">',
                 '<div class="vdjbox_title">V</div>',
                 '<div>{{v_gene.full}}</div>',
             '</div>',
         '</div>',
-        '<div class="progress-bar progress-bar-warning" style="width: 33.333%">',
+        '{{/v_gene}}',
+        '{{#d_gene}}',
+        '<div class="progress-bar progress-bar-warning" style="width:{{_vdj_width.d}}">',
             '<div class="vdjbox_inner">',
                 '<div class="vdjbox_title">D</div>',
                 '<div>{{d_gene.full}}</div>',
             '</div>',
         '</div>',
-        '<div class="progress-bar progress-bar-danger" style="width: 33.333%">',
+        '{{/d_gene}}',
+        '{{#j_gene}}',
+        '<div class="progress-bar progress-bar-danger" style="width:{{_vdj_width.j}}">',
             '<div class="vdjbox_inner">',
                 '<div class="vdjbox_title">J</div>',
                 '<div>{{j_gene.full}}</div>',
             '</div>',
         '</div>',
+        '{{/j_gene}}',
     '</div>',
 
       '<div class="row">',
-        '<div class="col-md-4">',
+        '{{#v_gene}}',
+        '<div class="col-md-{{_vdj_grid.v}}">',
             '<div class="vdj_inner">',
                 '<table>',
                 '<tr><th>nt_identity:</th><td>{{nt_identity.v}}</td></tr>',
@@ -87,7 +94,9 @@ var ab_template = (["",
                 '</table>',
             '</div>',
         '</div>',
-        '<div class="col-md-4">',
+        '{{/v_gene}}',
+        '{{#d_gene}}',
+        '<div class="col-md-{{_vdj_grid.v}}">',
             '<div class="vdj_inner">',
                 '<table>',
                 '<tr><th>nt_identity:</th><td>{{nt_identity.d}}</td></tr>',
@@ -97,7 +106,9 @@ var ab_template = (["",
                 '</table>',
             '</div>',
         '</div>',
-        '<div class="col-md-4">',
+        '{{/d_gene}}',
+        '{{#j_gene}}',
+        '<div class="col-md-{{_vdj_grid.v}}">',
             '<div class="vdj_inner">',
                 '<table>',
                 '<tr><th>nt_identity:</th><td>{{nt_identity.j}}</td></tr>',
@@ -107,6 +118,7 @@ var ab_template = (["",
                 '</table>',
             '</div>',
         '</div>',
+        '{{/j_gene}}',
       '</div>',
       '</li>',
       '<li class="list-group-item"><b>CDR3 length:</b> {{cdr3_len}}</li>',
@@ -287,6 +299,33 @@ $(document).ready(function() {
 	    	res['v_muts_aa'] = res['v_muts_aa']['muts'];
 			res['var_muts_nt'] = res['var_muts_nt']['muts'];
             res['sample_id'] = sample;
+            //check V/D/J existence
+            if (res['v_gene'] && res['d_gene'] && res['j_gene']){
+                res['_vdj_width'] = {
+                    'v': '33.333%',
+                    'd': '33.333%',
+                    'j': '33.333%'
+                };
+                res['_vdj_grid'] = {
+                    'v': '4',
+                    'd': '4',
+                    'j': '4'
+                };
+            }
+            else if (res['v_gene'] && res['j_gene']){
+                res['_vdj_width'] = {
+                    'v': '50%',
+                    'j': '50%'
+                };
+                res['_vdj_grid'] = {
+                    'v': '6',
+                    'j': '6'
+                };
+            }
+            else{
+                console.warn('unknown V/D/J pattern: ' + res['_id']);
+            }
+
 	    	$('.antibody_container').html(Mustache.to_html(ab_template, res));
 	    }
 	);
