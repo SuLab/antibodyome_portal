@@ -70,5 +70,6 @@ class Sample(models.Model):
     uuid = models.CharField(max_length=256)
     status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
     job_id = models.CharField(max_length=256)
+
     def __str__(self):
         return '"{}" for project "{}"'.format(self.name, self.project.title)

@@ -1,7 +1,7 @@
 .qq-upload-button {
     background: transparent;
     overflow: visible;
-    width: 117px;
+    width: 210px;
     border-bottom: 0px;
 }
 .qq-upload-button-hover {
@@ -106,6 +106,10 @@
   word-break: break-all;
 }
 
-.sample-detail:hover{
+/*.sample-detail:hover{
   background-color: #E4E2FA;
+}*/
+
+#view-report {
+  padding: 4px 7px;
 }

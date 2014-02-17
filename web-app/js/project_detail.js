@@ -33,6 +33,7 @@ $(document).ready(function() {
             {
                 if(res.status)
                 {
+                    $('#notification-modal').modal('show');
                     self.text("Waiting for analyzing...");
                     self.addClass('disabled');
                 }
@@ -71,6 +72,7 @@ function renderProjectDetail(id){
             if (res.user!=res.owner) {
                 $("#edit-project").hide();
             }
+            $('#notification').attr('href', 'project_detail.html?id='+id)
             $('#project-title').text(res.title);
             if(typeof(res.metadata)=='string')
             {
@@ -89,10 +91,16 @@ function renderProjectDetail(id){
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#samples').html(html2);
             $('.disabled').attr('disabled','disabled');
-            $('.sample-detail').click(function(){
-                var id = $(this).attr('id');
+            // console.log(res.samples)
+            $('.sample-detail #view-report').click(function(){
+                var id = $(this).closest('.sample-detail').attr('id');
                 window.location.href = '/web-app/profile.html?id='+id;
             });
 
+            $('.sample-detail').each(function(){
+                if($(this).attr('data')!=3) {
+                    $(this).find('#view-report').addClass('disabled');
+                }
+            })
         });
 }

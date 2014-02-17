@@ -176,6 +176,11 @@ LOGGING = {
 from settings_private import *
 from settings_auth import *
 
+ABOME_VERSION = 'test'
+
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+
 if DEBUG:
     try:
         from settings_dev import *

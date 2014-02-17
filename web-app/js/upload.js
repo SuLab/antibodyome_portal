@@ -87,7 +87,7 @@ $(document).ready(function() {
         },
         // autoUpload : false,
         text : {
-            uploadButton : '<a href="#" class="btn btn-default "> <span class="glyphicon glyphicon-plus"></span>samples</a>'
+            uploadButton : '<a href="#" class="btn btn-default "> <span class="glyphicon glyphicon-plus"></span>Deep-sequencing samples</a>'
         },
         chunking : {
             enabled : true,
