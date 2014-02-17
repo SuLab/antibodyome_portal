@@ -6,6 +6,7 @@ import rpyc
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.core.mail import send_mail
 
 from upload.models import Project
 
@@ -93,6 +94,9 @@ class Analysis(threading.Thread):
                 if s.status == Project.STATUS_OPTIONS[4][0]:
                     p.status = Project.STATUS_OPTIONS[4][0]
             p.save()
+            if p.status == Project.STATUS_OPTIONS[3][0]:
+                '''python -m smtpd -n -c DebuggingServer localhost:1025'''
+                send_mail('hello', 'welcome to register.', 'localhost@example.com', [p.owner.email], fail_silently=False)
 
     def get_status(self):
         return self.status

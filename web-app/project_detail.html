@@ -70,7 +70,7 @@
 
         <script type="text/x-jquery-tmpl" id="sample-list-tmpl">
             {{each(i,sample) samples}}
-            <div  class="well well-sm sample-detail" id="${sample.id}" style="cursor: pointer;">
+            <div  class="well well-sm sample-detail" id="${sample.id}" data="${sample.status}">
                 <dl class="dl">
                     <dt>Name:</dt>
                     <dd id="sample-name">${sample.name}</dd>
@@ -83,11 +83,26 @@
                 	<dt>File:</dt>
                     <dd id="summary">${sample.filename}</dd>
                 </dl>
+                <div id="view-report" class="btn btn-primary">view report</div>
             </div>
             {{/each}}
         </script>
         <script>
         	$("#navbar").load("navbar.html");
         </script>
+
+        <div class="modal fade" id="notification-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" id="modal-header">
+                        Notification
+                    </div>
+                    <div class="modal-body">
+                        Your project begins to be analyzed, we will email you after it finished.
+                        You can check status on this page.
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
