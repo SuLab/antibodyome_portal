@@ -12,7 +12,7 @@ class ProjectManager(models.Manager):
 
 class Project(models.Model):
     objects = ProjectManager()
-    #id = models.CharField(max_length=20, primary_key=True)
+    ab_id = models.CharField(max_length=20)
     owner = models.ForeignKey(User)
     organism = models.CharField(max_length=50)
     title = models.CharField(max_length=500)
@@ -42,24 +42,9 @@ class Project(models.Model):
     def __str__(self):
         return '"{}" by "{}"'.format(self.title, self.owner.username)
 
-    @property
-    def samples(self):
-        return self.sample_set.all()
-        samples = self.sample_set.all()
-        samples_dict = serialize('json', samples)
-        return samples_dict
-
-    @property
-    def manifest(self):
-        attribute_key_list = ['id', 'organism', 'title', 'summary', 'metadata', 'status', 'samples']
-        entity_dict = {}
-        for key in attribute_key_list:
-            entity_dict[key] = self.__getattribute__(key)
-        return entity_dict
-
 
 class Sample(models.Model):
-    #id = models.CharField(max_length=20, primary_key=True)
+    ab_id = models.CharField(max_length=20)
     project = models.ForeignKey(Project)
     name = models.CharField(max_length=500)
     description = models.TextField()

@@ -60,16 +60,109 @@ $(document).ready(function() {
 
     $.get('/upload/sample-ab/'+id, function(res){
     	var tmp = clone(res);
-        p_l = data_process(tmp['light']);
-        p_l['total'] = res['light']['total'];
+        // p_l = data_process(tmp['light']);
+        // p_l['total'] = res['light']['total'];
         p_h = data_process(tmp['heavy']);
 		p_h['total'] = res['heavy']['total'];
         data_heavy = p_h;
-        data_light = p_l;
-        setPlot();
+        // data_light = p_l;
+        //setPlot();
+        render_d3_bar({total:p_h['total'], 'trees':p_h['trees']['d']});
     });
-
 });
+
+function render_d3_bar(obj)
+{
+	var data = [];
+	var raw = obj['trees'];
+	var total = obj['total'];
+	for(var key in raw)
+	{
+		data.push({name: key, count:raw[key].total, type:'family'});
+	}
+	bar_render();
+	function bar_render()
+	{
+		function to_percent(count)
+		{
+			return parseInt(100*count/total);
+		}
+		function to_percent_float(count)
+		{
+			return (100*count/total).toFixed(2);
+		}
+		var xScale = d3.scale.linear()
+			.domain([0, 100])
+			.range([0, $('.profile_d').width()-100]);
+		var yScale = d3.scale.ordinal()
+			.domain(d3.range(data.length))
+			.rangeRoundBands([0, 1000], 0.5);
+		p = d3.select(".profile_d")
+			.selectAll("div")
+	    	.data(data)
+	  		.enter().append("div")
+	  		.style("width", function(d) {
+				p =to_percent(d.count)
+	  			return parseInt(xScale(p))+'px';})
+	  		.style("padding-left", function(d) {return '0px';})
+	  		.style("background-color", function(d) {
+	  			if(d.type == 'family')
+	  				return '#0000CC';
+	  			if(d.type == 'gene')
+	  				return '#0066FF';
+	  			return '#00FF99';
+	  		})
+	  		.style("margin-bottom", function(d) {return '2px';})
+	    	.text(function(d) { return to_percent_float(d.count)+'%'; })
+	    	.on("click", function(d, i) {
+	    		//already unfolded
+	    		if (i<data.length-1 && data[i+1].type != d.type)
+	    		{
+	    			data_pop_at(data, i);
+	    		}
+	    		else
+	    		{
+		    		genes = raw[d.name].genes;
+		    		var new_data=[];
+		    		for(var key in genes)
+		    		{
+		    			new_data.push({name: key, count:genes[key].total, type:'gene'});
+		    		}
+		    		data = array_join_at(data, new_data, i);
+		    	}
+	    		d3.select(".profile_d")
+					.selectAll("div")
+					.remove()
+	    		bar_render();
+	    	});
+    }
+}
+//remove different type data after index i
+function data_pop_at(a, i)
+{
+	var type = a[i].type;
+	var j=i+1;
+	while(a[j].type != type)
+	{
+		j++;
+	}
+	a.splice(i+1, j-i-1);
+}
+
+function array_join_at(a_d, a_s, i)
+{
+	var a_new = new Array();
+	for(var j=0; j<=i; j++)
+	{
+		a_new.push(a_d[j]);
+	}
+	a_new = a_new.concat(a_s);
+	for(var j=i+1; j<a_d.length; j++)
+	{
+		a_new.push(a_d[j])
+	}
+	return a_new;
+}
 
 function gene_parse(k)
 {
@@ -115,6 +208,8 @@ function data_process(raw)
 			var f = alleles[k2]['family'];
 			var g = alleles[k2]['gene'];
 			var v = alleles[k2]['val'];
+			var allele = new Object;
+			allele[k2] = v;
 			if(f in tree)
 			{
 				tree[f]['total'] += v;
@@ -122,20 +217,30 @@ function data_process(raw)
 				{
 					if(g in tree[f]['genes'])
 					{
-						tree[f]['genes'][g] += v;
+						tree[f]['genes'][g]['total'] += v;
+						tree[f]['genes'][g]['alleles'].push(allele);
 					}
 					else
 					{
-						tree[f]['genes'][g] = v;
+						tree[f]['genes'][g] = {'total':v, 'alleles':[allele]};
 					}
+				}
+				else
+				{
+					tree[f]['alleles'].push({k2:v});
 				}
 			}
 			else
 			{
-				tree[f] = {'total':v, 'genes':{}};
+				tree[f] = {'total':v};
 				if(g != null)
 				{
-					tree[f]['genes'][g] = v;
+					tree[f]['genes'] = {}
+					tree[f]['genes'][g] = {'total':v, 'alleles':[allele]};
+				}
+				else
+				{
+					tree[f]['alleles'] = [allele];
 				}
 			}
 		}
@@ -233,6 +338,9 @@ var plot_args = {
         showTooltipUnitPosition : false
     }
 }
+
+var bar_store = {};
+
 function setPlot() {
     //横向柱状图
     var data_v_h=[];
@@ -243,6 +351,7 @@ function setPlot() {
 		data_v_h.push([total*100/heavy_total, key]);
     }
     profile_v_h = $.jqplot('profile-v-h', [data_v_h], plot_args);
+	bar_store['profile-v-h'] = data_v_h;
 
     var data_d_h=[];
     for(var key in p_h['trees']['d'])
@@ -276,5 +385,16 @@ function setPlot() {
 		data_j_l.push([total*100/light_total, key]);
     }
     profile_j_l = $.jqplot('profile-j-l', [data_j_l], plot_args);
+
+    $('#profile-v-h').bind('jqplotDataClick', function(ev, seriesIndex, pointIndex, data) {
+
+		var fml = bar_store[ev.target.id][data[1]-1][1];
+		data_heavy['trees']['v'][fml]
+		bar_store[ev.target.id].push(data_heavy['trees']['v'][fml]['genes'])
+		data_v_h = bar_store[ev.target.id];
+		profile_v_h = $.jqplot('profile-v-h', [[3,'a'],[4,'c']], plot_args);
+    });
 }
+
+
 

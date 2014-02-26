@@ -36,6 +36,10 @@ $(document).ready(function() {
                     $('#notification-modal').modal('show');
                     self.text("Waiting for analyzing...");
                     self.addClass('disabled');
+                    $('#notification-modal #cancel_modal').click(function(event) {
+                        /* Act on the event */
+                        $('#notification-modal').modal('hide');
+                    });
                 }
             }
         });
