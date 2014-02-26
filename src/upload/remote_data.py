@@ -38,12 +38,13 @@ def get_ab_data(job_id):
         job = ab.get_job(job_id)
     except Exception:
         return None
-    data = ab.get_post_processed_result(job['result_store'])['ab_counts']
-    res = {}
-    res['variable'] = dict(data['v'])
-    res['joining'] = dict(data['j'])
-    res['diversity'] = dict(data['d'])
-    return res
+    data = ab.get_post_processed_result(job['result_store'], as_str=True)
+
+#     res = {}
+#     res['variable'] = dict(data['v'])
+#     res['joining'] = dict(data['j'])
+#     res['diversity'] = dict(data['d'])
+    return json.loads(data)['ab_counts']
 
 
 def get_random_ab(job_id):
