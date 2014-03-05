@@ -78,7 +78,7 @@ function render_d3_bar(obj)
 	var total = obj['total'];
 	for(var key in raw)
 	{
-		data.push({name: key, count:raw[key].total, type:'family'});
+		data.push({name: key, obj:raw[key]});
 	}
 	bar_render();
 	function bar_render()
@@ -91,50 +91,67 @@ function render_d3_bar(obj)
 		{
 			return (100*count/total).toFixed(2);
 		}
+
+		var width = 800,
+    	barHeight = 20;
+    	var x = d3.scale.linear()
+    		.range([0, width]);
+    	var chart = d3.select(".profile_d")
+    		.attr("width", width);
+		chart.attr("height", barHeight * data.length+30);
+
 		var xScale = d3.scale.linear()
 			.domain([0, 100])
-			.range([0, $('.profile_d').width()-100]);
+			.range([0, $('.profile_d').width()]);
 		var yScale = d3.scale.ordinal()
-			.domain(d3.range(data.length))
-			.rangeRoundBands([0, 1000], 0.5);
-		p = d3.select(".profile_d")
-			.selectAll("div")
+			.domain(data.map(function(d) { return d.name; }))
+			.rangeRoundBands([0, barHeight * data.length], 0);
+
+		var xAxis = d3.svg.axis()
+		    .scale(xScale)
+		    .orient("bottom");
+		var yAxis = d3.svg.axis()
+		    .scale(yScale)
+		    .orient("left")
+
+		var bar = chart.selectAll("g")
 	    	.data(data)
-	  		.enter().append("div")
-	  		.style("width", function(d) {
-				p =to_percent(d.count)
-	  			return parseInt(xScale(p))+'px';})
-	  		.style("padding-left", function(d) {return '0px';})
-	  		.style("background-color", function(d) {
-	  			if(d.type == 'family')
-	  				return '#0000CC';
-	  			if(d.type == 'gene')
-	  				return '#0066FF';
-	  			return '#00FF99';
-	  		})
-	  		.style("margin-bottom", function(d) {return '2px';})
-	    	.text(function(d) { return to_percent_float(d.count)+'%'; })
-	    	.on("click", function(d, i) {
-	    		//already unfolded
-	    		if (i<data.length-1 && data[i+1].type != d.type)
-	    		{
-	    			data_pop_at(data, i);
-	    		}
-	    		else
-	    		{
-		    		genes = raw[d.name].genes;
-		    		var new_data=[];
-		    		for(var key in genes)
-		    		{
-		    			new_data.push({name: key, count:genes[key].total, type:'gene'});
-		    		}
-		    		data = array_join_at(data, new_data, i);
-		    	}
-	    		d3.select(".profile_d")
-					.selectAll("div")
-					.remove()
-	    		bar_render();
-	    	});
+	  		.enter().append("g")
+	  		.attr("transform", function(d, i) { return "translate(70," + i * barHeight + ")"; });
+
+	    chart.append("g")
+	      .attr("class", "x axis")
+	      .call(xAxis)
+	      .attr("transform", function(d, i) { return "translate(69, "+barHeight*data.length+")"; });
+
+	    chart.append("g")
+	      .attr("class", "y axis")
+	      .call(yAxis)
+	      .attr("transform", function(d, i) { return "translate(69, 0)"; });
+
+        bar.append("rect")
+	       .attr("width", function(d) {
+	       	 return xScale(to_percent(d.obj.total));
+	       })
+	       .attr("height", barHeight - 2);
+	  bar.append("text")
+	      .attr("x", function(d) {
+	      	return to_percent(xScale(d.obj.total)) + 20;
+	      	})
+	      .attr("y", barHeight / 2)
+	      .attr("dy", ".35em")
+	      .style("fill", "black")
+	      .text(function(d) { return to_percent_float(d.obj.total)+'%'; });
+
+	 bar.on("click", function(d, i) {
+	 	if($(bar[0][i]).attr('expanded')=='true')
+	 	{
+	 		$(bar[0][i]).attr('expanded',false);
+	 		$(bar[0][i]).append('div');
+	 	}
+	 	else
+	 		$(bar[0][i]).attr('expanded',true);
+	 });
     }
 }
 //remove different type data after index i
@@ -262,139 +279,7 @@ function data_process(raw)
 	return {'details':res,'trees':trees};
 }
 
-function setPlotAndSidebarValue(){
-    var i = 1;
-    $.each(v_count, function(key, value) {
-        vvalue.push(new Array(Math.log(value) * Math.LOG10E, key));
-        //$('.variable-list').append('<a href="#" class="list-group-item" style="border: 0px; padding:3px 5px;">'+key+'</a>');
-        i++;
-    });
-    i = 0;
-    varray.push(vvalue);
-    $.each(d_count, function(key, value) {
-        dvalue.push(new Array(Math.log(value) * Math.LOG10E, key));
-        //$('.diversity-list').append('<a href="#" class="list-group-item" style="border: 0px; padding:3px 5px;">'+key+'</a>');
-        i++;
-    });
-    i = 0;
-    darray.push(dvalue);
 
-    $.each(j_count, function(key, value) {
-        jvalue.push(new Array(Math.log(value) * Math.LOG10E, key));
-        //$('.joining-list').append('<a href="#" class="list-group-item" style="border: 0px; padding:3px 5px;">'+key+'</a>');
-        i++;
-    });
-    i = 0;
-    jarray.push(jvalue);
-
-    //set the height of plot
-    $("#profile-v").css("height", function() {
-        return vvalue.length * 20;
-    });
-    $("#profile-d").css("height", function() {
-        return dvalue.length * 20;
-    });
-    $("#profile-j").css("height", function() {
-        return jvalue.length * 20;
-    });
-
-}
-
-var plot_args = {
-    seriesDefaults : {
-        renderer : $.jqplot.BarRenderer,
-        pointLabels : {
-            show : true,
-            location : 'e',
-            edgeTolerance : -15,
-            ypadding : 32
-        },
-        pointLabels : {
-            show : true,
-            location : 'e',
-            edgeTolerance : -15
-        },
-        shadow : false,
-        rendererOptions : {
-            barPadding : 2, //设置同一分类两个柱状条之间的距离（px）
-            barDirection : 'horizontal', //设置柱状图显示的方向：垂直显示和水平显示
-            //，默认垂直显示 vertical or horizontal.
-            barWidth : 10, // 设置柱状图中每个柱状条的宽度
-        }
-    },
-    axes : {
-        yaxis : {
-            renderer : $.jqplot.CategoryAxisRenderer
-        }
-    },
-    cursor : {
-        style : 'crosshair',
-        show : true,
-        showTooltip : false,
-        followMouse : true,
-        tooltipLocation : 'nw',
-        tooltipOffset : 6,
-        showTooltipGridPosition : false,
-        showTooltipUnitPosition : false
-    }
-}
-
-var bar_store = {};
-
-function setPlot() {
-    //横向柱状图
-    var data_v_h=[];
-    var heavy_total = p_h['total'];
-    for(var key in p_h['trees']['v'])
-    {
-		var total = p_h['trees']['v'][key]['total'];
-		data_v_h.push([total*100/heavy_total, key]);
-    }
-    profile_v_h = $.jqplot('profile-v-h', [data_v_h], plot_args);
-	bar_store['profile-v-h'] = data_v_h;
-
-    var data_d_h=[];
-    for(var key in p_h['trees']['d'])
-    {
-		var total = p_h['trees']['d'][key]['total'];
-		data_d_h.push([total*100/heavy_total, key]);
-    }
-    profile_d_h = $.jqplot('profile-d-h', [data_d_h], plot_args);
-
-    var data_j_h=[];
-    for(var key in p_h['trees']['j'])
-    {
-		var total = p_h['trees']['j'][key]['total'];
-		data_j_h.push([total*100/heavy_total, key]);
-    }
-    profile_j_h = $.jqplot('profile-j-h', [data_j_h], plot_args);
-
-    var data_v_l=[];
-    var light_total = p_l['total'];
-    for(var key in p_l['trees']['v'])
-    {
-		var total = p_l['trees']['v'][key]['total'];
-		data_v_l.push([total*100/light_total, key]);
-    }
-    profile_v_l = $.jqplot('profile-v-l', [data_v_l], plot_args);
-
-    var data_j_l=[];
-    for(var key in p_l['trees']['j'])
-    {
-		var total = p_l['trees']['j'][key]['total'];
-		data_j_l.push([total*100/light_total, key]);
-    }
-    profile_j_l = $.jqplot('profile-j-l', [data_j_l], plot_args);
-
-    $('#profile-v-h').bind('jqplotDataClick', function(ev, seriesIndex, pointIndex, data) {
-
-		var fml = bar_store[ev.target.id][data[1]-1][1];
-		data_heavy['trees']['v'][fml]
-		bar_store[ev.target.id].push(data_heavy['trees']['v'][fml]['genes'])
-		data_v_h = bar_store[ev.target.id];
-		profile_v_h = $.jqplot('profile-v-h', [[3,'a'],[4,'c']], plot_args);
-    });
-}
 
 
 

@@ -37,6 +37,19 @@
         <script type="text/javascript" src="3rd/jqplot/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
         <!-- mouse -->
         <script type="text/javascript" src="3rd/jqplot/plugins/jqplot.cursor.js"></script>
+
+        <style>
+			.axis path,
+			.axis line {
+			  fill: none;
+			  stroke: #000;
+			  shape-rendering: crispEdges;
+			}
+
+			.bar {
+			  fill: steelblue;
+			}
+		</style>
     </head>
     <body>
         <script>
@@ -189,7 +202,7 @@
                                     Diversity
                                 </div>
                                 <div class="panel-body">
-                                    <div id="profile-d-h" class="profile_d"></div>
+                                    <svg id="profile-d-h" class="profile_d"></svg>
                                 </div>
                             </div>
 
