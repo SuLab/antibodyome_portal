@@ -22,7 +22,10 @@ var d_count = {
 var j_count = {
     "IGHJ3*01" : 11757,
 };
-var data_heavy, data_light;
+var data_heavy, data_light, total;
+
+var bar_color = [{'family':'#cc3300','genes':'#cc6600','alleles':'#cc9900'}, {'family':'#003399','genes':'#006699','alleles':'#009999'}]
+var bar_height = {'family':18, 'genes':10, 'alleles':4}
 
 function clone(obj){
     var objClone;
@@ -60,26 +63,14 @@ $(document).ready(function() {
 
     $.get('/upload/sample-ab/'+id, function(res){
     	var tmp = clone(res);
-        // p_l = data_process(tmp['light']);
-        // p_l['total'] = res['light']['total'];
         p_h = data_process(tmp['heavy']);
-		p_h['total'] = res['heavy']['total'];
-        data_heavy = p_h;
-        // data_light = p_l;
-        //setPlot();
-        render_d3_bar({total:p_h['total'], 'trees':p_h['trees']['d']});
+        render_d3_bar(p_h);
     });
 });
 
 function render_d3_bar(obj)
 {
-	var data = [];
-	var raw = obj['trees'];
-	var total = obj['total'];
-	for(var key in raw)
-	{
-		data.push({name: key, obj:raw[key]});
-	}
+	var data = map_to_array(obj);
 	bar_render();
 	function bar_render()
 	{
@@ -92,19 +83,21 @@ function render_d3_bar(obj)
 			return (100*count/total).toFixed(2);
 		}
 
-		var width = 800,
-    	barHeight = 20;
-    	var x = d3.scale.linear()
-    		.range([0, width]);
+		var width = 800, barHeight = 20;
+    	// var x = d3.scale.linear()
+    		// .range([0, width]);
+
+
     	var chart = d3.select(".profile_d")
-    		.attr("width", width);
-		chart.attr("height", barHeight * data.length+30);
+    		.attr("width", width)
+
+ 		chart.attr("height", barHeight * data.length+30);
 
 		var xScale = d3.scale.linear()
 			.domain([0, 100])
-			.range([0, $('.profile_d').width()]);
+			.range([0, $('.profile_d').width()-250]);
 		var yScale = d3.scale.ordinal()
-			.domain(data.map(function(d) { return d.name; }))
+			.domain($.map(data, function (value, key) { return value.name; }))
 			.rangeRoundBands([0, barHeight * data.length], 0);
 
 		var xAxis = d3.svg.axis()
@@ -112,47 +105,87 @@ function render_d3_bar(obj)
 		    .orient("bottom");
 		var yAxis = d3.svg.axis()
 		    .scale(yScale)
-		    .orient("left")
+		    .orient("left");
+
+		// var zoom = d3.behavior.zoom()
+		    // .on("zoom", zoomed);
+//
+		// var chart = d3.select(".profile_d")
+    		// .attr("width", width)
+    		// .append("g")
+    		// .attr("transform", "translate(10,30)")
+//
+//
+		// chart.attr("height", barHeight * data.length+30)
+			// .call(zoom);
 
 		var bar = chart.selectAll("g")
 	    	.data(data)
 	  		.enter().append("g")
-	  		.attr("transform", function(d, i) { return "translate(70," + i * barHeight + ")"; });
+	  		.attr("transform", function(d, i) {return "translate(108," + i * barHeight + ")"; });
 
+	  	chart.data(data)
+	  	.enter();
 	    chart.append("g")
 	      .attr("class", "x axis")
 	      .call(xAxis)
-	      .attr("transform", function(d, i) { return "translate(69, "+barHeight*data.length+")"; });
+	      .attr("transform", function(d, i) { return "translate(107, "+barHeight*data.length+")"; });
 
 	    chart.append("g")
 	      .attr("class", "y axis")
 	      .call(yAxis)
-	      .attr("transform", function(d, i) { return "translate(69, 0)"; });
+	      .attr("transform", function(d, i) {return "translate(107, 0)"; })
 
         bar.append("rect")
-	       .attr("width", function(d) {
-	       	 return xScale(to_percent(d.obj.total));
+        	.style("fill", function(d){
+  				return bar_color[d.color][d.type];
+  			})
+  		   .attr("y", function(d,i) {
+	       	 return (barHeight-bar_height[d.type])/2;
 	       })
-	       .attr("height", barHeight - 2);
-	  bar.append("text")
-	      .attr("x", function(d) {
-	      	return to_percent(xScale(d.obj.total)) + 20;
-	      	})
+	       .attr("width", function(d,i) {
+	       	 return xScale(to_percent(d.count))
+	       })
+	       .attr("height", function(d,i) {
+	       	 return bar_height[d.type];
+	       });
+
+	  	bar.append("text")
+	      .attr("x", function(d,i) {
+	       	return xScale(to_percent(d.count)+1)
+	      })
 	      .attr("y", barHeight / 2)
 	      .attr("dy", ".35em")
-	      .style("fill", "black")
-	      .text(function(d) { return to_percent_float(d.obj.total)+'%'; });
+	      // .style("fill", "black")
+	      .style("fill", function(d){
+	      	return bar_color[d.color][d.type];
+  		   })
+	      .text(function(d,i) { return to_percent_float(d.count)+'%'; });
 
-	 bar.on("click", function(d, i) {
-	 	if($(bar[0][i]).attr('expanded')=='true')
-	 	{
-	 		$(bar[0][i]).attr('expanded',false);
-	 		$(bar[0][i]).append('div');
-	 	}
-	 	else
-	 		$(bar[0][i]).attr('expanded',true);
-	 });
-    }
+		 function zoomed() {
+	  		//d3.select(".x.axis").call(xAxis);
+	  		//xScale.domain([0,50]);
+	  		//chart.select(".x.axis").transition().call(xScale);
+		 }
+
+		 bar.on("click", function(d, i) {
+		 	if (d.type=='alleles')
+		 		return
+		 	if (i<data.length-1 && data[i+1].type != d.type)
+			{
+				data_pop_at(data, i);
+			}
+			else
+			{
+				data = array_join_at(data, d.children, i);
+
+			}
+			d3.select(".profile_d")
+	 			.selectAll("g")
+	 			.remove()
+			bar_render();
+		 });
+	 }
 }
 //remove different type data after index i
 function data_pop_at(a, i)
@@ -181,32 +214,101 @@ function array_join_at(a_d, a_s, i)
 	return a_new;
 }
 
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+
 function gene_parse(k)
 {
-	var res = {'family':null, 'gene':null};
-	var tmp = k.split('/');
-	if(tmp.length ==2)
+	var res = {'family':null, 'gene':null, 'allele':null};
+	var t,s;
+	t=k.indexOf('-');
+	if(t == -1)
 	{
-		res['family'] = tmp[0];
-		res['gene'] = tmp[1].split('*')[0];
-		return res;
+		t=k.indexOf('/');
 	}
-	var tmp = k.split('-');
-	if(tmp.length ==2)
+	if(t != -1)
 	{
-		res['family'] = tmp[0];
-		res['gene'] = tmp[1].split('*')[0];
-		return res;
+		s = k.substring(t+1,k.length);
+		res['family'] = k.substring(0, t);
+		res['gene'] = s.split('*')[0];
+		res['allele'] = s.split('*')[1];
 	}
-	res['family'] = k.split('*')[0];
+	else
+	{
+		res['family'] = k.split('*')[0];
+		res['allele'] = k.split('*')[1];
+	}
 	return res;
+}
+
+function map_to_array(origin_data)
+{
+	var new_data = [];
+	var new_genes = [];
+	var i=0;
+	for (var key in origin_data) {
+		var new_genes = [];
+		for(var gene_key in origin_data[key].children) {
+			var g = origin_data[key].children[gene_key];
+			for(var j in g['children'])
+			{
+				g['children'][j].color = i;
+			}
+			g.color = i;
+			new_genes.push(origin_data[key].children[gene_key]);
+		}
+		origin_data[key]['children'] = new_genes;
+		origin_data[key].color = i;
+		new_data.push(origin_data[key]);
+		if(i==0) i=1; else i=0;
+	}
+	return new_data;
+}
+
+
+function redraw()
+{
+
+    console.log("here", d3.event.translate, d3.event.scale);
+    path.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
+
+    var xoffset = (xMax + xMin) / 2;
+    var yoffset = (yMax + yMin) / 2;
+
+    var xTemp = [(0 - xoffset) * (1/d3.event.scale), (0 + xoffset) * (1/d3.event.scale)];
+    var yTemp = [(0 - yoffset) * (1/d3.event.scale), (0 + yoffset) * (1/d3.event.scale)];
+
+    xMin = xTemp[0] + xoffset;
+    xMax = xTemp[1] + xoffset;
+    yMin = yTemp[0] + yoffset;
+    yMax = yTemp[1] + yoffset;
+
+    console.log("", xMin, xMax, yMin, yMax);
+
+    xScale.domain([xMin, xMax]);
+    yScale.domain([yMax, yMin]);
+
+    xaxis.call(xAxis);
+    yaxis.call(yAxis);
+
+    path.attr("d", line)
+        .attr("transform", null)
+        .transition()
+        .ease("linear")
+        ;
 }
 
 //raw --- {'total':xxxx, 'd':{}, 'j':{}, 'v':{}}
 function data_process(raw)
 {
 	var res = {};
-	var total = raw['total'];
+	total = raw['total'];
 	var trees={};
 	for(var key in raw)
 	{
@@ -226,57 +328,47 @@ function data_process(raw)
 			var g = alleles[k2]['gene'];
 			var v = alleles[k2]['val'];
 			var allele = new Object;
-			allele[k2] = v;
+			allele['name'] = alleles[k2]['allele'];
+			allele['count'] = v;
+			allele['type'] = 'alleles';
 			if(f in tree)
 			{
-				tree[f]['total'] += v;
+				tree[f]['count'] += v;
 				if(g != null)
 				{
-					if(g in tree[f]['genes'])
+					if(g in tree[f]['children'])
 					{
-						tree[f]['genes'][g]['total'] += v;
-						tree[f]['genes'][g]['alleles'].push(allele);
+						tree[f]['children'][g]['count'] += v;
+						tree[f]['children'][g]['type'] = 'genes';
+						tree[f]['children'][g]['name'] = g;
+						tree[f]['children'][g]['children'].push(allele);
 					}
 					else
 					{
-						tree[f]['genes'][g] = {'total':v, 'alleles':[allele]};
+						tree[f]['children'][g] = {'count':v, 'type':'genes','name': g,'children':[allele]};
 					}
 				}
 				else
 				{
-					tree[f]['alleles'].push({k2:v});
+					tree[f]['children'].push(allele)
 				}
 			}
 			else
 			{
-				tree[f] = {'total':v};
+				tree[f] = {'count':v, 'name':f, 'type':'family'};
 				if(g != null)
 				{
-					tree[f]['genes'] = {}
-					tree[f]['genes'][g] = {'total':v, 'alleles':[allele]};
+					tree[f]['children'] = {}
+					tree[f]['children'][g] = {'count':v,'type':'genes','name': g, 'children':[allele]};
 				}
 				else
 				{
-					tree[f]['alleles'] = [allele];
+					tree[f]['children'] = [allele];
 				}
 			}
 		}
-		trees[key] = tree;
-		// res[key] = {};
-		// res[key]['allele'] = raw[key];
-		// var gene={}, family={};
-		// for(var k in res[key]['allele'])
-		// {
-			// var val = res[key]['allele'][k];
-			// var tmp = 100*val/total;
-			// tmp = tmp.toFixed(2)
-			// res[key]['allele'][k] = tmp+'%';
-            // //split to family and gene
-            // tmp = gene_parse(k);
-		// }
 	}
-
-	return {'details':res,'trees':trees};
+	return tree;
 }
 
 
