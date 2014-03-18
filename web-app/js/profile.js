@@ -24,8 +24,9 @@ var j_count = {
 };
 var data_heavy, data_light, total;
 
-var bar_color = [{'family':'#cc3300','genes':'#cc6600','alleles':'#cc9900'}, {'family':'#003399','genes':'#006699','alleles':'#009999'}]
-var bar_height = {'family':18, 'genes':10, 'alleles':4}
+var bar_color = [{'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}, {'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}]
+var bar_height = {'family':18, 'genes':12, 'alleles':10}
+var bar_gap = {'family':4, 'genes':2, 'alleles':1}
 
 function clone(obj){
     var objClone;
@@ -47,6 +48,7 @@ function clone(obj){
 }
 
 $(document).ready(function() {
+    $("#svg-div").css("overflow","hidden");
     $.urlParam = function(name){
         var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
         return results[1] || 0;
@@ -70,9 +72,39 @@ $(document).ready(function() {
 
 function render_d3_bar(obj)
 {
+	var width = 800, tick = 10
 	var data = map_to_array(obj);
-	bar_render();
-	function bar_render()
+
+	$('.refresh').click(function(){
+		d3.select(".profile_d")
+	 	  .selectAll("g")
+	   	  .remove();
+	   	width = 800;
+	   	tick = 10;
+		bar_render(width, tick);
+	})
+
+	$('.zoom-in').click(function(){
+		d3.select(".profile_d")
+	 	  .selectAll("g")
+	   	  .remove();
+	   	width = width *1.2;
+	   	tick = tick*1.2;
+		bar_render(width, tick);
+	})
+
+	$('.zoom-out').click(function(){
+        if (width > 370.5){
+            d3.select(".profile_d")
+                .selectAll("g")
+                .remove();
+            width = width *0.8;
+            tick = tick*0.8;
+            bar_render(width, tick*0.8);
+        }
+	})
+	bar_render(width, tick);
+	function bar_render(width, tick)
 	{
 		function to_percent(count)
 		{
@@ -83,10 +115,8 @@ function render_d3_bar(obj)
 			return (100*count/total).toFixed(2);
 		}
 
-		var width = 800, barHeight = 20;
-    	// var x = d3.scale.linear()
-    		// .range([0, width]);
-
+		var barHeight = 20;
+		var y_trans = 0;
 
     	var chart = d3.select(".profile_d")
     		.attr("width", width)
@@ -102,75 +132,93 @@ function render_d3_bar(obj)
 
 		var xAxis = d3.svg.axis()
 		    .scale(xScale)
-		    .orient("bottom");
+		    .orient("bottom")
+		    .ticks(tick);
 		var yAxis = d3.svg.axis()
 		    .scale(yScale)
 		    .orient("left");
 
-		// var zoom = d3.behavior.zoom()
-		    // .on("zoom", zoomed);
-//
-		// var chart = d3.select(".profile_d")
-    		// .attr("width", width)
-    		// .append("g")
-    		// .attr("transform", "translate(10,30)")
-//
-//
-		// chart.attr("height", barHeight * data.length+30)
-			// .call(zoom);
-
 		var bar = chart.selectAll("g")
 	    	.data(data)
 	  		.enter().append("g")
-	  		.attr("transform", function(d, i) {return "translate(108," + i * barHeight + ")"; });
+	  		.attr("transform", function(d, i) {
+	  			ret =  "translate(108," + y_trans + ")";
+				y_trans += (bar_height[d.type]);
+	  			return ret;
+	  		});
 
-	  	chart.data(data)
-	  	.enter();
 	    chart.append("g")
 	      .attr("class", "x axis")
 	      .call(xAxis)
-	      .attr("transform", function(d, i) { return "translate(107, "+barHeight*data.length+")"; });
-
-	    chart.append("g")
-	      .attr("class", "y axis")
-	      .call(yAxis)
-	      .attr("transform", function(d, i) {return "translate(107, 0)"; })
+	      .attr("transform", function(d, i) { return "translate(107, "+y_trans+")"; });
 
         bar.append("rect")
         	.style("fill", function(d){
   				return bar_color[d.color][d.type];
   			})
   		   .attr("y", function(d,i) {
-	       	 return (barHeight-bar_height[d.type])/2;
+	       	 return bar_gap[d.type];
 	       })
 	       .attr("width", function(d,i) {
 	       	 return xScale(to_percent(d.count))
 	       })
 	       .attr("height", function(d,i) {
-	       	 return bar_height[d.type];
+	       	 return bar_height[d.type]-bar_gap[d.type];
 	       });
 
 	  	bar.append("text")
 	      .attr("x", function(d,i) {
-	       	return xScale(to_percent(d.count)+1)
+	       	return xScale(to_percent(d.count)+1);
 	      })
-	      .attr("y", barHeight / 2)
+	      .attr("y", function(d,i) {
+	       	return bar_height[d.type]/2;
+	      })
 	      .attr("dy", ".35em")
-	      // .style("fill", "black")
 	      .style("fill", function(d){
 	      	return bar_color[d.color][d.type];
   		   })
+  		  .style("font-size", function(d) {
+  		  	if(d.type=='alleles')
+  		  		return "10px";
+  		  	if(d.type=='gene')
+  		  		return "12px";
+  		  	return "15px"; })
 	      .text(function(d,i) { return to_percent_float(d.count)+'%'; });
 
-		 function zoomed() {
-	  		//d3.select(".x.axis").call(xAxis);
-	  		//xScale.domain([0,50]);
-	  		//chart.select(".x.axis").transition().call(xScale);
-		 }
+	      bar.append("text")
+	      .attr("x", function(d,i) {
+	       	if(d.type=='alleles')
+  		  		return -90;
+  		  	if(d.type=='genes')
+  		  		return -95;
+  		  	return -100;
+	      })
+	      .attr("y", function(d,i) {
+	       	return bar_height[d.type]/2;
+	      })
+	      .attr("dy", ".35em")
+	      .style("fill", function(d){
+	      	return bar_color[d.color][d.type];
+  		   })
+  		  .style("font-size", function(d) {
+  		  	if(d.type=='alleles')
+  		  		return "10px";
+  		  	if(d.type=='genes')
+  		  		return "12px";
+  		  	return "15px"; })
+	      .text(function(d,i) { return d.name; });
+
+          chart.append("line")
+            .attr("x1", 107)
+            .attr("y1", 0)
+            .attr("x2", 107)
+            .attr("y2", y_trans)
+            .attr("stroke-width", 1)
+            .attr("stroke", "black");
 
 		 bar.on("click", function(d, i) {
 		 	if (d.type=='alleles')
-		 		return
+		 		return;
 		 	if (i<data.length-1 && data[i+1].type != d.type)
 			{
 				data_pop_at(data, i);
@@ -178,12 +226,14 @@ function render_d3_bar(obj)
 			else
 			{
 				data = array_join_at(data, d.children, i);
-
 			}
 			d3.select(".profile_d")
 	 			.selectAll("g")
-	 			.remove()
-			bar_render();
+	 			.remove();
+	 		d3.select(".profile_d")
+	 			.selectAll("line")
+	 			.remove();
+			bar_render(width, tick);
 		 });
 	 }
 }
@@ -192,7 +242,7 @@ function data_pop_at(a, i)
 {
 	var type = a[i].type;
 	var j=i+1;
-	while(a[j].type != type)
+	while((j<a.length)&&(a[j].type!=type))
 	{
 		j++;
 	}
@@ -236,13 +286,15 @@ function gene_parse(k)
 	{
 		s = k.substring(t+1,k.length);
 		res['family'] = k.substring(0, t);
-		res['gene'] = s.split('*')[0];
-		res['allele'] = s.split('*')[1];
+		// res['gene'] = s.split('*')[0];
+		res['gene'] = res['family']+'-'+s.split('*')[0];
+		res['allele'] = k;
 	}
 	else
 	{
 		res['family'] = k.split('*')[0];
-		res['allele'] = k.split('*')[1];
+		// res['allele'] = k.split('*')[1];
+		res['allele'] = k;
 	}
 	return res;
 }
@@ -271,38 +323,6 @@ function map_to_array(origin_data)
 	return new_data;
 }
 
-
-function redraw()
-{
-
-    console.log("here", d3.event.translate, d3.event.scale);
-    path.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
-
-    var xoffset = (xMax + xMin) / 2;
-    var yoffset = (yMax + yMin) / 2;
-
-    var xTemp = [(0 - xoffset) * (1/d3.event.scale), (0 + xoffset) * (1/d3.event.scale)];
-    var yTemp = [(0 - yoffset) * (1/d3.event.scale), (0 + yoffset) * (1/d3.event.scale)];
-
-    xMin = xTemp[0] + xoffset;
-    xMax = xTemp[1] + xoffset;
-    yMin = yTemp[0] + yoffset;
-    yMax = yTemp[1] + yoffset;
-
-    console.log("", xMin, xMax, yMin, yMax);
-
-    xScale.domain([xMin, xMax]);
-    yScale.domain([yMax, yMin]);
-
-    xaxis.call(xAxis);
-    yaxis.call(yAxis);
-
-    path.attr("d", line)
-        .attr("transform", null)
-        .transition()
-        .ease("linear")
-        ;
-}
 
 //raw --- {'total':xxxx, 'd':{}, 'j':{}, 'v':{}}
 function data_process(raw)
