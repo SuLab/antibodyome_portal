@@ -30,4 +30,5 @@ urlpatterns = patterns(
     url(r'^sample-ab/(?P<id>\d+)/$', views.sample_ab, name="sample-ab"),
     url(r'^random-ab/(?P<id>\d+)/$', views.random_ab, name="random-ab"),
     url(r'^ab-detail/$', views.ab_detail, name="ab-detail"),
+    url(r'^convert-svg/$', views.convert_svg, name="convert-svg"),
 )

@@ -4,8 +4,9 @@ import hmac
 import hashlib
 import json
 
+from django.shortcuts import render_to_response
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden,HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from upload.models import Project, Sample
 from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder
@@ -99,8 +100,8 @@ def make_response(status=200, content=None):
     return response
 
 def set_ab_id(model, prefix):
-  model.__setattr__('ab_id','%s%s' %(prefix,model.id))
-  model.save()
+    model.__setattr__('ab_id','%s%s' %(prefix,model.id))
+    model.save()
 
 def create_project(request):
     user = request.user
@@ -249,8 +250,7 @@ class ProjectDetail(AbomeDetailView):
         return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), content_type="application/json")
 
 
-def ABProjectDetail(request, ab_id):
-    # import pdb;pdb.set_trace()
+def ABProjectDetail(request, ab_id):    
     p = Project.objects.get(ab_id=ab_id)
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
@@ -309,3 +309,30 @@ def ab_detail(request):
     #job_id = '52d42f1b9baecf05bfddffed'
     abs = get_ab(job_id, ab)
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
+
+# import cairo
+# import rsvg
+import cairosvg
+@require_http_methods(["POST"])
+def convert_svg(request):
+    svg = request.POST.get('svg')
+    output_format = request.POST.get('output_format')
+    # data = '/web-app/media/test.file'
+    file_path = ''
+    if output_format == 'png':
+        file_path = '/web-app/media/svg.png'
+        f = open(file_path,'w')
+        cairosvg.svg2png(bytestring=svg,write_to=f)
+        f.close()
+    elif output_format == 'pdf':
+        file_path = '/web-app/media/svg.pdf'
+        f = open(file_path,'w')
+        cairosvg.svg2pdf(bytestring=svg,write_to=f)
+        f.close()
+    else:
+        file_path = '/web-app/media/svg.svg'
+        f=open(file_path, 'w')
+        f.write(svg)
+        f.close()
+    return HttpResponse(json.dumps(file_path, cls=ComplexEncoder), content_type="application/json")
+
