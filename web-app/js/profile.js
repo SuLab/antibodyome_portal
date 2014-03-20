@@ -25,8 +25,8 @@ var j_count = {
 var data_heavy, data_light, total;
 
 var bar_color = [{'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}, {'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}]
-var bar_height = {'family':18, 'genes':12, 'alleles':10}
-var bar_gap = {'family':4, 'genes':2, 'alleles':1}
+var bar_height = {'family':24, 'genes':12, 'alleles':10}
+var bar_gap = {'family':10, 'genes':2, 'alleles':1}
 
 function clone(obj){
     var objClone;
@@ -68,7 +68,42 @@ $(document).ready(function() {
         p_h = data_process(tmp['heavy']);
         render_d3_bar(p_h);
     });
+
+    $("#save_to_svg").click(function() { submit_download_form("svg"); });
+
+	$("#save_to_pdf").click(function() { submit_download_form("pdf"); });
+
+	$("#save_to_png").click(function() { submit_download_form("png"); });
 });
+
+
+function get_svg_code()
+{
+	// Get the d3js SVG element
+	// var tmp  = document.getElementById("profile_d");
+	var svg = $('.profile_d').find("svg")[0];
+
+	// Extract the data as SVG text string
+	var svg_xml = (new XMLSerializer).serializeToString($('#profile-d-h')[0]);
+
+}
+
+function submit_download_form(output_format)
+{
+	svg_xml = get_svg_code()
+	data = {
+		'output_format': output_format,
+		'svg': svg_xml,
+	}
+	$.post(
+		'/upload/convert-svg/',
+		data,
+		function(res){
+			// window.location.href = res;
+			window.location.replace(res);
+	})
+}
+
 
 function render_d3_bar(obj)
 {
@@ -108,7 +143,7 @@ function render_d3_bar(obj)
 	{
 		function to_percent(count)
 		{
-			return parseInt(100*count/total);
+            return 100*count/total;
 		}
 		function to_percent_float(count)
 		{
@@ -119,9 +154,7 @@ function render_d3_bar(obj)
 		var y_trans = 0;
 
     	var chart = d3.select(".profile_d")
-    		.attr("width", width)
-
- 		chart.attr("height", barHeight * data.length+30);
+    		.attr("width", width);
 
 		var xScale = d3.scale.linear()
 			.domain([0, 100])
@@ -147,6 +180,9 @@ function render_d3_bar(obj)
 	  			return ret;
 	  		});
 
+	  	chart.attr("height", y_trans+30);
+
+
 	    chart.append("g")
 	      .attr("class", "x axis")
 	      .call(xAxis)
@@ -160,7 +196,7 @@ function render_d3_bar(obj)
 	       	 return bar_gap[d.type];
 	       })
 	       .attr("width", function(d,i) {
-	       	 return xScale(to_percent(d.count))
+	       	 return xScale(to_percent(d.count));
 	       })
 	       .attr("height", function(d,i) {
 	       	 return bar_height[d.type]-bar_gap[d.type];
@@ -168,7 +204,7 @@ function render_d3_bar(obj)
 
 	  	bar.append("text")
 	      .attr("x", function(d,i) {
-	       	return xScale(to_percent(d.count)+1);
+ 	       	return xScale(to_percent(d.count))+5;
 	      })
 	      .attr("y", function(d,i) {
 	       	return bar_height[d.type]/2;
@@ -183,7 +219,7 @@ function render_d3_bar(obj)
   		  	if(d.type=='gene')
   		  		return "12px";
   		  	return "15px"; })
-	      .text(function(d,i) { return to_percent_float(d.count)+'%'; });
+	      .text(function(d,i) { return to_percent_float(d.count)+'%(' + d.count + ")"; });
 
 	      bar.append("text")
 	      .attr("x", function(d,i) {
@@ -218,15 +254,12 @@ function render_d3_bar(obj)
 
 		 bar.on("click", function(d, i) {
 		 	if (d.type=='alleles')
-		 		return;
-		 	if (i<data.length-1 && data[i+1].type != d.type)
-			{
-				data_pop_at(data, i);
-			}
-			else
-			{
-				data = array_join_at(data, d.children, i);
-			}
+		 		return
+            if (!d.clicked) {
+                data = array_join_at(data, d.children, i);
+            }else{
+                data_pop_at(data, i);
+            }
 			d3.select(".profile_d")
 	 			.selectAll("g")
 	 			.remove();
@@ -236,16 +269,21 @@ function render_d3_bar(obj)
 			bar_render(width, tick);
 		 });
 	 }
+
 }
 //remove different type data after index i
 function data_pop_at(a, i)
 {
 	var type = a[i].type;
 	var j=i+1;
-	while((j<a.length)&&(a[j].type!=type))
+
+	while(a[j] && a[j].type != type)
 	{
+        if(a[j].type == "family")
+            break;
 		j++;
 	}
+	a[i].clicked = false;
 	a.splice(i+1, j-i-1);
 }
 
@@ -254,7 +292,12 @@ function array_join_at(a_d, a_s, i)
 	var a_new = new Array();
 	for(var j=0; j<=i; j++)
 	{
-		a_new.push(a_d[j]);
+        if(j == i){
+            a_d[j].clicked = true
+            a_new.push(a_d[j]);
+        }else{
+            a_new.push(a_d[j]);
+        }
 	}
 	a_new = a_new.concat(a_s);
 	for(var j=i+1; j<a_d.length; j++)
@@ -311,12 +354,15 @@ function map_to_array(origin_data)
 			for(var j in g['children'])
 			{
 				g['children'][j].color = i;
+                g['children'][j].clicked = false;
 			}
 			g.color = i;
+            g.clicked = false;
 			new_genes.push(origin_data[key].children[gene_key]);
 		}
 		origin_data[key]['children'] = new_genes;
 		origin_data[key].color = i;
+        origin_data[key].clicked = false;
 		new_data.push(origin_data[key]);
 		if(i==0) i=1; else i=0;
 	}
