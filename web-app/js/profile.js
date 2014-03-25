@@ -130,6 +130,7 @@ function render_d3_bar(obj)
 	   	  .remove();
 	   	width = 800;
 	   	tick = 10;
+	   	data = map_to_array(obj);
 		bar_render(width, tick);
 	})
 
