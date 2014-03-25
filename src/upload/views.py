@@ -313,26 +313,38 @@ def ab_detail(request):
 # import cairo
 # import rsvg
 import cairosvg
+import uuid
+from django.core.servers.basehttp import FileWrapper
+import os
 @require_http_methods(["POST"])
 def convert_svg(request):
     svg = request.POST.get('svg')
     output_format = request.POST.get('output_format')
-    # data = '/web-app/media/test.file'
-    file_path = ''
+
+    file_name = str(uuid.uuid1())
     if output_format == 'png':
-        file_path = '/web-app/media/svg.png'
-        f = open(file_path,'w')
+        file_name = file_name+'.png'
+        f = open('../web-app/media/'+file_name,'w')
         cairosvg.svg2png(bytestring=svg,write_to=f)
         f.close()
     elif output_format == 'pdf':
-        file_path = '/web-app/media/svg.pdf'
-        f = open(file_path,'w')
+        file_name = file_name+'.pdf'
+        f = open('../web-app/media/'+file_name,'w')
         cairosvg.svg2pdf(bytestring=svg,write_to=f)
         f.close()
     else:
-        file_path = '/web-app/media/svg.svg'
-        f=open(file_path, 'w')
+        file_name = file_name+'.svg'
+        f=open('../web-app/media/'+file_name, 'w')
         f.write(svg)
         f.close()
-    return HttpResponse(json.dumps(file_path, cls=ComplexEncoder), content_type="application/json")
 
+    return HttpResponse(json.dumps('/upload/file-down/?name='+file_name, cls=ComplexEncoder), content_type="application/json")
+
+def file_download(request):
+    file_name = request.GET.get('name')
+    file_path = '../web-app/media/'+file_name
+    wrapper = FileWrapper(file('../web-app/media/'+file_name))
+    response = HttpResponse(wrapper, mimetype='application/octetstream')
+    response['Content-Length'] = os.path.getsize(file_path)
+    response['Content-Disposition'] = 'attachment; filename=%s' % file_path.split('/')[-1]
+    return response

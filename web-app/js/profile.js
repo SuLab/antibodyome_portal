@@ -67,6 +67,7 @@ $(document).ready(function() {
     	var tmp = clone(res);
         p_h = data_process(tmp['heavy']);
         render_d3_bar(p_h);
+        $("#button-div").removeClass("hide");
     });
 
     $("#save_to_svg").click(function() { submit_download_form("svg"); });
@@ -85,8 +86,22 @@ function get_svg_code()
 
 	// Extract the data as SVG text string
 	var svg_xml = (new XMLSerializer).serializeToString($('#profile-d-h')[0]);
+    return svg_xml;
 
 }
+
+
+function downloadURL(url) {
+    var hiddenIFrameID = 'hiddenDownloader',
+        iframe = document.getElementById(hiddenIFrameID);
+    if (iframe === null) {
+        iframe = document.createElement('iframe');
+        iframe.id = hiddenIFrameID;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    iframe.src = url;
+};
 
 function submit_download_form(output_format)
 {
@@ -99,8 +114,7 @@ function submit_download_form(output_format)
 		'/upload/convert-svg/',
 		data,
 		function(res){
-			// window.location.href = res;
-			window.location.replace(res);
+			downloadURL(res);
 	})
 }
 
@@ -209,17 +223,55 @@ function render_d3_bar(obj)
 	      .attr("y", function(d,i) {
 	       	return bar_height[d.type]/2;
 	      })
-	      .attr("dy", ".35em")
+	      .attr("dy", function(d, i){
+              if(d.type=='alleles')
+                return ".4em";
+            if(d.type=='genes')
+                return ".5em";
+            return ".6em";
+            })
 	      .style("fill", function(d){
 	      	return bar_color[d.color][d.type];
   		   })
   		  .style("font-size", function(d) {
   		  	if(d.type=='alleles')
-  		  		return "10px";
-  		  	if(d.type=='gene')
-  		  		return "12px";
-  		  	return "15px"; })
-	      .text(function(d,i) { return to_percent_float(d.count)+'%(' + d.count + ")"; });
+  		  		return "9px";
+  		  	if(d.type=='genes')
+  		  		return "11px";
+  		  	return "13px"; })
+	      .text(function(d,i) { return to_percent_float(d.count)+'%'; });
+
+          // new code
+          bar.append("text")
+          .attr("x", function(d,i) {
+              if(to_percent(d.count) >= 10){
+                  return xScale(to_percent(d.count))+52;
+              }else{
+                  return xScale(to_percent(d.count))+45;
+              }
+
+          })
+          .attr("y", function(d,i) {
+            return bar_height[d.type]/2;
+          })
+          .attr("dy", function(d, i){
+              if(d.type=='alleles')
+                return ".44em";
+            if(d.type=='genes')
+                return ".54em";
+            return ".64em";
+            })
+          .style("fill", function(d){
+            return bar_color[d.color][d.type];
+           })
+          .style("font-size", function(d) {
+            if(d.type=='alleles')
+                return "8px";
+            if(d.type=='genes')
+                return "10px";
+            return "12px"; })
+          .text(function(d,i) { return "(" + d.count + ")"; });
+          // end new code
 
 	      bar.append("text")
 	      .attr("x", function(d,i) {
@@ -232,7 +284,13 @@ function render_d3_bar(obj)
 	      .attr("y", function(d,i) {
 	       	return bar_height[d.type]/2;
 	      })
-	      .attr("dy", ".35em")
+	      .attr("dy", function(d, i){
+              if(d.type=='alleles')
+                return ".5em";
+            if(d.type=='genes')
+                return ".5em";
+            return ".7em";
+            })
 	      .style("fill", function(d){
 	      	return bar_color[d.color][d.type];
   		   })
