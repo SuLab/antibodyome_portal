@@ -18,7 +18,7 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^upload/', include('upload.urls', namespace='upload')),
     url(r'^auth/', include('auth.urls', namespace='auth')),
-    url(r'', include('social.apps.django_app.urls', namespace='social')),
+    url(r'', include('social.apps.django_app.urls', namespace='social auth')),
 )
 
 urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
