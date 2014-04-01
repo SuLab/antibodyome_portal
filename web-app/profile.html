@@ -37,31 +37,6 @@
         <script type="text/javascript" src="3rd/jqplot/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
         <!-- mouse -->
         <script type="text/javascript" src="3rd/jqplot/plugins/jqplot.cursor.js"></script>
-
-        <style>
-			.axis path,
-			.axis line {
-			  fill: none;
-			  stroke: #000;
-			  shape-rendering: crispEdges;
-			}
-            .axis text {
-              font-size: 14px;
-            }
-			.bar {
-			  fill: steelblue;
-			}
-
-            .family text {
-                fill: #0000CC;
-            }
-            .genes text {
-                fill: #0066FF;
-            }
-            .alleles text {
-                fill: #00FF99
-            }
-		</style>
     </head>
     <body>
         <script>
@@ -204,8 +179,34 @@
                                 <div class="panel-heading">
                                     Variable
                                 </div>
-                                <div class="panel-body">
-                                    <div id="profile-v-h" class="profile_v"></div>
+                                <div class="panel-body profile_v_h">
+                                    <div id="button-div" class="row hide">
+                                        <div class="col-md-2 col-md-offset-10">
+                                        	<button type="button" class="btn btn-default btn-xs refresh">
+                                                <span class="glyphicon glyphicon-retweet"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-out">
+                                                <span class="glyphicon glyphicon-minus"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-in">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                                    <span class="glyphicon glyphicon-download"><!--</span><span class="caret"></span>-->
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu" style="min-width:1px">
+                                                    <li><a id="save_to_svg">SVG</a></li>
+                                                    <li><a id="save_to_pdf">PDF</a></li>
+                                                    <li><a id="save_to_png">PNG</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </br>
+                                    <div id="svg-div" class = "row">
+                                        <svg></svg>
+                                    </div>
                                 </div>
                             </div>
 
@@ -213,37 +214,35 @@
                                 <div class="panel-heading">
                                     Diversity
                                 </div>
-                                <div class="panel-body">
+                                <div class="panel-body profile_d_h">
                                     <div id="button-div" class="row hide">
-                                        <div class="col-md-6" >
-                                        Save as:
-                                            <button type="button" id="save_to_svg" class="btn btn-default btn-xs">
-                                                SVG
-                                            </button>
-                                            <button type="button" id="save_to_pdf" class="btn btn-default btn-xs ">
-                                                PDF
-                                            </button>
-
-                                            <button type="button" id="save_to_png" class="btn btn-default btn-xs ">
-                                                PNG
-                                            </button>
-                                        </div>
-                                        <div class="pull-right">
+                                        <div class="col-md-2 col-md-offset-10">
                                         	<button type="button" class="btn btn-default btn-xs refresh">
                                                 <span class="glyphicon glyphicon-retweet"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-out">
+                                                <span class="glyphicon glyphicon-minus"></span>
                                             </button>
                                             <button type="button" class="btn btn-default btn-xs zoom-in">
                                                 <span class="glyphicon glyphicon-plus"></span>
                                             </button>
-
-                                            <button type="button" class="btn btn-default btn-xs zoom-out">
-                                                <span class="glyphicon glyphicon-minus"></span>
-                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                                    <span class="glyphicon glyphicon-download"><!--</span><span class="caret"></span>-->
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu" style="min-width:1px">
+                                                    <li><a id="save_to_svg">SVG</a></li>
+                                                    <li><a id="save_to_pdf">PDF</a></li>
+                                                    <li><a id="save_to_png">PNG</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
+                                    </br>
                                     <div id="svg-div" class = "row">
-                                        <svg id="profile-d-h" class="profile_d"></svg>
+                                        <svg></svg>
                                     </div>
+                                   </div>
                                 </div>
                             </div>
 
@@ -251,9 +250,35 @@
                                 <div class="panel-heading">
                                     Joining
                                 </div>
-                                <div class="panel-body">
-                                    <div id="profile-j-h" class="profile_j"></div>
-                                </div>
+                                <div class="panel-body profile_j_h">
+                                    <div id="button-div" class="row hide">
+                                        <div class="col-md-2 col-md-offset-10">
+                                        	<button type="button" class="btn btn-default btn-xs refresh">
+                                                <span class="glyphicon glyphicon-retweet"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-out">
+                                                <span class="glyphicon glyphicon-minus"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-in">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                                    <span class="glyphicon glyphicon-download"><!--</span><span class="caret"></span>-->
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu" style="min-width:1px">
+                                                    <li><a id="save_to_svg">SVG</a></li>
+                                                    <li><a id="save_to_pdf">PDF</a></li>
+                                                    <li><a id="save_to_png">PNG</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </br>
+                                    <div id="svg-div" class = "row">
+                                        <svg></svg>
+                                    </div>
+                                   </div>
                             </div>
                         </div>
                         <div class="tab-pane fade active in" id="table">
@@ -261,21 +286,72 @@
                                 <div class="panel-heading">
                                     Variable
                                 </div>
-                                <div class="panel-body">
-                                    <div id="profile-v-l" class="profile_v"></div>
-                                </div>
+                                <div class="panel-body profile_v_l">
+                                    <div id="button-div" class="row hide">
+                                        <div class="col-md-2 col-md-offset-10">
+                                        	<button type="button" class="btn btn-default btn-xs refresh">
+                                                <span class="glyphicon glyphicon-retweet"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-out">
+                                                <span class="glyphicon glyphicon-minus"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-in">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                                    <span class="glyphicon glyphicon-download"><!--</span><span class="caret"></span>-->
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu" style="min-width:1px">
+                                                    <li><a id="save_to_svg">SVG</a></li>
+                                                    <li><a id="save_to_pdf">PDF</a></li>
+                                                    <li><a id="save_to_png">PNG</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </br>
+                                    <div id="svg-div" class = "row">
+                                        <svg></svg>
+                                    </div>
+                                   </div>
                             </div>
-                            <div class="panel panel-default">
+                            <div class="panel panel-default ">
                                 <div class="panel-heading">
                                     Joining
                                 </div>
-                                <div class="panel-body">
-                                    <div id="profile-j-l" class="profile_j"></div>
-                                </div>
+                                <div class="panel-body profile_j_l">
+                                    <div id="button-div" class="row hide">
+                                        <div class="col-md-2 col-md-offset-10">
+                                        	<button type="button" class="btn btn-default btn-xs refresh">
+                                                <span class="glyphicon glyphicon-retweet"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-out">
+                                                <span class="glyphicon glyphicon-minus"></span>
+                                            </button>
+                                            <button type="button" class="btn btn-default btn-xs zoom-in">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                                    <span class="glyphicon glyphicon-download"><!--</span><span class="caret"></span>-->
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu" style="min-width:1px">
+                                                    <li><a id="save_to_svg">SVG</a></li>
+                                                    <li><a id="save_to_pdf">PDF</a></li>
+                                                    <li><a id="save_to_png">PNG</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </br>
+                                    <div id="svg-div" class = "row">
+                                        <svg></svg>
+                                    </div>
+                                   </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
