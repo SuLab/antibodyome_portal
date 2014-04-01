@@ -1,32 +1,36 @@
 $("#navbar").load("navbar.html");
-//data for profile_v
-var vvalue = new Array();
-var varray = new Array();
 
-//data for profile_d
-var dvalue = new Array();
-var darray = new Array();
 
-//data for profile_j
-var jvalue = new Array();
-var jarray = new Array();
-
-var v_count = {
-    "IGHV1-18*01" : 86735,
-};
-
-var d_count = {
-    "IGHD1-1*01" : 58327,
-};
-
-var j_count = {
-    "IGHJ3*01" : 11757,
-};
-var data_heavy, data_light, total;
 
 var bar_color = [{'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}, {'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}]
 var bar_height = {'family':24, 'genes':12, 'alleles':10}
 var bar_gap = {'family':10, 'genes':2, 'alleles':1}
+
+var getRGBColorFromHex=function(color_num, type) {
+        color_codes = ['9400D3', '2F4F4F', '483D8B', '8FBC8B', 'E9967A', '8B0000', '9932CC', 'FF8C00', '556B2F', '8B008B', 'BDB76B', '7FFFD4', 'A9A9A9', 'B8860B', '008B8B', '00008B', '00FFFF', 'DC143C', '6495ED', 'FF7F50', 'D2691E', '7FFF00', '5F9EA0', 'DEB887', 'A52A2A', '8A2BE2', '0000FF', '000000', 'FFE4C4', '006400', '00FFFF'];
+        if (color_num > color_codes.length) {
+            color_num = (color_num % color_codes.length) - 1;
+        }
+        var hex = color_codes[color_num];
+        if (hex == undefined) {
+            hex = color_codes[0];
+        }
+
+        // Convert hex color value to RGB
+        var r = parseInt(hex.substring(0, 2), 16);
+        var g = parseInt(hex.substring(2, 4), 16);
+        var b = parseInt(hex.substring(4, 6), 16);
+        if(type=="family"){
+        	return "rgba(" + r + ", " + g + ", " + b + ", 1)";
+        }
+        if(type=="genes"){
+        	return "rgba(" + r + ", " + g + ", " + b + ", 0.6)";
+        }
+        if(type=="alleles"){
+        	return "rgba(" + r + ", " + g + ", " + b + ", 0.3)";
+        }
+
+    }
 
 function clone(obj){
     var objClone;
@@ -64,32 +68,47 @@ $(document).ready(function() {
      });
 
     $.get('/upload/sample-ab/'+id, function(res){
-    	var tmp = clone(res);
-        p_h = data_process(tmp['heavy']);
-        render_d3_bar(p_h);
-        $("#button-div").removeClass("hide");
+    	//var tmp = clone(res);
+        p_h = data_process(res['heavy']);
+        render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
+        render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
+        render_d3_bar(p_h['j'], res['heavy']['total'], '.profile_j_h');
+        light = combine_light(res['kappa'], res['lambda']);
+        p_l = data_process(light);
+        render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
+        render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
     });
-
-    $("#save_to_svg").click(function() { submit_download_form("svg"); });
-
-	$("#save_to_pdf").click(function() { submit_download_form("pdf"); });
-
-	$("#save_to_png").click(function() { submit_download_form("png"); });
 });
 
-
-function get_svg_code()
+function combine_light(kappa, lambda)
 {
-	// Get the d3js SVG element
-	// var tmp  = document.getElementById("profile_d");
-	var svg = $('.profile_d').find("svg")[0];
+	var light = clone(kappa);
+	light.total += lambda.total;
+	for(var v1 in lambda.v)
+	{
+		if(v1 in light)
+		{
+			light.v[v1]+=lambda.v[v1];
+		}
+		else
+		{
+			light.v[v1]=lambda.v[v1];
+		}
+	}
 
-	// Extract the data as SVG text string
-	var svg_xml = (new XMLSerializer).serializeToString($('#profile-d-h')[0]);
-    return svg_xml;
-
+	for(var v1 in lambda.j)
+	{
+		if(v1 in light)
+		{
+			light.j[v1]+=lambda.j[v1];
+		}
+		else
+		{
+			light.j[v1]=lambda.j[v1];
+		}
+	}
+	return light;
 }
-
 
 function downloadURL(url) {
     var hiddenIFrameID = 'hiddenDownloader',
@@ -103,9 +122,10 @@ function downloadURL(url) {
     iframe.src = url;
 };
 
-function submit_download_form(output_format)
+function submit_download_form(selector, output_format)
 {
-	svg_xml = get_svg_code()
+	// Extract the data as SVG text string
+	var svg_xml = (new XMLSerializer).serializeToString($(selector+' svg')[0]);
 	data = {
 		'output_format': output_format,
 		'svg': svg_xml,
@@ -119,42 +139,45 @@ function submit_download_form(output_format)
 }
 
 
-function render_d3_bar(obj)
+function render_d3_bar(obj, total, selector)
 {
 	var width = 800, tick = 10
+	var zoom = 1
 	var data = map_to_array(obj);
 
-	$('.refresh').click(function(){
-		d3.select(".profile_d")
+	$(selector+" #save_to_svg").click(function() { submit_download_form(selector, "svg"); });
+	$(selector+" #save_to_pdf").click(function() { submit_download_form(selector, "pdf"); });
+	$(selector+" #save_to_png").click(function() { submit_download_form(selector, "png"); });
+
+	$(selector).find('.refresh').click(function(){
+		d3.select(selector+' svg')
 	 	  .selectAll("g")
 	   	  .remove();
-	   	width = 800;
-	   	tick = 10;
+	   	zoom = 1
 	   	data = map_to_array(obj);
-		bar_render(width, tick);
+		bar_render(zoom, tick);
 	})
 
-	$('.zoom-in').click(function(){
-		d3.select(".profile_d")
+	$(selector).find('.zoom-in').click(function(){
+		d3.select(selector+' svg')
 	 	  .selectAll("g")
 	   	  .remove();
-	   	width = width *1.2;
-	   	tick = tick*1.2;
-		bar_render(width, tick);
+	   	zoom = zoom*1.2;
+		bar_render(zoom, tick);
 	})
 
-	$('.zoom-out').click(function(){
+	$(selector).find('.zoom-out').click(function(){
         if (width > 370.5){
-            d3.select(".profile_d")
+            d3.select(selector+' svg')
                 .selectAll("g")
                 .remove();
-            width = width *0.8;
-            tick = tick*0.8;
-            bar_render(width, tick*0.8);
+            zoom = zoom*0.8
+            bar_render(zoom, tick);
         }
 	})
-	bar_render(width, tick);
-	function bar_render(width, tick)
+	bar_render(zoom, tick);
+	$(selector+" #button-div").removeClass("hide");
+	function bar_render(zoom, tick)
 	{
 		function to_percent(count)
 		{
@@ -168,12 +191,12 @@ function render_d3_bar(obj)
 		var barHeight = 20;
 		var y_trans = 0;
 
-    	var chart = d3.select(".profile_d")
+    	var chart = d3.select(selector+' svg')
     		.attr("width", width);
 
 		var xScale = d3.scale.linear()
-			.domain([0, 100])
-			.range([0, $('.profile_d').width()-250]);
+			.domain([0, 100/zoom])
+			.range([0, $(selector).width()-120]);
 		var yScale = d3.scale.ordinal()
 			.domain($.map(data, function (value, key) { return value.name; }))
 			.rangeRoundBands([0, barHeight * data.length], 0);
@@ -197,20 +220,39 @@ function render_d3_bar(obj)
 
 	  	chart.attr("height", y_trans+30);
 
-
-	    chart.append("g")
+	    var barset = chart.append("g")
 	      .attr("class", "x axis")
 	      .call(xAxis)
 	      .attr("transform", function(d, i) { return "translate(107, "+y_trans+")"; });
 
+	    var smallLine = barset.selectAll("g");
+	    smallLine.selectAll("line")
+	        .attr("fill", "none")
+	        .attr("stroke", "#000")
+	        .attr("shape-rendering", "crispEdges");
+	    smallLine.selectAll("text")
+	        .attr("font-size", "14px")
+	    barset.selectAll("path")
+	    .attr("fill", "none")
+	        .attr("stroke", "#000")
+	        .attr("shape-rendering", "crispEdges");
         bar.append("rect")
         	.style("fill", function(d){
-  				return bar_color[d.color][d.type];
+        		return getRGBColorFromHex(d.color, d.type);
+
+  			})
+  			.style("cursor", function(d, i){
+  			    if(d.type == "family" || d.type == "genes")
+  			        return "pointer";
+  			    return "default";
   			})
   		   .attr("y", function(d,i) {
 	       	 return bar_gap[d.type];
 	       })
 	       .attr("width", function(d,i) {
+	       	 if(xScale(to_percent(d.count))>width){
+	       	 	return width-120;
+	       	 }
 	       	 return xScale(to_percent(d.count));
 	       })
 	       .attr("height", function(d,i) {
@@ -232,7 +274,7 @@ function render_d3_bar(obj)
             return ".6em";
             })
 	      .style("fill", function(d){
-	      	return bar_color[d.color][d.type];
+	      	return bar_color[0][d.type];
   		   })
   		  .style("font-size", function(d) {
   		  	if(d.type=='alleles')
@@ -263,7 +305,7 @@ function render_d3_bar(obj)
             return ".64em";
             })
           .style("fill", function(d){
-            return bar_color[d.color][d.type];
+            return bar_color[0][d.type];
            })
           .style("font-size", function(d) {
             if(d.type=='alleles')
@@ -292,8 +334,13 @@ function render_d3_bar(obj)
                 return ".5em";
             return ".7em";
             })
+            .style("cursor", function(d, i){
+  			    if(d.type == "family" || d.type == "genes")
+  			        return "pointer";
+  			    return "default";
+  			})
 	      .style("fill", function(d){
-	      	return bar_color[d.color][d.type];
+	      	return bar_color[0][d.type];
   		   })
   		  .style("font-size", function(d) {
   		  	if(d.type=='alleles')
@@ -319,13 +366,13 @@ function render_d3_bar(obj)
             }else{
                 data_pop_at(data, i);
             }
-			d3.select(".profile_d")
+			d3.select(selector+' svg')
 	 			.selectAll("g")
 	 			.remove();
-	 		d3.select(".profile_d")
+	 		d3.select(selector+' svg')
 	 			.selectAll("line")
 	 			.remove();
-			bar_render(width, tick);
+			bar_render(zoom, tick);
 		 });
 	 }
 
@@ -401,30 +448,82 @@ function gene_parse(k)
 	return res;
 }
 
+function sort_key(data, flag)
+{
+	var keys = [];
+	var indexs = [];
+	var items = {};
+	if(flag){
+		$.map(data, function(value, index){
+			keys.push(value.name);
+		})
+		var items = keys.map(function(e, i){
+  			return {index: i, value: e}
+		})
+		items.sort(function(a, b) {
+  			return a.value > b.value ? 1 : -1;
+		});
+		return items;
+	}
+	else {
+		for (var key in data) {
+	      if (data.hasOwnProperty(key)) {
+	        keys.push(key);
+	      }
+	    }
+	    keys.sort ();
+	}
+
+    return keys;
+}
+
 function map_to_array(origin_data)
 {
 	var new_data = [];
 	var new_genes = [];
 	var i=0;
-	for (var key in origin_data) {
-		var new_genes = [];
-		for(var gene_key in origin_data[key].children) {
-			var g = origin_data[key].children[gene_key];
-			for(var j in g['children'])
-			{
-				g['children'][j].color = i;
-                g['children'][j].clicked = false;
+
+	family_array = sort_key(origin_data)
+	$.map(family_array,function(value1){
+		var key = Object.keys(origin_data[value1].children)[0];
+		if(origin_data[value1].children[key].type=='alleles')
+		{
+			var new_alleles = [];
+			var f = origin_data[value1];
+			alleles_items = sort_key(f['children'], 1);
+			for(var key in alleles_items){
+				f['children'][alleles_items[key].index].color = i;
+                f['children'][alleles_items[key].index].clicked = false;
+                new_alleles.push(f.children[alleles_items[key].index]);
 			}
-			g.color = i;
-            g.clicked = false;
-			new_genes.push(origin_data[key].children[gene_key]);
+			f.children = new_alleles;
 		}
-		origin_data[key]['children'] = new_genes;
-		origin_data[key].color = i;
-        origin_data[key].clicked = false;
-		new_data.push(origin_data[key]);
-		if(i==0) i=1; else i=0;
-	}
+		else
+		{
+			var new_genes = [];
+			gene_array = sort_key(origin_data[value1].children);
+			$.map(gene_array, function(value2){
+				var new_alleles = [];
+				var g = origin_data[value1].children[value2];
+				alleles_items = sort_key(g['children'], 1);
+				for(var key in alleles_items){
+					g['children'][alleles_items[key].index].color = i;
+	                g['children'][alleles_items[key].index].clicked = false;
+	                new_alleles.push(g.children[alleles_items[key].index]);
+				}
+				g.color = i;
+				g.children = new_alleles;
+	            g.clicked = false;
+				new_genes.push(g);
+			})
+
+			origin_data[value1]['children'] = new_genes;
+		}
+		origin_data[value1].color = i;
+        origin_data[value1].clicked = false;
+		new_data.push(origin_data[value1]);
+		i = i+1;
+	});
 	return new_data;
 }
 
@@ -433,7 +532,7 @@ function map_to_array(origin_data)
 function data_process(raw)
 {
 	var res = {};
-	total = raw['total'];
+	var total = raw['total'];
 	var trees={};
 	for(var key in raw)
 	{
@@ -492,8 +591,9 @@ function data_process(raw)
 				}
 			}
 		}
+		trees[key]=tree
 	}
-	return tree;
+	return trees;
 }
 
 
