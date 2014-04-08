@@ -348,3 +348,14 @@ def file_download(request):
     response['Content-Length'] = os.path.getsize(file_path)
     response['Content-Disposition'] = 'attachment; filename=%s' % file_path.split('/')[-1]
     return response
+
+
+def search(request):
+    """
+    Search through the entries
+    """
+    query = request.GET.get('q',None)
+    if query is None:
+        return HttpResponse('no input query string', status=400, content_type="application/json")
+    results = Project.search_manager.search(query)
+    return HttpResponse(json.dumps(results, cls=ComplexEncoder), content_type="application/json")

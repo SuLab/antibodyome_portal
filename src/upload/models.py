@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django_extensions.db.fields import AutoSlugField
 import jsonfield
 from django.core.serializers import serialize
+from djorm_pgfulltext.fields import VectorField
+from djorm_pgfulltext.models import SearchManager
 
 
 class ProjectManager(models.Manager):
@@ -35,6 +37,7 @@ class Project(models.Model):
     permission = models.IntegerField(null=False, default=0, choices=PERMISSION_OPTIONS)
     status = models.IntegerField(null=False, default=0, choices=STATUS_OPTIONS)
     ready = models.BooleanField(default=False)
+    search_index = VectorField()
 
     def natual_key(self):
         return (self.user, self.name)
@@ -42,6 +45,12 @@ class Project(models.Model):
     def __str__(self):
         return '"{}" by "{}"'.format(self.title, self.owner.username)
 
+    search_manager = SearchManager(
+            fields=('title', 'summary', 'metadata', 'slug',),
+            config='pg_catalog.english',
+            search_field='search_index',
+            auto_update_search_field=True
+        )
 
 class Sample(models.Model):
     ab_id = models.CharField(max_length=20)

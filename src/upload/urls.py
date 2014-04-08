@@ -32,4 +32,5 @@ urlpatterns = patterns(
     url(r'^ab-detail/$', views.ab_detail, name="ab-detail"),
     url(r'^convert-svg/$', views.convert_svg, name="convert-svg"),
     url(r'^file-down/$', views.file_download, name="file-download"),
+    url(r'^search/$', views.search, name="project-search"),
 )
