@@ -1,21 +1,60 @@
-
 var csrftoken = $.cookie('csrftoken');
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
+
 $.ajaxSetup({
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function(xhr, settings) {
+    crossDomain : false, // obviates need for sameOrigin test
+    beforeSend : function(xhr, settings) {
         if (!csrfSafeMethod(settings.type)) {
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
         }
     }
 });
 
+function onKeyDown() {
+    if (event.keyCode == 13) {
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var remembered = $(".remembered")[0].checked;
+        if (username == '' || password == '') {
+            if (!$('#error-login').hasClass('hide')) {
+                $('#error-login').addClass('hide');
+            }
+            $('#blank-login').removeClass('hide');
+        } else {
+            $.post('/auth/login/', {
+                username : username,
+                password : password,
+                remembered : remembered
+            }, function(res) {
+                if (res.status == '1') {
+                    $('#my-login-modal').modal('hide');
+                    //var login_html = '<span class="logout"><a href="#">' + username + '</a>  <a href="/auth/accounts/logout/">logout</a></span>';
+                    //$('#user-login').after(login_html);
+                    $('#user-login').addClass('hide');
+                    if (username.length > 12) {
+                        $('#userinfo').html('<img class="background-img" src="./3rd/icon/' + $.cookie()['usertype'] + '-16.png">&nbsp;</img>' + username.substring(0, 12) + '...<span class="caret"></span>');
+                    } else {
+                        $('#userinfo').html('<img class="background-img" src="./3rd/icon/' + $.cookie()['usertype'] + '-16.png">&nbsp;</img>' + username + '<span class="caret"></span>');
+                    }
+                    $('#usernav').removeClass('hide');
+
+                } else {
+                    if (!$('#blank-login').hasClass('hide')) {
+                        $('#blank-login').addClass('hide');
+                    }
+                    $('#error-login').removeClass('hide');
+                }
+            });
+        }
+    }
+}
+
 function getLocation() {
     nameList = location.pathname.split("/");
-    return nameList[nameList.length-1];
+    return nameList[nameList.length - 1];
 }
 
 switch(getLocation()) {
@@ -34,8 +73,7 @@ switch(getLocation()) {
 if ($.cookie()['username'] != 'null' && $.cookie()['username'] != undefined) {
     var username = $.cookie()['username'];
     $('#user-login').addClass('hide');
-    $('#userinfo').html("<i class='icon-user icon-large'></i>" + username +
-    	'<span class="caret"></span>');
+    $('#userinfo').html("<i class='icon-user icon-large'></i>" + username + '<span class="caret"></span>');
     $('#usernav').removeClass('hide');
 } else {
     $('#user-login').removeClass('hide');
