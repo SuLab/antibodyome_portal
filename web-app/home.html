@@ -14,7 +14,7 @@
         <script src="3rd/bs3/js/bootstrap.min.js"></script>
         <script src="3rd/form-validator/jquery.form-validator.min.js"></script>
     </head>
-    <body>
+    <body onkeydown="onKeyDown()">
         <div id="navbar"></div>
         <div class="jumbotron">
             <div class="container">
@@ -25,16 +25,15 @@
                             <span class="input-group-btn">
                                 <button type="button" class="btn btn-default">
                                     <i class="icon-search"></i> Search
-                                </button>
-                            </span>
+                                </button> </span>
                         </div>
                     </div>
                 </div>
                 <!-- <p align="center">
-                    Or
+                Or
                 </p>
                 <div align="center" >
-                    <a class="btn btn-default upload-btn" style="cursor: pointer;" > Click To Upload </a>
+                <a class="btn btn-default upload-btn" style="cursor: pointer;" > Click To Upload </a>
                 </div> -->
             </div>
         </div>
@@ -92,7 +91,7 @@
             </footer>
         </div>
         <script>
-        	$("#navbar").load("navbar.html");
+			$("#navbar").load("navbar.html");
         </script>
     </body>
 </html>
