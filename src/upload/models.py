@@ -13,7 +13,7 @@ class ProjectManager(models.Manager):
 
 
 class Project(models.Model):
-    objects = ProjectManager()
+
     ab_id = models.CharField(max_length=20)
     owner = models.ForeignKey(User)
     organism = models.CharField(max_length=50)
@@ -44,9 +44,11 @@ class Project(models.Model):
 
     def __str__(self):
         return '"{}" by "{}"'.format(self.title, self.owner.username)
+    
+    objects = ProjectManager()
 
     search_manager = SearchManager(
-            fields=('title', 'summary', 'metadata', 'slug',),
+            fields=('title', 'summary', 'slug'),
             config='pg_catalog.english',
             search_field='search_index',
             auto_update_search_field=True
@@ -64,6 +66,15 @@ class Sample(models.Model):
     uuid = models.CharField(max_length=256)
     status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
     job_id = models.CharField(max_length=256)
+    search_index = VectorField()
 
+    objects = ProjectManager()
+
+    search_manager = SearchManager(
+        fields=('name', 'description',),
+        config='pg_catalog.english',
+        search_field='search_index',
+        auto_update_search_field=True
+    )
     def __str__(self):
         return '"{}" for project "{}"'.format(self.name, self.project.title)

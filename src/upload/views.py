@@ -350,12 +350,32 @@ def file_download(request):
     return response
 
 
-def search(request):
-    """
-    Search through the entries
-    """
-    query = request.GET.get('q',None)
-    if query is None:
-        return HttpResponse('no input query string', status=400, content_type="application/json")
-    results = Project.search_manager.search(query)
-    return HttpResponse(json.dumps(results, cls=ComplexEncoder), content_type="application/json")
+
+class ProjectSearch(AbomeListView):
+    model = Project
+
+    def get_queryset(self):
+        query = self.request.GET.get('q',None)
+        if query is None:
+            return HttpResponse('no input query string', status=400, content_type="application/json")    
+        projects = Project.search_manager.search(query)# raw=True)
+        samples = Sample.search_manager.search(query)        
+        ids_p = projects.values_list('id', flat=True)
+        ids_s = samples.values_list('project', flat=True)
+        if ids_s.count()>0:
+            ids_s = list(ids_s)
+            ids_p = list(ids_p)
+            ids_p.append(*ids_s)
+        self.queryset = Project.objects.filter(id__in=ids_p)
+        return self.queryset
+
+    def render_to_response(self, context):
+
+        res = {
+            'detail': context['object_list'],
+            'prev': context['page_obj'].has_previous(),
+            'next': context['page_obj'].has_next(),
+            'count': self.queryset.count()
+        }
+        return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
+
