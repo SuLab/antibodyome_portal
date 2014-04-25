@@ -22,7 +22,7 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-offset-3">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="search-text" placeholder="">
+                            <input type="text" class="form-control" id="search-text" placeholder="" onkeydown="onSearchKeyDown()">
                             <span class="input-group-btn">
                                 <button type="button" class="btn btn-default" id="search-btn">
                                     <i class="icon-search"></i> Search
@@ -97,10 +97,15 @@
                 var query = $('#search-text').val();
                 renderSearchList(1, query);
             });
-
+            $('#username').focus();
             function renderSearchList(page, query){
                 $.get('/upload/search/?q='+query+'&page='+page, function(data) {
-                    console.log(data);
+                    if(data.count>0)
+                    {
+                        for(e in data.detail){
+                            data.detail[e].metadata = JSON.parse(data.detail[e].metadata);
+                        }
+                    }
                     var html = $("#project-search-list-tmpl").tmpl({'projects': data});
                     $('#container-text').html(html);
 
@@ -125,6 +130,13 @@
                     }
 
                 });
+            }
+
+            function onSearchKeyDown() {
+                if (event.keyCode == 13) {
+                    var query = $('#search-text').val();
+                    renderSearchList(1, query);
+                }
             }
 
         </script>

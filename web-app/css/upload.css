@@ -113,3 +113,8 @@
 #view-report {
   padding: 4px 7px;
 }
+
+.project-button {
+    position: relative;
+    left: 85%;
+}

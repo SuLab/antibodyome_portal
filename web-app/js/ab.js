@@ -9,6 +9,19 @@ var ab_template = (["",
     '<a href="/upload/ab-detail?sample={{sample_id}}&ab={{_id}}" class="json_link">json</a>',
 
 "</div>",
+'<div class="container">',
+            '<ol class="breadcrumb">',
+                '<li>',
+                    '<a id="project-link" href="#">project</a>',
+                '</li>',
+                '<li>',
+                    '<a id="sample-link" href="#">sample</a>',
+                '</li>',
+                '<li class="active">',
+                    'antibody',
+                '</li>',
+            '</ol>',
+        '</div>',
 
 '<h2>Summary</h2>',
 '<!--',
@@ -280,14 +293,14 @@ var ab_template = (["",
 
 ""]).join('\n');
 
+$.urlParam = function(name){
+    var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
+    return results[1] || 0;
+}
 
 $(document).ready(function() {
-    $.urlParam = function(name){
-	    var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
-	    return results[1] || 0;
-    }
     $("#navbar").load("navbar.html");
-    var sample = $.urlParam('sample');
+    var sample = $.urlParam('abs_id');
     var ab = $.urlParam('ab');
     $.get('/upload/ab-detail/',
     	{
@@ -327,8 +340,11 @@ $(document).ready(function() {
             }
 
 	    	$('.antibody_container').html(Mustache.to_html(ab_template, res));
+	    	var s = $.urlParam('abs_id');
+            var p = $.urlParam('abp_id');
+            $('#project-link').attr('href','/web-app/project_detail.html?abp_id='+p);
+            $('#sample-link').attr('href','/web-app/profile.html?abs_id='+s+'&abp_id='+p);
 	    }
 	);
-
 });
 

@@ -1,8 +1,16 @@
 var page = 1;
-var id = -1;
+var abp_id = -1;
 var key = 'all';
 var bucket_name = 'abome-test';
 var uid = null;
+
+$.urlParam = function(name){
+    var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
+    if (results == null)
+    	return -1;
+    return results[1];
+}
+
 
 function acquire_project_data(){
 
@@ -17,7 +25,7 @@ function acquire_project_data(){
     }
     $('.edit-project .sample-form').each(function(i){
         filename = ''
-        if (id==-1) {
+        if (abp_id==-1) {
             var filename = $(this).closest('li').find('.qq-upload-file').text();
         }
         else {
@@ -25,7 +33,6 @@ function acquire_project_data(){
             if (filename==undefined) {
                 filename = $(this).closest('li').find('.qq-upload-file').text();
             }
-            // console.log(filename);
 
         }
         data.samples.push(
@@ -47,18 +54,14 @@ $(document).ready(function() {
 	var url=window.location.toString();
     var str="";
     var str_value="";
-    if(url.indexOf("?")!=-1){
-        var ary=url.split("?")[1].split("&");
-        for(var i in ary){
-            str=ary[i].split("=")[0];
-            if (str == "id") {
-                id = decodeURI(ary[i].split("=")[1]);
-                $('#edit_or_new').text('Edit');
-                $('.submit-btn').removeClass('disabled');
-                renderProjectDetail(id);
-            }
-        }
-    }
+
+    abp_id = $.urlParam("abp_id");
+    if (abp_id != -1)
+	{
+		$('#edit_or_new').text('Edit');
+		$('.submit-btn').removeClass('disabled');
+		renderProjectDetail(abp_id);
+	}
 
 	renderProjectList(page, key);
 
@@ -135,14 +138,13 @@ $(document).ready(function() {
 
     $('#triggerUpload').click(function() {
         var data = acquire_project_data();
-        if (id==-1) {
+        if (abp_id==-1) {
             $.post(
                 "/upload/create-project/",
                 JSON.stringify(data),
                 function(res){
-
                     if(res.status) {
-                        window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                        window.location.href = "/web-app/project_detail.html?abp_id=" + res.project_id;
                     }
                     else {
                         $('.error-tips').removeClass('hide');
@@ -153,11 +155,11 @@ $(document).ready(function() {
         }
         else {
             $.post(
-                '/upload/update-project/'+id,
+                '/upload/update-project/'+abp_id,
                 JSON.stringify(data),
                 function(res){
                     if (res.status) {
-                        window.location.href = "/web-app/project_detail.html?id=" + res.project_id;
+                        window.location.href = "/web-app/project_detail.html?abp_id=" + res.project_id;
                     }
                     else {
                         $('.error-tips').removeClass('hide');
@@ -259,9 +261,9 @@ function renderProjectList(page, key){
 }
 
 
-function renderProjectDetail(id){
+function renderProjectDetail(abp_id){
     $.ajax({
-        url:"/upload/project/"+id+'/',
+        url:"/upload/project/"+abp_id+'/',
         type:'GET',
         success:function(res){
             $('#project-title').val(res.title);

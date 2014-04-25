@@ -85,7 +85,7 @@
                         <div class="form-group">
                             <label for="keywords" class="col-md-2 control-label">Keywords:</label>
                             <div class="col-md-10">
-                                <input type="text" class="form-control disabled " id="keywords" name="slug" placeholder="keywords" data-validation="required" data-validation-error-msg="* required">
+                                <input type="text" class="form-control disabled " id="keywords" name="slug" placeholder="multiple keywords should be comma-separated" data-validation="required" data-validation-error-msg="* required">
                             </div>
                         </div>
 
@@ -149,7 +149,7 @@
                 <div class="list-group">
                 ${count} projects in total
                 {{each(i,project) projects}}
-                <a href="/web-app/project_detail.html?id=${project.id}" class="list-group-item" id="${project.id}">
+                <a href="/web-app/project_detail.html?abp_id=${project.ab_id}" class="list-group-item" id="${project.id}">
                 <h5>${project.title}</h5>
                 <h6>${project.created}</h6>
                 </a>

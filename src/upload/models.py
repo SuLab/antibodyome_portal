@@ -48,7 +48,7 @@ class Project(models.Model):
     objects = ProjectManager()
 
     search_manager = SearchManager(
-            fields=('title', 'summary', 'slug'),
+            fields=('title', 'summary', 'slug', 'ab_id',),
             config='pg_catalog.english',
             search_field='search_index',
             auto_update_search_field=True
@@ -71,7 +71,7 @@ class Sample(models.Model):
     objects = ProjectManager()
 
     search_manager = SearchManager(
-        fields=('name', 'description',),
+        fields=('name', 'description', 'ab_id',),
         config='pg_catalog.english',
         search_field='search_index',
         auto_update_search_field=True
