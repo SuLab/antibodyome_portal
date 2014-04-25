@@ -16,6 +16,7 @@ from django.db.models.query_utils import Q
 from upload.remote_data import get_random_ab, get_ab, get_ab_data
 from django.core.exceptions import ObjectDoesNotExist
 import copy
+from django.contrib.auth.models import User
 
 
 CREATE_SUCCESS = 1
@@ -100,7 +101,7 @@ def make_response(status=200, content=None):
     return response
 
 def set_ab_id(model, prefix):
-    model.__setattr__('ab_id','%s%s' %(prefix,model.id))
+    model.__setattr__('ab_id','%s%05d' %(prefix,model.id))
     model.save()
 
 def create_project(request):
@@ -133,20 +134,21 @@ def create_project(request):
                 data['status'] = CREATE_FAILURE
                 data['error'] = "Create Sample error! please try again."
                 print e
-        data['project_id'] = project.id
-    except:
+        data['project_id'] = project.ab_id
+    except Exception as e:
+        print e
         data['status'] = CREATE_FAILURE
         data['error'] = "Create Project error! please try again."
 
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
-def update_project(request, id):
+def update_project(request, abp_id):
     user = request.user
     content = json.loads(request.body)
     data = {}
     sample_contents = content['samples']
-    p = Project.objects.get(pk=id)
+    p = Project.objects.get(ab_id=abp_id)
     if user == p.owner:
         data['status'] = CREATE_SUCCESS
         for sc in sample_contents:
@@ -163,11 +165,12 @@ def update_project(request, id):
                 sample.name = sc['name']
                 sample.description = sc['description']
                 sample.save()
+                set_ab_id(sample, 'ABS')
             except Exception as e:
                 raise e
                 data['status'] = CREATE_FAILURE
                 data['error'] = "Edit Sample error! please try again."
-        data['project_id'] = p.id
+        data['project_id'] = p.ab_id
         content.pop('samples')
         p.__dict__.update(content)
         try:
@@ -199,9 +202,9 @@ def delete_sample(request, id):
 
 
 @require_http_methods(["POST"])
-def submit_analyze(request, pk):
+def submit_analyze(request, abp_id):
     try:
-        p = Project.objects.get(pk=pk)
+        p = Project.objects.get(ab_id=abp_id)
         p.status = 1
         p.ready = True
         p.save()
@@ -248,10 +251,16 @@ class ProjectDetail(AbomeDetailView):
         s_qs = Sample.objects.filter(project=p).order_by('created')
         p_j['samples'] = list(s_qs.values())
         return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), content_type="application/json")
+    
+    def get_object(self, queryset=None):
+        obj = super(AbomeDetailView, self).get_object()
+        if obj.owner != self.request.user and obj.permission==1:
+            raise HttpResponseForbidden('private project can not access')
+        return obj
 
 
-def ABProjectDetail(request, ab_id):    
-    p = Project.objects.get(ab_id=ab_id)
+def ABProjectDetail(request, abp_id):    
+    p = Project.objects.get(ab_id=abp_id)
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     user = request.user
@@ -266,7 +275,7 @@ def ABProjectDetail(request, ab_id):
 @require_http_methods(["GET"])
 def sample_ab(request, id):
     try:
-        s = Sample.objects.get(pk=id)
+        s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
     job_id = s.job_id
@@ -285,10 +294,10 @@ def sample_ab(request, id):
 
 
 @require_http_methods(["GET"])
-def random_ab(request, id):
+def random_ab(request, abs_id):
     #res = get_ab_data(id)
     try:
-        s = Sample.objects.get(pk=id)
+        s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
     job_id = s.job_id
@@ -299,9 +308,9 @@ def random_ab(request, id):
 
 @require_http_methods(["GET"])
 def ab_detail(request):
-    s_id = request.GET.get('sample')
+    ab_id = request.GET.get('sample')
     try:
-        s = Sample.objects.get(pk=s_id)
+        s = Sample.objects.get(ab_id=ab_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
     ab = request.GET.get('ab')
@@ -310,8 +319,7 @@ def ab_detail(request):
     abs = get_ab(job_id, ab)
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
 
-# import cairo
-# import rsvg
+
 import cairosvg
 import uuid
 from django.core.servers.basehttp import FileWrapper
@@ -357,15 +365,21 @@ class ProjectSearch(AbomeListView):
     def get_queryset(self):
         query = self.request.GET.get('q',None)
         if query is None:
-            return HttpResponse('no input query string', status=400, content_type="application/json")    
+            self.queryset = Project.objects.none()
+            return self.queryset
         projects = Project.search_manager.search(query)# raw=True)
-        samples = Sample.search_manager.search(query)        
+        samples = Sample.search_manager.search(query)
         ids_p = projects.values_list('id', flat=True)
         ids_s = samples.values_list('project', flat=True)
+        ids_p = list(ids_p)
+        #match user's username
+        ids_u = User.objects.filter(username__icontains=query)
+        if ids_u.count()>0:
+            p2 = Project.objects.filter(owner__in=ids_u)
+            ids_p2 = p2.values_list('id', flat=True)
+            ids_p.extend(list(ids_p2))
         if ids_s.count()>0:
-            ids_s = list(ids_s)
-            ids_p = list(ids_p)
-            ids_p.append(*ids_s)
+            ids_p.extend(list(ids_s))
         self.queryset = Project.objects.filter(id__in=ids_p)
         return self.queryset
 

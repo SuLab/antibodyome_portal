@@ -49,23 +49,33 @@ function clone(obj){
     return objClone;
 }
 
+
+$.urlParam = function(name){
+    var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
+    return results[1] || 0;
+}
+
+
 $(document).ready(function() {
+    var mUrl = $.urlParam("abp_id");
+    var sUrl = $.urlParam("abs_id");
+    $('#project-link').attr('href','/web-app/project_detail.html?abp_id='+mUrl);
     $("#svg-div").css("overflow","hidden");
     $.urlParam = function(name){
         var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
         return results[1] || 0;
     }
-    var id = $.urlParam('id');
+    var abs_id = $.urlParam('abs_id');
 
-    $.get('/upload/random-ab/'+id, function(res){
+    $.get('/upload/random-ab/'+abs_id+'/', function(res){
          var html='';
          $.each(res, function(i, e){
-             html+='<a href="abome_ab.html?sample='+id+'&ab='+e+'">ab'+i+'  </a>';
+             html+='<a href="abome_ab.html?abs_id='+abs_id+'&ab='+e+'&abp_id='+mUrl+'">ab'+i+'  </a>';
          });
          $('.random_list').html(html);
      });
 
-    $.get('/upload/sample-ab/'+id, function(res){
+    $.get('/upload/sample-ab/'+abs_id+'/', function(res){
         p_h = data_process(res['heavy']);
         render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
         render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');

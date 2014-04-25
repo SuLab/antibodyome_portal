@@ -159,6 +159,8 @@ $('#register-button').click(function() {
 });
 
 $('#user-login').click(function() {
+    $('#username').focus();
+    $('#id_username').focus();
     $('#modal-header').addClass('hide');
     $('#my-login-modal').modal();
     $('#login-button').click(function() {

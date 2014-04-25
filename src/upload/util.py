@@ -51,6 +51,7 @@ class AbomeDetailView(BaseDetailView):
         detail view that returns JSON data
     """
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            return HttpResponse('login please', content_type="application/json", status=401)
+#         if not request.user.is_authenticated():
+#             return HttpResponse('login please', content_type="application/json", status=401)
         return super(AbomeDetailView, self).get(request, *args, **kwargs)
+
