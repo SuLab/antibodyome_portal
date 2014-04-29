@@ -94,7 +94,7 @@ function renderProjectDetail(abp_id){
             // console.log(res.samples)
             $('.sample-detail #view-report').click(function(){
                 var sid = $(this).closest('.sample-detail').attr('id');
-                window.location.href = '/web-app/profile.html?abp_id='+sid+"&abs_id="+id;
+                window.location.href = '/web-app/profile.html?abp_id='+abp_id+"&abs_id="+sid;
             });
 
             $('.sample-detail').each(function(){
