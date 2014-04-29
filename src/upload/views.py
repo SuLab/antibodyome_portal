@@ -273,7 +273,7 @@ def ABProjectDetail(request, abp_id):
 
 
 @require_http_methods(["GET"])
-def sample_ab(request, id):
+def sample_ab(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
