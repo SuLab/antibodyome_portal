@@ -84,11 +84,11 @@ function renderProjectDetail(abp_id){
             	meta = res.metadata;
             }
             var p_name = (res.permission==0? 'public':'private');
-            $('#permission').text("permission: "+p_name);
-            $('#organism').text("organism: "+res.organism);
-            $('#platform').text("platform: "+meta['platform']);
-            $('#keywords').text("keywords: "+meta['keywords']);
-            $('#summary').text(res.summary);
+            $('#permission').append(p_name);
+            $('#organism').append(res.organism);
+            $('#platform').append(meta['platform']);
+            $('#keywords').append(meta['keywords']);
+            $('#summary').append(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#samples').html(html2);
             $('.disabled').attr('disabled','disabled');

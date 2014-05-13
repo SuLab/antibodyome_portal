@@ -87,6 +87,9 @@ $(document).ready(function() {
     refresh_ab_list();
 
     $.get('/upload/sample-ab/' + abs_id + '/', function(res) {
+    	$('#title').append(res.sample.name);
+    	$('#desc').append(res.sample.name);
+    	$('#file').append(res.sample.file);
         p_h = data_process(res['heavy']);
         render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
         render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
