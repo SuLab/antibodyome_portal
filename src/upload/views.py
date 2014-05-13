@@ -282,6 +282,7 @@ def sample_ab(request, abs_id):
     #job_id = '52d42f1b9baecf05bfddffed'
     if job_id is not None:
         res = get_ab_data(job_id)
+        res['sample'] = {'name':s.name, 'desc':s.description, 'file':s.filename}
         return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
     else:
         return HttpResponse('fail', status=400, content_type="application/json")
