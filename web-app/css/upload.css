@@ -118,3 +118,6 @@
     position: relative;
     left: 85%;
 }
+h2 small {
+    color: #000;
+}

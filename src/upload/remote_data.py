@@ -59,6 +59,18 @@ def get_random_ab(job_id):
     return list(ab_li)
 
 
+def get_ab_list(job_id, filters=None, start=0, limit=20):
+    rr = RemoteRoot()
+    ab = rr.conn.root
+    try:
+        job = ab.get_job(job_id)
+    except Exception, e:
+        return None    
+    ab_count = ab.get_ab_list(job['result_store'], filters=filters, count_only=True)
+    ab_li = ab.get_ab_list(job['result_store'], filters=filters, start=start, limit=limit, as_str=True)
+    ret = {'count':ab_count, 'details':json.loads(ab_li)}
+    return ret
+
 def get_ab(job_id, ab_id):
     rr = RemoteRoot()
     ab = rr.conn.root
