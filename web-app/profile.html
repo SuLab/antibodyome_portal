@@ -48,7 +48,9 @@
         <div id="navbar"></div>
         <!--end of navbar-->
 
-        <div class="container">
+        <div class="container" style="
+    margin-top: 50px;
+">
             <div class="jumbotron">
                 <h1>Sample</h1>
                 <!-- <h5> id: {{id}}</h5>
@@ -72,6 +74,7 @@
                 </button> -->
             </div>
             <div class="row">
+                <!--
                 <div class="col-lg-2">
 
                     <div class="well">
@@ -87,13 +90,11 @@
                                             <button type="button" class="btn btn-default">
                                                 <span class="glyphicon glyphicon-search"></span>
                                             </button> </span>
-                                    </div><!-- /input-group -->
+                                    </div>
                                 </div>
-                                <!-- select form group -->
                                 <div class="form-group" style="height:260px;overflow:auto;">
                                     <div class="list-group variable-list"></div>
                                 </div>
-                                <!-- End of select form group -->
                             </fieldset>
                         </form>
                     </div>
@@ -110,13 +111,11 @@
                                             <button type="button" class="btn btn-default">
                                                 <span class="glyphicon glyphicon-search"></span>
                                             </button> </span>
-                                    </div><!-- /input-group -->
+                                    </div>
                                 </div>
-                                <!-- select form group -->
                                 <div class="form-group" style="height:260px;overflow:auto;">
                                     <div class="list-group diversity-list"></div>
                                 </div>
-                                <!-- End of select form group -->
                             </fieldset>
                         </form>
                     </div>
@@ -133,29 +132,31 @@
                                             <button type="button" class="btn btn-default">
                                                 <span class="glyphicon glyphicon-search"></span>
                                             </button> </span>
-                                    </div><!-- /input-group -->
+                                    </div>
                                 </div>
-                                <!-- select form group -->
                                 <div class="form-group" style="height:260px;overflow:auto;">
                                     <div class="list-group joining-list"></div>
                                 </div>
-                                <!-- End of select form group -->
                             </fieldset>
                         </form>
                     </div>
                 </div>
+                -->
 
-                <div class="col-lg-10">
+                <div class="col-lg-12">
 
                     <ul class="nav nav-tabs">
-                        <li class="active">
+                        <li id="heavy_tab" class="active">
                             <a href="#chart" data-toggle="tab">Heavy</a>
                         </li>
-                        <li>
+                        <li id="light_tab">
                             <a href="#table" data-toggle="tab">Light</a>
                         </li>
+                        <li id="antibodyome_tab">
+                            <a href="#antibodyome" data-toggle="tab">Antibodyome</a>
+                        </li>
                     </ul>
-                    <div align="right">
+                    <!-- <div align="right">
                         <div class="btn-group" >
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                 Sort by
@@ -168,12 +169,16 @@
                                 </li>
                             </ul>
                         </div>
-                    </div>
+                    </div> -->
+                    </br>
                     <div class="well">
-                        <p>
-                            random abs(just for test)
+                        <p id='ab_count_total'>
+                            waiting...
                         </p>
-                        <div class='random_list'></div>
+                            <button type="button" id="go" class="btn btn-default btn-xs" style="position: relative;left: 95%;margin-top: -65px;">
+                                 view
+                            </button>
+                        <div class='random_list' style="padding-right: 20px"></div>
                     </div>
                     <div id="myTabContent" class="tab-content">
                         <div class="tab-pane fade active in" id="chart">
@@ -381,6 +386,14 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <!-- 新添加的tab -->
+                        <div class="tab-pane fade " id = "antibodyome">
+                            <div class='ab_list btn-group btn-group-justified' style="padding-right: 20px"></div>
+                            <ul class="pager">
+                              <li class="previous"><a href="javascript:void()">previous</a></li>
+                              <li class="next"><a href="javascript:void()">next</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>

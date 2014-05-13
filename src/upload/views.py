@@ -13,7 +13,7 @@ from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
 from django.db.models.query_utils import Q
-from upload.remote_data import get_random_ab, get_ab, get_ab_data
+from upload.remote_data import get_random_ab, get_ab, get_ab_data, get_ab_list
 from django.core.exceptions import ObjectDoesNotExist
 import copy
 from django.contrib.auth.models import User
@@ -282,12 +282,6 @@ def sample_ab(request, abs_id):
     #job_id = '52d42f1b9baecf05bfddffed'
     if job_id is not None:
         res = get_ab_data(job_id)
-#         rsp = {}
-#         rsp['heavy'] = copy.deepcopy(res['heavy'])
-#         rsp['light'] = copy.deepcopy(res['lambda'])
-#         rsp['light']['total'] += res['kappa']['total']
-#         rsp['light']['j'].update(res['kappa']['j'])
-#         rsp['light']['v'].update(res['kappa']['v'])
         return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
     else:
         return HttpResponse('fail', status=400, content_type="application/json")
@@ -304,6 +298,23 @@ def random_ab(request, abs_id):
     #job_id = '52d42f1b9baecf05bfddffed'
     abs = get_random_ab(job_id)
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
+
+
+@require_http_methods(["POST"])
+def list_ab(request, abs_id):
+    try:
+        s = Sample.objects.get(ab_id=abs_id)
+    except ObjectDoesNotExist:
+        return HttpResponse('no such sample', status=400, content_type="application/json")
+    #job_id = s.job_id
+    job_id = '52d42f1b9baecf05bfddffed'
+    filters = request.POST.get('filters', '')
+    if filters != '':
+        filters = json.loads(filters)
+    start = request.POST.get('start', 0)
+    limit = request.POST.get('limit', 50)
+    ab_li = get_ab_list(job_id, filters=filters, start=start, limit=limit)
+    return HttpResponse(json.dumps(ab_li, cls=ComplexEncoder), content_type="application/json")
 
 
 @require_http_methods(["GET"])

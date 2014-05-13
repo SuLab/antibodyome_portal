@@ -266,18 +266,21 @@ function renderProjectDetail(abp_id){
         url:"/upload/project/"+abp_id+'/',
         type:'GET',
         success:function(res){
+            console.log(res);
             $('#project-title').val(res.title);
             $('#select-permission').val(res.permission);
             $('#select-organism').val(res.organism);
             $('#select-platform').val(res.metadata);
-            $('#keywords').val(res.slug);
+            $('#platform').val(res.metadata.platform);
+            $('#keywords').val(res.metadata.keywords);
+            // $('#keywords').val(res.slug);
             $('#summary').val(res.summary);
             var html2 = $("#sample-list-tmpl").tmpl({'samples': res.samples});
             $('#sample-list-detail').html(html2);
             $('.sample-file-name').attr("disabled","disabled");
             $(".del-sample").click(function(){
                 delete_sample(this);
-            })
+            });
         },
         error: function(){
             $('#my-login-modal').modal('show');

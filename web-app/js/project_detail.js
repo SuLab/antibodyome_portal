@@ -73,7 +73,8 @@ function renderProjectDetail(abp_id){
             }
             $('#notification').attr('href', 'project_detail.html?abp_id='+abp_id);
             // $('#project-title').text(res.title);
-            $('#title').text("title: "+res.title);
+            // $('#title').text("title: "+res.title);
+            $('#title').append(res.title);
             if(typeof(res.metadata)=='string')
             {
             	meta = JSON.parse(res.metadata);

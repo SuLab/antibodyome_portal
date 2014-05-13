@@ -29,6 +29,7 @@ urlpatterns = patterns(
     url(r'^delete-file/(?P<key>.+)$', views.delete_s3_file, name="delete-s3-file"),
     url(r'^sample-ab/(?P<abs_id>.+)/$', views.sample_ab, name="sample-ab"),
     url(r'^random-ab/(?P<abs_id>.+)/$', views.random_ab, name="random-ab"),
+    url(r'^list-ab/(?P<abs_id>.+)/$', views.list_ab, name="list-ab"),
     url(r'^ab-detail/$', views.ab_detail, name="ab-detail"),
     url(r'^convert-svg/$', views.convert_svg, name="convert-svg"),
     url(r'^file-down/$', views.file_download, name="file-download"),

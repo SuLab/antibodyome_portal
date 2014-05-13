@@ -1,47 +1,69 @@
 $("#navbar").load("navbar.html");
 
-var bar_color = [{'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}, {'family':"rgba(0, 0, 0, 1.0)",'genes':"rgba(0, 0, 0, 0.5)",'alleles':"rgba(0, 0, 0, 0.3)"}]
-var bar_height = {'family':24, 'genes':12, 'alleles':10}
-var bar_gap = {'family':10, 'genes':2, 'alleles':1}
+var bar_color = [{
+    'family' : "rgba(0, 0, 0, 1.0)",
+    'genes' : "rgba(0, 0, 0, 0.5)",
+    'alleles' : "rgba(0, 0, 0, 0.3)"
+}, {
+    'family' : "rgba(0, 0, 0, 1.0)",
+    'genes' : "rgba(0, 0, 0, 0.5)",
+    'alleles' : "rgba(0, 0, 0, 0.3)"
+}]
+var bar_height = {
+    'family' : 24,
+    'genes' : 12,
+    'alleles' : 10
+}
+var bar_gap = {
+    'family' : 10,
+    'genes' : 2,
+    'alleles' : 1
+}
 
-var getRGBColorFromHex=function(color_num, type) {
-        color_codes = ['9400D3', '2F4F4F', '483D8B', '8FBC8B', 'E9967A', '8B0000', '9932CC', 'FF8C00', '556B2F', '8B008B', 'BDB76B', '7FFFD4', 'A9A9A9', 'B8860B', '008B8B', '00008B', '00FFFF', 'DC143C', '6495ED', 'FF7F50', 'D2691E', '7FFF00', '5F9EA0', 'DEB887', 'A52A2A', '8A2BE2', '0000FF', '000000', 'FFE4C4', '006400', '00FFFF'];
-        if (color_num > color_codes.length) {
-            color_num = (color_num % color_codes.length) - 1;
-        }
-        var hex = color_codes[color_num];
-        if (hex == undefined) {
-            hex = color_codes[0];
-        }
+var PAGE_SIZE = 30;
+var page = 0;
+var page_max=-1;
+var loading_abs = false;
 
-        // Convert hex color value to RGB
-        var r = parseInt(hex.substring(0, 2), 16);
-        var g = parseInt(hex.substring(2, 4), 16);
-        var b = parseInt(hex.substring(4, 6), 16);
-        if(type=="family"){
-            return "rgba(" + r + ", " + g + ", " + b + ", 1)";
-        }
-        if(type=="genes"){
-            return "rgba(" + r + ", " + g + ", " + b + ", 0.6)";
-        }
-        if(type=="alleles"){
-            return "rgba(" + r + ", " + g + ", " + b + ", 0.3)";
-        }
+var abs_list = new Array();
 
+var getRGBColorFromHex = function(color_num, type) {
+    color_codes = ['9400D3', '2F4F4F', '483D8B', '8FBC8B', 'E9967A', '8B0000', '9932CC', 'FF8C00', '556B2F', '8B008B', 'BDB76B', '7FFFD4', 'A9A9A9', 'B8860B', '008B8B', '00008B', '00FFFF', 'DC143C', '6495ED', 'FF7F50', 'D2691E', '7FFF00', '5F9EA0', 'DEB887', 'A52A2A', '8A2BE2', '0000FF', '000000', 'FFE4C4', '006400', '00FFFF'];
+    if (color_num > color_codes.length) {
+        color_num = (color_num % color_codes.length) - 1;
+    }
+    var hex = color_codes[color_num];
+    if (hex == undefined) {
+        hex = color_codes[0];
     }
 
-function clone(obj){
+    // Convert hex color value to RGB
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+    if (type == "family") {
+        return "rgba(" + r + ", " + g + ", " + b + ", 1)";
+    }
+    if (type == "genes") {
+        return "rgba(" + r + ", " + g + ", " + b + ", 0.6)";
+    }
+    if (type == "alleles") {
+        return "rgba(" + r + ", " + g + ", " + b + ", 0.3)";
+    }
+
+}
+function clone(obj) {
     var objClone;
-    if (obj.constructor == Object){
+    if (obj.constructor == Object) {
         objClone = new obj.constructor();
-    }else{
+    } else {
         objClone = new obj.constructor(obj.valueOf());
     }
-    for(var key in obj){
-        if ( objClone[key] != obj[key] ){
-            if ( typeof(obj[key]) == 'object' ){
+    for (var key in obj) {
+        if (objClone[key] != obj[key]) {
+            if ( typeof (obj[key]) == 'object') {
                 objClone[key] = clone(obj[key]);
-            }else{
+            } else {
                 objClone[key] = obj[key];
             }
         }
@@ -49,33 +71,22 @@ function clone(obj){
     return objClone;
 }
 
-
-$.urlParam = function(name){
+$.urlParam = function(name) {
     var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
     return results[1] || 0;
 }
 
 
 $(document).ready(function() {
-    var mUrl = $.urlParam("abp_id");
-    var sUrl = $.urlParam("abs_id");
-    $('#project-link').attr('href','/web-app/project_detail.html?abp_id='+mUrl);
-    $("#svg-div").css("overflow","hidden");
-    $.urlParam = function(name){
-        var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
-        return results[1] || 0;
-    }
-    var abs_id = $.urlParam('abs_id');
+	var abs_id = $.urlParam('abs_id');
+	var abp_id = $.urlParam('abp_id');
 
-    $.get('/upload/random-ab/'+abs_id+'/', function(res){
-         var html='';
-         $.each(res, function(i, e){
-             html+='<a href="abome_ab.html?abs_id='+abs_id+'&ab='+e+'&abp_id='+mUrl+'">ab'+i+'  </a>';
-         });
-         $('.random_list').html(html);
-     });
+    $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
+    $("#svg-div").css("overflow", "hidden");
 
-    $.get('/upload/sample-ab/'+abs_id+'/', function(res){
+    refresh_ab_list();
+
+    $.get('/upload/sample-ab/' + abs_id + '/', function(res) {
         p_h = data_process(res['heavy']);
         render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
         render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
@@ -85,41 +96,77 @@ $(document).ready(function() {
         render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
         render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
     });
+
+    $("#go").click(function() {
+        $("#antibodyome").addClass("active in");
+        $("#chart,#table").removeClass("active in");
+        $("#heavy_tab, #light_tab").removeClass("active");
+        $("#antibodyome_tab").addClass("active");
+        // 根据sample-ab 获得antibodyome Coding here
+        //abs_list
+		refresh_ab_list();
+    });
+
+    $('.pager .next').click(function() {
+		if(page<page_max)
+			refresh_ab_list();
+    });
+    $('.pager .previous').click(function() {
+		if(page>0)
+			refresh_ab_list();
+    });
 });
 
-function combine_light(kappa, lambda)
+function refresh_ab_list()
 {
+	if(loading_abs==true)
+		return
+	var abs_id = $.urlParam('abs_id');
+	var abp_id = $.urlParam('abp_id');
+	var filter=null;
+	$('#ab_count_total').text('waiting...');
+    if(abs_list.length>0)
+    	filter = JSON.stringify(gene_parse_4_ab_filter(abs_list[0]));
+    $.post('/upload/list-ab/' + abs_id + '/',
+    {'filters':filter,
+     'start':page*PAGE_SIZE,
+     'limit':PAGE_SIZE,
+    },
+    function(res) {
+    	if(res.count<=0) return;
+    	page_max = Math.ceil(res.count/PAGE_SIZE);
+    	$('#ab_count_total').text(res.count+' antibody in total');
+        var html = '';
+        $.each(res.details, function(i, e) {
+            html += '<a href="abome_ab.html?abs_id=' + abs_id + '&ab=' + e._id + '&abp_id=' + abp_id + '">' + e._id + '  </a>';
+        });
+        $('.ab_list').html(html);
+    });
+}
+
+function combine_light(kappa, lambda) {
     var light = clone(kappa);
     light.total += lambda.total;
-    for(var v1 in lambda.v)
-    {
-        if(v1 in light)
-        {
-            light.v[v1]+=lambda.v[v1];
-        }
-        else
-        {
-            light.v[v1]=lambda.v[v1];
+    for (var v1 in lambda.v) {
+        if ( v1 in light) {
+            light.v[v1] += lambda.v[v1];
+        } else {
+            light.v[v1] = lambda.v[v1];
         }
     }
 
-    for(var v1 in lambda.j)
-    {
-        if(v1 in light)
-        {
-            light.j[v1]+=lambda.j[v1];
-        }
-        else
-        {
-            light.j[v1]=lambda.j[v1];
+    for (var v1 in lambda.j) {
+        if ( v1 in light) {
+            light.j[v1] += lambda.j[v1];
+        } else {
+            light.j[v1] = lambda.j[v1];
         }
     }
     return light;
 }
 
 function downloadURL(url) {
-    var hiddenIFrameID = 'hiddenDownloader',
-        iframe = document.getElementById(hiddenIFrameID);
+    var hiddenIFrameID = 'hiddenDownloader', iframe = document.getElementById(hiddenIFrameID);
     if (iframe === null) {
         iframe = document.createElement('iframe');
         iframe.id = hiddenIFrameID;
@@ -129,259 +176,270 @@ function downloadURL(url) {
     iframe.src = url;
 };
 
-function submit_download_form(selector, output_format)
-{
+function submit_download_form(selector, output_format) {
     // Extract the data as SVG text string
     var svg_xml = (new XMLSerializer).serializeToString($(selector+' svg')[0]);
     data = {
-        'output_format': output_format,
-        'svg': svg_xml,
-    }
-    $.post(
-        '/upload/convert-svg/',
-        data,
-        function(res){
-            downloadURL(res);
-    })
+        'output_format' : output_format,
+        'svg' : svg_xml,
+    };
+    $.post('/upload/convert-svg/', data, function(res) {
+        downloadURL(res);
+    });
 }
 
+function removeab(text) {
+    var removeByValue = function(array, val) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i] == val) {
+                array.splice(i, 1);
+                break;
+            }
+        }
+    };
+    removeByValue(abs_list, text);
+}
 
-function render_d3_bar(obj, total, selector)
-{
-    var width = 850, bar_max=700, tick = 10;
+function trim(str) {//删除左右两端的空格
+    return str.replace(/(^\s*)|(\s*$)/g, "");
+}
+
+function render_d3_bar(obj, total, selector) {
+    var width = 850, bar_max = 700, tick = 10;
     var zoom = 1;
     var data = map_to_array(obj);
 
-    $(selector+" #save_to_svg").click(function() { submit_download_form(selector, "svg"); });
-    $(selector+" #save_to_pdf").click(function() { submit_download_form(selector, "pdf"); });
-    $(selector+" #save_to_png").click(function() { submit_download_form(selector, "png"); });
+    $(selector + " #save_to_svg").click(function() {
+        submit_download_form(selector, "svg");
+    });
+    $(selector + " #save_to_pdf").click(function() {
+        submit_download_form(selector, "pdf");
+    });
+    $(selector + " #save_to_png").click(function() {
+        submit_download_form(selector, "png");
+    });
 
-    function clear_svg()
-    {
-        d3.select(selector+' svg')
-           .selectAll("g")
-             .remove();
-           d3.select(selector+' svg')
-           .selectAll("line")
-             .remove();
+    function clear_svg() {
+        d3.select(selector + ' svg').selectAll("g").remove();
+        d3.select(selector + ' svg').selectAll("line").remove();
     }
-    $(selector).find('.refresh').click(function(){
+
+
+    $(selector).find('.refresh').click(function() {
         clear_svg();
-           zoom = 1;
-           data = map_to_array(obj);
+        zoom = 1;
+        data = map_to_array(obj);
         bar_render(zoom, tick);
     });
 
-    $(selector).find('.zoom-in').click(function(){
+    $(selector).find('.zoom-in').click(function() {
         clear_svg();
-           zoom = zoom*1.2;
+        zoom = zoom * 1.2;
         bar_render(zoom, tick);
     });
 
-    $(selector).find('.zoom-out').click(function(){
-            clear_svg();
-            zoom = zoom*0.8;
-            bar_render(zoom, tick);
+    $(selector).find('.zoom-out').click(function() {
+        clear_svg();
+        zoom = zoom * 0.8;
+        bar_render(zoom, tick);
     });
     bar_render(zoom, tick);
-    $(selector+" #button-div").removeClass("hide");
-    function bar_render(zoom, tick)
-    {
-        function to_percent(count)
-        {
-            return 100*count/total;
+    $(selector + " #button-div").removeClass("hide");
+    function bar_render(zoom, tick) {
+        function to_percent(count) {
+            return 100 * count / total;
         }
 
         function to_percent_float(count) {
             return (100 * count / total).toFixed(2);
         }
 
-        var barHeight = 20;
-        var y_trans = 0, x_trans=108;
-
-        var chart = d3.select(selector+' svg')
-            .attr("width", width);
-
-        var xScale = d3.scale.linear()
-            .domain([0, 100/zoom])
-            .range([0, bar_max]);
-        var yScale = d3.scale.ordinal()
-            .domain($.map(data, function (value, key) { return value.name; }))
-            .rangeRoundBands([0, barHeight * data.length], 0);
-
-        var xAxis = d3.svg.axis()
-            .scale(xScale)
-            .orient("bottom")
-            .ticks(tick);
-        var yAxis = d3.svg.axis()
-            .scale(yScale)
-            .orient("left");
-
-        var bar = chart.selectAll("g")
-            .data(data)
-              .enter().append("g")
-              .attr("transform", function(d, i) {
-                  ret =  "translate("+x_trans+"," + y_trans + ")";
-                y_trans += (bar_height[d.type]);
-                  return ret;
-              });
-
-          chart.attr("height", y_trans+30);
-
-        var barset = chart.append("g")
-          .attr("class", "x axis")
-          .call(xAxis)
-          .attr("transform", function(d, i) { return "translate("+(x_trans-1)+", "+y_trans+")"; });
-
-        var smallLine = barset.selectAll("g");
-        smallLine.selectAll("line")
-            .attr("fill", "none")
-            .attr("stroke", "#000")
-            .attr("shape-rendering", "crispEdges");
-        smallLine.selectAll("text")
-            .attr("font-size", "14px");
-        barset.selectAll("path")
-        .attr("fill", "none")
-            .attr("stroke", "#000")
-            .attr("shape-rendering", "crispEdges");
-        bar.append("rect")
-            .style("fill", function(d){
-                return getRGBColorFromHex(d.color, d.type);
-
-              })
-              .style("cursor", function(d, i){
-                  if(d.type == "family" || d.type == "genes")
-                      return "pointer";
-                  return "default";
-              })
-             .attr("y", function(d,i) {
-                return bar_gap[d.type];
-           })
-           .attr("width", function(d,i) {
-                // if(xScale(to_percent(d.count))>width){
-                    // return width-120;
-                // }
-                return xScale(to_percent(d.count));
-           })
-           .attr("height", function(d,i) {
-                return bar_height[d.type]-bar_gap[d.type];
-           });
-
-          bar.append("text")
-          .attr("x", function(d,i) {
-                return xScale(to_percent(d.count))+5;
-          })
-          .attr("y", function(d,i) {
-               return bar_height[d.type]/2;
-          })
-          .attr("dy", function(d, i){
-              if(d.type=='alleles')
-                return ".4em";
-            if(d.type=='genes')
-                return ".5em";
-            return ".6em";
-            })
-          .style("fill", function(d){
-              return bar_color[0][d.type];
-             })
-            .style("font-size", function(d) {
-                if(d.type=='alleles')
-                    return "9px";
-                if(d.type=='genes')
-                    return "11px";
-                return "13px"; })
-          .text(function(d,i) { return to_percent_float(d.count)+'%'; });
-
-          // new code
-          bar.append("text")
-          .attr("x", function(d,i) {
-              if(to_percent(d.count) >= 10){
-                  return xScale(to_percent(d.count))+52;
-              }else{
-                  return xScale(to_percent(d.count))+45;
-              }
-
-          })
-          .attr("y", function(d,i) {
-            return bar_height[d.type]/2;
-          })
-          .attr("dy", function(d, i){
-              if(d.type=='alleles')
-                return ".44em";
-            if(d.type=='genes')
-                return ".54em";
-            return ".64em";
-            })
-          .style("fill", function(d){
-            return bar_color[0][d.type];
-           })
-          .style("font-size", function(d) {
-            if(d.type=='alleles')
-                return "8px";
-            if(d.type=='genes')
-                return "10px";
-            return "12px"; })
-          .text(function(d,i) { return "(" + d.count + ")"; });
-          // end new code
-
-          bar.append("text")
-          .attr("x", function(d,i) {
-               if(d.type=='alleles')
-                    return -90;
-                if(d.type=='genes')
-                    return -95;
-                return -100;
-          })
-          .attr("y", function(d,i) {
-               return bar_height[d.type]/2;
-          })
-          .attr("dy", function(d, i){
-              if(d.type=='alleles')
-                return ".5em";
-            if(d.type=='genes')
-                return ".5em";
-            return ".7em";
-            })
-            .style("cursor", function(d, i){
-                  if(d.type == "family" || d.type == "genes")
-                      return "pointer";
-                  return "default";
-              })
-          .style("fill", function(d){
-              return bar_color[0][d.type];
-             })
-            .style("font-size", function(d) {
-                if(d.type=='alleles')
-                    return "10px";
-                if(d.type=='genes')
-                    return "12px";
-                return "15px"; })
-          .text(function(d,i) { return d.name; });
-
-          chart.append("line")
-            .attr("x1", x_trans-1)
-            .attr("y1", 0)
-            .attr("x2", x_trans-1)
-            .attr("y2", y_trans)
-            .attr("stroke-width", 1)
-            .attr("stroke", "black");
-
-         bar.on("click", function(d, i) {
-             if (d.type=='alleles')
-                 return
+        function doClick(d, i) {
+            if (d.type == 'alleles')
+                return;
             if (!d.clicked) {
                 data = array_join_at(data, d.children, i);
-            }else{
+            } else {
                 data_pop_at(data, i);
             }
-            d3.select(selector+' svg')
-                 .selectAll("g")
-                 .remove();
-             d3.select(selector+' svg')
-                 .selectAll("line")
-                 .remove();
+            d3.select(selector + ' svg').selectAll("g").remove();
+            d3.select(selector + ' svg').selectAll("line").remove();
             bar_render(zoom, tick);
+        }
+
+        var barHeight = 20;
+        var y_trans = 0, x_trans = 108;
+
+        var chart = d3.select(selector + ' svg').attr("width", width);
+
+        var xScale = d3.scale.linear().domain([0, 100 / zoom]).range([0, bar_max]);
+        var yScale = d3.scale.ordinal().domain($.map(data, function(value, key) {
+            return value.name;
+        })).rangeRoundBands([0, barHeight * data.length], 0);
+
+        var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(tick);
+        var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+        var bar = chart.selectAll("g").data(data).enter().append("g").attr("transform", function(d, i) {
+            ret = "translate(" + x_trans + "," + y_trans + ")";
+            y_trans += (bar_height[d.type]);
+            return ret;
         });
+
+        chart.attr("height", y_trans + 30);
+
+        var barset = chart.append("g").attr("class", "x axis").call(xAxis).attr("transform", function(d, i) {
+            return "translate(" + (x_trans - 1) + ", " + y_trans + ")";
+        });
+
+        var smallLine = barset.selectAll("g");
+        smallLine.selectAll("line").attr("fill", "none").attr("stroke", "#000").attr("shape-rendering", "crispEdges");
+        smallLine.selectAll("text").attr("font-size", "14px");
+        barset.selectAll("path").attr("fill", "none").attr("stroke", "#000").attr("shape-rendering", "crispEdges");
+        bar.append("rect").style("fill", function(d) {
+            return getRGBColorFromHex(d.color, d.type);
+
+        }).style("cursor", function(d, i) {
+            if (d.type == "family" || d.type == "genes")
+                return "pointer";
+            return "default";
+        }).attr("y", function(d, i) {
+            return bar_gap[d.type];
+        }).attr("width", function(d, i) {
+            // if(xScale(to_percent(d.count))>width){
+            // return width-120;
+            // }
+            return xScale(to_percent(d.count));
+        }).attr("height", function(d, i) {
+            return bar_height[d.type] - bar_gap[d.type];
+        }).on("click", function(d, i) {
+            doClick(d, i);
+        });
+
+        bar.append("text").attr("x", function(d, i) {
+            return xScale(to_percent(d.count)) + 5;
+        }).attr("y", function(d, i) {
+            return bar_height[d.type] / 2;
+        }).attr("dy", function(d, i) {
+            if (d.type == 'alleles')
+                return ".4em";
+            if (d.type == 'genes')
+                return ".5em";
+            return ".6em";
+        }).style("fill", function(d) {
+            return bar_color[0][d.type];
+        }).style("font-size", function(d) {
+            if (d.type == 'alleles')
+                return "9px";
+            if (d.type == 'genes')
+                return "11px";
+            return "13px";
+        }).on("click", function(d, i) {
+            doClick(d, i);
+        }).text(function(d, i) {
+            return to_percent_float(d.count) + '%';
+        });
+
+        // new code
+        bar.append("text").attr("x", function(d, i) {
+            if (to_percent(d.count) >= 10) {
+                return xScale(to_percent(d.count)) + 52;
+            } else {
+                return xScale(to_percent(d.count)) + 45;
+            }
+
+        }).attr("y", function(d, i) {
+            return bar_height[d.type] / 2;
+        }).attr("dy", function(d, i) {
+            if (d.type == 'alleles')
+                return ".44em";
+            if (d.type == 'genes')
+                return ".54em";
+            return ".64em";
+        }).style("fill", function(d) {
+            return bar_color[0][d.type];
+        }).style("font-size", function(d) {
+            if (d.type == 'alleles')
+                return "8px";
+            if (d.type == 'genes')
+                return "10px";
+            return "12px";
+        }).on("click", function(d, i) {
+            doClick(d, i);
+        }).text(function(d, i) {
+            return "(" + d.count + ")";
+        });
+        // end new code
+
+        bar.append("text").attr("x", function(d, i) {
+            if (d.type == 'alleles')
+                return -90;
+            if (d.type == 'genes')
+                return -95;
+            return -100;
+        }).attr("y", function(d, i) {
+            return bar_height[d.type] / 2;
+        }).attr("dy", function(d, i) {
+            if (d.type == 'alleles')
+                return ".5em";
+            if (d.type == 'genes')
+                return ".5em";
+            return ".7em";
+        }).style("cursor", function(d, i) {
+            if (d.type == "family" || d.type == "genes")
+                return "pointer";
+            return "default";
+        }).style("fill", function(d) {
+            return bar_color[0][d.type];
+        }).style("font-size", function(d) {
+            if (d.type == 'alleles')
+                return "10px";
+            if (d.type == 'genes')
+                return "12px";
+            return "15px";
+        }).on("click", function(d, i) {// 图表标签点击事件,再此可判断有无重复元素
+
+            var contains = function(array, obj) {
+                var i = array.length;
+                while (i--) {
+                    if (array[i] === obj) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            if (!contains(abs_list, trim($(this).text()))) {
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + $(this).text() + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');
+                abs_list.push(trim($(this).text()));
+            }
+
+        }).text(function(d, i) {
+            return d.name;
+        });
+
+        chart.append("line").attr("x1", x_trans - 1).attr("y1", 0).attr("x2", x_trans - 1).attr("y2", y_trans).attr("stroke-width", 1).attr("stroke", "black");
+
+        /*
+         bar.on("click", function(d, i) {
+         console.log(d);
+         console.log(i);
+         if (d.type=='alleles')
+         return
+         if (!d.clicked) {
+         data = array_join_at(data, d.children, i);
+         }else{
+         data_pop_at(data, i);
+         }
+         d3.select(selector+' svg')
+         .selectAll("g")
+         .remove();
+         d3.select(selector+' svg')
+         .selectAll("line")
+         .remove();
+         bar_render(zoom, tick);
+         });*/
+
     }
 
 }
@@ -449,6 +507,39 @@ function gene_parse(k) {
         res['allele'] = k;
     }
     return res;
+}
+
+function gene_parse_4_ab_filter(k) {
+    var res = { };
+    var type = k[3].toLowerCase()+'_gene';
+    var t, s;
+    //family和gene以/ 或者 -间隔
+    t = k.indexOf('-');
+    if (t == -1) {
+        t = k.indexOf('/');
+    }
+    if (t != -1) {
+        s = k.substring(t + 1, k.length);
+        res['fam'] = k.substring(4, t);
+        var split = s.split('*');
+        res['gene'] = split[0];
+        if(split.length>1)
+        {
+        	res['all'] = split[1];
+        }
+    }
+    else//没有gene的情况 family和alleles以*间隔 或者只是family
+    {
+    	var split = k.split('*');
+        res['fam'] = split[0].substring(4);
+        if(split.length>1)
+        {
+        	res['all'] = split[1];
+        }
+    }
+    ret = {}
+    ret[type]=res;
+    return ret;
 }
 
 function sort_key(data, flag) {
