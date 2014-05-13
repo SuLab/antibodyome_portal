@@ -84,7 +84,7 @@ $(document).ready(function() {
     $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
     $("#svg-div").css("overflow", "hidden");
 
-    refresh_ab_list();
+    refresh_ab_list(true);
 
     $.get('/upload/sample-ab/' + abs_id + '/', function(res) {
     	$('#title').append(res.sample.name);
@@ -107,20 +107,26 @@ $(document).ready(function() {
         $("#antibodyome_tab").addClass("active");
         // 根据sample-ab 获得antibodyome Coding here
         //abs_list
-		refresh_ab_list();
+		refresh_ab_list(true);
     });
 
     $('.pager .next').click(function() {
 		if(page<page_max)
-			refresh_ab_list();
+		{
+			page = page+1;
+			refresh_ab_list(false);
+		}
     });
     $('.pager .previous').click(function() {
 		if(page>0)
-			refresh_ab_list();
+		{
+			page = page-1;
+			refresh_ab_list(false);
+		}
     });
 });
 
-function refresh_ab_list()
+function refresh_ab_list(update_count)
 {
 	if(loading_abs==true)
 		return
@@ -128,6 +134,7 @@ function refresh_ab_list()
 	var abp_id = $.urlParam('abp_id');
 	var filter=null;
 	$('#ab_count_total').text('waiting...');
+	$('.ab_list').html('');
     if(abs_list.length>0)
     	filter = JSON.stringify(gene_parse_4_ab_filter(abs_list[0]));
     $.post('/upload/list-ab/' + abs_id + '/',
@@ -136,9 +143,12 @@ function refresh_ab_list()
      'limit':PAGE_SIZE,
     },
     function(res) {
-    	if(res.count<=0) return;
     	page_max = Math.ceil(res.count/PAGE_SIZE);
-    	$('#ab_count_total').text(res.count+' antibody in total');
+    	if(update_count==true)
+    	{
+    		$('#ab_count_total').text(res.count+' antibody in total');
+    	}
+    	if(res.count<=0) return;
         var html = '';
         $.each(res.details, function(i, e) {
             html += '<a href="abome_ab.html?abs_id=' + abs_id + '&ab=' + e._id + '&abp_id=' + abp_id + '">' + e._id + '  </a>';
