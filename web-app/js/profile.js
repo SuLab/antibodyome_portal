@@ -133,7 +133,10 @@ function refresh_ab_list(update_count)
 	var abs_id = $.urlParam('abs_id');
 	var abp_id = $.urlParam('abp_id');
 	var filter=null;
-	$('#ab_count_total').text('waiting...');
+	if(update_count==true)
+	{
+		$('#ab_count_total').text('waiting...');
+	}
 	$('.ab_list').html('');
     if(abs_list.length>0)
     	filter = JSON.stringify(gene_parse_4_ab_filter(abs_list[0]));
