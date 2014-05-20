@@ -37,6 +37,8 @@
         <script type="text/javascript" src="3rd/jqplot/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
         <!-- mouse -->
         <script type="text/javascript" src="3rd/jqplot/plugins/jqplot.cursor.js"></script>
+        <script type="text/javascript" src="3rd/paginator/jquery.simplePagination.js"></script>
+        <link rel="stylesheet" href="3rd/paginator/simplePagination.css" />
     </head>
     <body>
         <script>
@@ -48,9 +50,7 @@
         <div id="navbar"></div>
         <!--end of navbar-->
 
-        <div class="container" style="
-    margin-top: 50px;
-">
+        <div class="container" style="margin-top: 50px;">
             <div class="jumbotron">
                 <h1>Sample</h1>
                 <h3 id="title"> </h3>
@@ -143,9 +143,18 @@
                     </div>
                 </div>
                 -->
-
                 <div class="col-lg-12">
-
+                    <div class="well">
+                        <p id='ab_count_total'>
+                            click F,G,A to filter
+                        </p>
+                        <button type="button" id="go" class="btn btn-default btn-xs zoom-in" style="position: relative;left: 95%;margin-top: -65px;">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                        <div class='random_list' style="padding-right: 20px"></div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
                     <ul class="nav nav-tabs">
                         <li id="heavy_tab" class="active">
                             <a href="#chart" data-toggle="tab">Heavy</a>
@@ -172,15 +181,6 @@
                         </div>
                     </div> -->
                     </br>
-                    <div class="well">
-                        <p id='ab_count_total'>
-                            waiting...
-                        </p>
-                            <button type="button" id="go" class="btn btn-default btn-xs" style="position: relative;left: 95%;margin-top: -65px;">
-                                 view
-                            </button>
-                        <div class='random_list' style="padding-right: 20px"></div>
-                    </div>
                     <div id="myTabContent" class="tab-content">
                         <div class="tab-pane fade active in" id="chart">
                             <div class="panel panel-default">
@@ -391,10 +391,17 @@
                         <!-- 新添加的tab -->
                         <div class="tab-pane fade " id = "antibodyome">
                             <div class='ab_list btn-group btn-group-justified' style="padding-right: 20px"></div>
-                            <ul class="pager">
-                              <li class="previous"><a href="javascript:void()">previous</a></li>
-                              <li class="next"><a href="javascript:void()">next</a></li>
-                            </ul>
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3" style="margin-top: 2px;">
+                                    <div id="pagination"> </div>
+                                </div>
+                                <div class="col-md-2 col-md-offset-1">
+                                    <!-- <div class="input-group input-group-sm" style="left: 50%;">
+                                        <span class="input-group-addon glyphicon glyphicon-hand-right"> </span>
+                                        <input type="text" class="form-control" style="margin-top: 1px;width: 50px;">
+                                    </div> -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
