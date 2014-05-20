@@ -20,10 +20,8 @@ var bar_gap = {
     'alleles' : 1
 }
 
-var PAGE_SIZE = 30;
-var page = 0;
-var page_max=-1;
-var loading_abs = false;
+var PAGE_SIZE = 100;
+var pagination_init = false;
 
 var abs_list = new Array();
 
@@ -77,19 +75,25 @@ $.urlParam = function(name) {
 }
 
 
-$(document).ready(function() {
-	var abs_id = $.urlParam('abs_id');
-	var abp_id = $.urlParam('abp_id');
+function on_page_changed(pageNumber, event) {
+    refresh_ab_list(pageNumber-1);
+    //处理点击事件
+}
 
-    $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
+
+$(document).ready(function() {
+    var abs_id = $.urlParam('abs_id');
+    var abp_id = $.urlParam('abp_id');
+
+    $('#project-link').attr('href', '/web-app/project_detail.html?abp_id='+abp_id);
     $("#svg-div").css("overflow", "hidden");
 
-    refresh_ab_list(true);
+    refresh_ab_list(0);
 
     $.get('/upload/sample-ab/' + abs_id + '/', function(res) {
-    	$('#title').append(res.sample.name);
-    	$('#desc').append(res.sample.name);
-    	$('#file').append(res.sample.file);
+        $('#title').append(res.sample.name);
+        $('#desc').append(res.sample.name);
+        $('#file').append(res.sample.file);
         p_h = data_process(res['heavy']);
         render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
         render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
@@ -105,58 +109,58 @@ $(document).ready(function() {
         $("#chart,#table").removeClass("active in");
         $("#heavy_tab, #light_tab").removeClass("active");
         $("#antibodyome_tab").addClass("active");
-        // 根据sample-ab 获得antibodyome Coding here
-        //abs_list
-		refresh_ab_list(true);
-    });
-
-    $('.pager .next').click(function() {
-		if(page<page_max)
-		{
-			page = page+1;
-			refresh_ab_list(false);
-		}
-    });
-    $('.pager .previous').click(function() {
-		if(page>0)
-		{
-			page = page-1;
-			refresh_ab_list(false);
-		}
+        //
+        pagination_init = false;
+        refresh_ab_list(0);
     });
 });
 
-function refresh_ab_list(update_count)
-{
-	if(loading_abs==true)
-		return
-	var abs_id = $.urlParam('abs_id');
-	var abp_id = $.urlParam('abp_id');
-	var filter=null;
-	if(update_count==true)
-	{
-		$('#ab_count_total').text('waiting...');
-	}
-	$('.ab_list').html('');
-    if(abs_list.length>0)
-    	filter = JSON.stringify(gene_parse_4_ab_filter(abs_list[0]));
-    $.post('/upload/list-ab/' + abs_id + '/',
-    {'filters':filter,
-     'start':page*PAGE_SIZE,
-     'limit':PAGE_SIZE,
-    },
-    function(res) {
-    	page_max = Math.ceil(res.count/PAGE_SIZE);
-    	if(update_count==true)
+function refresh_ab_list(p) {
+    var abs_id = $.urlParam('abs_id');
+    var abp_id = $.urlParam('abp_id');
+    var filter = '';
+
+    var extend=function(o,n,override){
+	    for(var p in n)if(n.hasOwnProperty(p) && (!o.hasOwnProperty(p) || override))o[p]=n[p];
+	};
+
+    $('.ab_list').html('');
+    if(abs_list.length > 0)
+    {
+    	var filter = new Object;
+    	for(var i in abs_list)
     	{
-    		$('#ab_count_total').text(res.count+' antibody in total');
+    		var obj = gene_parse_4_ab_filter(abs_list[i]);
+    		extend(filter, obj);
     	}
-    	if(res.count<=0) return;
-        var html = '';
+        filter = JSON.stringify(filter);
+	}
+
+    $.post('/upload/list-ab/' + abs_id + '/', {
+        'filters' : filter,
+        'start' : p * PAGE_SIZE,
+        'limit' : PAGE_SIZE,
+    }, function(res) {
+        if (res.count <= 0)
+            return;
+        var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
         $.each(res.details, function(i, e) {
-            html += '<a href="abome_ab.html?abs_id=' + abs_id + '&ab=' + e._id + '&abp_id=' + abp_id + '">' + e._id + '  </a>';
+            html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id='+abs_id+'&abp_id='+abp_id+'&ab='+e._id+'\'"><td>' + e._id + '</td><td>' + e.v_gene.full + '</td><td>' + e.d_gene.full + '</td><td>' + e.j_gene.full + '</td></tr>';
         });
+        html += '</tbody></table>';
         $('.ab_list').html(html);
+        if(pagination_init==false)
+        {
+	        $("#pagination").pagination({
+	            items : res.count,
+	            itemsOnPage : PAGE_SIZE,
+	            cssStyle : 'compact-theme',
+	            edges: 2,
+	            displayedPages: 3,
+	            onPageClick : on_page_changed
+	         });
+	         pagination_init = true;
+	    }
     });
 }
 
@@ -414,22 +418,19 @@ function render_d3_bar(obj, total, selector) {
                 return "12px";
             return "15px";
         }).on("click", function(d, i) {// 图表标签点击事件,再此可判断有无重复元素
-
-            var contains = function(array, obj) {
-                var i = array.length;
-                while (i--) {
-                    if (array[i] === obj) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-
-            if (!contains(abs_list, trim($(this).text()))) {
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + $(this).text() + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');
-                abs_list.push(trim($(this).text()));
-            }
-
+			var name = trim($(this).text());
+			var type = name[3];
+			var exist = $(".random_list a");
+			$.each(exist, function(i, e){
+				var text = $(e).text();
+				if(text[3]==type)
+				{
+					$(e).remove();
+					removeab(trim(text));
+				}
+			})
+            $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');
+            abs_list.push(name);
         }).text(function(d, i) {
             return d.name;
         });
@@ -527,7 +528,7 @@ function gene_parse(k) {
 
 function gene_parse_4_ab_filter(k) {
     var res = { };
-    var type = k[3].toLowerCase()+'_gene';
+    var type = k[3].toLowerCase() + '_gene';
     var t, s;
     //family和gene以/ 或者 -间隔
     t = k.indexOf('-');
@@ -539,22 +540,19 @@ function gene_parse_4_ab_filter(k) {
         res['fam'] = k.substring(4, t);
         var split = s.split('*');
         res['gene'] = split[0];
-        if(split.length>1)
-        {
-        	res['all'] = split[1];
+        if (split.length > 1) {
+            res['all'] = split[1];
         }
-    }
-    else//没有gene的情况 family和alleles以*间隔 或者只是family
+    } else//没有gene的情况 family和alleles以*间隔 或者只是family
     {
-    	var split = k.split('*');
+        var split = k.split('*');
         res['fam'] = split[0].substring(4);
-        if(split.length>1)
-        {
-        	res['all'] = split[1];
+        if (split.length > 1) {
+            res['all'] = split[1];
         }
     }
     ret = {}
-    ret[type]=res;
+    ret[type] = res;
     return ret;
 }
 

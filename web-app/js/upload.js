@@ -165,7 +165,8 @@ $(document).ready(function() {
                         $('.error-tips').removeClass('hide');
                         $(".error-tips p").text(res.error);
                     }
-                })
+                }
+            );
         }
         // $('#manual-fine-uploader').fineUploaderS3('uploadStoredFiles');
     });
@@ -270,8 +271,9 @@ function renderProjectDetail(abp_id){
             $('#project-title').val(res.title);
             $('#select-permission').val(res.permission);
             $('#select-organism').val(res.organism);
-            $('#select-platform').val(res.metadata);
-            $('#platform').val(res.metadata.platform);
+            res.metadata = JSON.parse(res.metadata);
+            $('#select-platform').val(res.metadata.platform);
+            // $('#platform').val(res.metadata.platform);
             $('#keywords').val(res.metadata.keywords);
             // $('#keywords').val(res.slug);
             $('#summary').val(res.summary);
