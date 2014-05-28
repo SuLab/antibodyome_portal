@@ -208,10 +208,10 @@ def submit_analyze(request, abp_id):
         p.status = 1
         p.ready = True
         p.save()
-        return HttpResponse('ok', content_type="application/json")
+        return HttpResponse('{"result":"ok"}', content_type="application/json")
     except Exception, e:
         print e
-        return HttpResponse('fail', status=404, content_type="application/json")
+        return HttpResponse('{"result":"failed"}', status=404, content_type="application/json")
 
 
 class ProjectList(AbomeListView):
@@ -260,7 +260,10 @@ class ProjectDetail(AbomeDetailView):
 
 
 def ABProjectDetail(request, abp_id):    
-    p = Project.objects.get(ab_id=abp_id)
+    try:
+        p = Project.objects.get(ab_id=abp_id)
+    except ObjectDoesNotExist:
+        return HttpResponse('no such project', status=400, content_type="application/json")
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     user = request.user

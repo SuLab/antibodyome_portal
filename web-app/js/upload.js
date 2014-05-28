@@ -267,11 +267,11 @@ function renderProjectDetail(abp_id){
         url:"/upload/project/"+abp_id+'/',
         type:'GET',
         success:function(res){
-            console.log(res);
+            console.log("success");
             $('#project-title').val(res.title);
             $('#select-permission').val(res.permission);
             $('#select-organism').val(res.organism);
-            res.metadata = JSON.parse(res.metadata);
+            //res.metadata = JSON.parse(res.metadata);
             $('#select-platform').val(res.metadata.platform);
             // $('#platform').val(res.metadata.platform);
             $('#keywords').val(res.metadata.keywords);
@@ -285,7 +285,13 @@ function renderProjectDetail(abp_id){
             });
         },
         error: function(){
-            $('#my-login-modal').modal('show');
+            console.log("error");
+            $('#projectid-error-modal').modal('show');
+            $('#projectid-error-modal #cancel_modal').click(function(event) {
+                /* Act on the event */
+                console.log("Click event");
+                $('#projectid-error-modal').modal('hide');
+            });
         }
     });
 }

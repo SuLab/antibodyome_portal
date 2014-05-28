@@ -45,56 +45,60 @@ class Analysis(threading.Thread):
     def get_analysis_target(self):
         # import pdb;pdb.set_trace()
         try:
-            p = Project.objects.filter(status=1, ready=1).earliest('created')
+            p = Project.objects.filter(status__in=[Project.STATUS_READY, Project.STATUS_ANALYZING], ready=1).earliest('created')
         except Project.DoesNotExist:
             p = None
         return p
 
     def do_analysis(self, p):
         # import pdb;pdb.set_trace()
-        samples = p.sample_set.filter(status=1)
+        samples = p.sample_set.filter(status__in=[Project.STATUS_READY, Project.STATUS_ANALYZING])
         if samples is not None:
             # project in analyzing status
-            p.status = Project.STATUS_OPTIONS[2][0]
-            p.save()
+            if p.status != Project.STATUS_ANALYZING:
+                p.status = Project.STATUS_ANALYZING
+                p.save()
             ab = self.conn.root
             for s in samples:
                 # update local status
-                self.status = [p.id, s.id, 0]
-                try:
-                    key = str("s3:"+s.uuid)
-                    # Start analysis sample's3:raw_data/2064_g1.fasta.gz'
-                    job_id = ab.run_igblast(infile=key)
-                    s.job_id = job_id
-                    s.status = Project.STATUS_OPTIONS[2][0]
-                    s.save()
-                except Exception as e:
-                    raise e
-                    s.status = Project.STATUS_OPTIONS[4][0]
-                    s.save()
-                    continue
+                if s.status == Project.STATUS_READY:
+                    self.status = [p.id, s.id, 0]
+                    try:
+                        key = str("s3:"+s.uuid)
+                        # Start analysis sample's3:raw_data/2064_g1.fasta.gz'
+                        job_id = ab.run_igblast(infile=key)
+                        s.job_id = job_id
+                        s.status = Project.STATUS_ANALYZING
+                        s.save()
+                    except Exception as e:
+                        #raise e
+                        s.status = Project.STATUS_FAILED
+                        s.save()
+                        continue
+                else:
+                    job_id = s.job_id
 
                 while True:
                     pro = ab.check_progress(job_id)
                     if len(pro) == 1 and pro[0][0] == u'SUCCESS':
-                        print "progress bar 100%"
-                        s.status = Project.STATUS_OPTIONS[3][0]
+                        print "progress 100%"
+                        s.status = Project.STATUS_ANALYZED
                         self.status[2] = 100
                         s.save()
                         break
                     else:
-                        print "progress bar " + str(int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)) + "%"
+                        print "progress  " + str(int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)) + "%"
                         self.status[2] = int(float(pro[1][1])/float(pro[0][1]+pro[1][1])*100)
                     # sleep a while before next check
                     time.sleep(self.SLEEP_TIME)
 
             # all sample finished, determine project analyze result
-            p.status = Project.STATUS_OPTIONS[3][0]
+            p.status = Project.STATUS_ANALYZED
             for s in samples:
-                if s.status == Project.STATUS_OPTIONS[4][0]:
-                    p.status = Project.STATUS_OPTIONS[4][0]
+                if s.status == Project.STATUS_FAILED:
+                    p.status = Project.STATUS_FAILED
             p.save()
-            if p.status == Project.STATUS_OPTIONS[3][0]:
+            if p.status == Project.STATUS_ANALYZED:
                 '''python -m smtpd -n -c DebuggingServer localhost:1025'''
                 send_mail('hello', 'welcome to register.', 'localhost@example.com', [p.owner.email], fail_silently=False)
 
