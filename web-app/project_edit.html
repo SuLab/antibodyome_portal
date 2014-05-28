@@ -139,11 +139,27 @@
         </div>
 
         <div class="row" id="project-container"></div>
-
+        <div class="modal fade" id="projectid-error-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" id="modal-header">
+                            Error
+                        </div>
+                        <div class="modal-body">
+                            The project is not exist, please check again.
+                        </div>
+                        <div class="modal-footer" style="padding: 5px 33px 5px; margin-top: 0px;">
+                            <div id="cancel_modal" class="btn btn-primary">
+                                ok
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         <script type="text/x-jquery-tmpl" id="project-list-tmpl">
             <div class="list-group">
                 {{each(i,project) projects}}
-                    <a href="/web-app/project_detail.html?id=${project.id}" class="list-group-item" id="${project.id}">
+                    <a href="/web-app/project_detail.html?abp_id=${project.ab_id}" class="list-group-item" id="${project.id}">
                         <h5>${project.title}</h5>
                         <h6>${project.created}</h6>
                     </a>

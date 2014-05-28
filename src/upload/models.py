@@ -23,19 +23,29 @@ class Project(models.Model):
     lastmodified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     slug = AutoSlugField(populate_from='title')
+    
+    STATUS_EDITING = 0
+    STATUS_READY = 1
+    STATUS_ANALYZING = 2
+    STATUS_ANALYZED = 3
+    STATUS_FAILED = 4
+
     STATUS_OPTIONS = (
-        (0, 'editing'),
-        (1, 'ready'),
-        (2, 'analyzing'),
-        (3, 'analyzed'),
-        (4, 'analyze failed'),
+        (STATUS_EDITING, 'editing'),
+        (STATUS_READY, 'ready'),
+        (STATUS_ANALYZING, 'analyzing'),
+        (STATUS_ANALYZED, 'analyzed'),
+        (STATUS_FAILED, 'analyze failed'),
     )
+    
+    PERMISSION_PUBLIC = 0
+    PERMISSION_PRIVATE = 1
     PERMISSION_OPTIONS = (
-        (0, 'public'),
-        (1, 'private'),
+        (PERMISSION_PUBLIC, 'public'),
+        (PERMISSION_PRIVATE, 'private'),
     )
-    permission = models.IntegerField(null=False, default=0, choices=PERMISSION_OPTIONS)
-    status = models.IntegerField(null=False, default=0, choices=STATUS_OPTIONS)
+    permission = models.IntegerField(null=False, default=PERMISSION_PUBLIC, choices=PERMISSION_OPTIONS)
+    status = models.IntegerField(null=False, default=STATUS_EDITING, choices=STATUS_OPTIONS)
     ready = models.BooleanField(default=False)
     search_index = VectorField()
 

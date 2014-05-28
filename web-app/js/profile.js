@@ -73,10 +73,8 @@ $.urlParam = function(name) {
     var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
     return results[1] || 0;
 }
-
-
 function on_page_changed(pageNumber, event) {
-    refresh_ab_list(pageNumber-1);
+    refresh_ab_list(pageNumber - 1);
     //处理点击事件
 }
 
@@ -85,23 +83,35 @@ $(document).ready(function() {
     var abs_id = $.urlParam('abs_id');
     var abp_id = $.urlParam('abp_id');
 
-    $('#project-link').attr('href', '/web-app/project_detail.html?abp_id='+abp_id);
+    $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
     $("#svg-div").css("overflow", "hidden");
 
     refresh_ab_list(0);
+    $.ajax({
+        url : '/upload/sample-ab/' + abs_id + '/',
+        type : 'GET',
+        success : function(res) {
+            $('#title').append(res.sample.name);
+	    $('#desc').append(res.sample.name);
+	    $('#file').append(res.sample.file);
+	    p_h = data_process(res['heavy']);
+	    render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
+            render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
+	    render_d3_bar(p_h['j'], res['heavy']['total'], '.profile_j_h');
+	    light = combine_light(res['kappa'], res['lambda']);
+	    p_l = data_process(light);
+	    render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
+	    render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
+        },
+        error : function(res) {
+            $('#samp-ab-modal').modal('show');
 
-    $.get('/upload/sample-ab/' + abs_id + '/', function(res) {
-        $('#title').append(res.sample.name);
-        $('#desc').append(res.sample.name);
-        $('#file').append(res.sample.file);
-        p_h = data_process(res['heavy']);
-        render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
-        render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
-        render_d3_bar(p_h['j'], res['heavy']['total'], '.profile_j_h');
-        light = combine_light(res['kappa'], res['lambda']);
-        p_l = data_process(light);
-        render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
-        render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
+            $('#samp-ab-modal #cancel_modal').click(function(event) {
+                /* Act on the event */
+                console.log("Click event");
+                $('#samp-ab-modal').modal('hide');
+            });
+        }
     });
 
     $("#go").click(function() {
@@ -120,48 +130,68 @@ function refresh_ab_list(p) {
     var abp_id = $.urlParam('abp_id');
     var filter = '';
 
-    var extend=function(o,n,override){
-	    for(var p in n)if(n.hasOwnProperty(p) && (!o.hasOwnProperty(p) || override))o[p]=n[p];
-	};
+    var extend = function(o, n, override) {
+        for (var p in n)
+        if (n.hasOwnProperty(p) && (!o.hasOwnProperty(p) || override))
+            o[p] = n[p];
+    };
 
     $('.ab_list').html('');
-    if(abs_list.length > 0)
-    {
-    	var filter = new Object;
-    	for(var i in abs_list)
-    	{
-    		var obj = gene_parse_4_ab_filter(abs_list[i]);
-    		extend(filter, obj);
-    	}
+    if (abs_list.length > 0) {
+        var filter = new Object;
+        for (var i in abs_list) {
+            var obj = gene_parse_4_ab_filter(abs_list[i]);
+            extend(filter, obj);
+        }
         filter = JSON.stringify(filter);
-	}
+    }
 
-    $.post('/upload/list-ab/' + abs_id + '/', {
-        'filters' : filter,
-        'start' : p * PAGE_SIZE,
-        'limit' : PAGE_SIZE,
-    }, function(res) {
-        if (res.count <= 0)
-            return;
-        var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
-        $.each(res.details, function(i, e) {
-            html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id='+abs_id+'&abp_id='+abp_id+'&ab='+e._id+'\'"><td>' + e._id + '</td><td>' + e.v_gene.full + '</td><td>' + e.d_gene.full + '</td><td>' + e.j_gene.full + '</td></tr>';
-        });
-        html += '</tbody></table>';
-        $('.ab_list').html(html);
-        if(pagination_init==false)
-        {
-	        $("#pagination").pagination({
-	            items : res.count,
-	            itemsOnPage : PAGE_SIZE,
-	            cssStyle : 'compact-theme',
-	            edges: 2,
-	            displayedPages: 3,
-	            onPageClick : on_page_changed
-	         });
-	         pagination_init = true;
-	    }
+    $.ajax({
+        url : '/upload/list-ab/' + abs_id + '/',
+        type : 'POST',
+        data : {
+            'filters' : filter,
+            'start' : p * PAGE_SIZE,
+            'limit' : PAGE_SIZE,
+        },
+        dataType : 'application/json',
+        timeout : 1000,
+        success : function(res) {
+            console.log("success");
+            if (res.count <= 0)
+                return;
+            var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
+            $.each(res.details, function(i, e) {
+                html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id=' + abs_id + '&abp_id=' + abp_id + '&ab=' + e._id + '\'"><td>' + e._id + '</td><td>' + e.v_gene.full + '</td><td>' + e.d_gene.full + '</td><td>' + e.j_gene.full + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            $('.ab_list').html(html);
+            if (pagination_init == false) {
+                $("#pagination").pagination({
+                    items : res.count,
+                    itemsOnPage : PAGE_SIZE,
+                    cssStyle : 'compact-theme',
+                    edges : 2,
+                    displayedPages : 3,
+                    onPageClick : on_page_changed
+                });
+                pagination_init = true;
+            }
+        },
+        error : function(res) {
+            $('#list-ab-modal').modal('show');
+            /*
+             self.text("Waiting for analyzing...");
+             self.addClass('disabled');*/
+
+            $('#list-ab-modal #cancel_modal').click(function(event) {
+                /* Act on the event */
+                console.log("Click event");
+                $('#list-ab-modal').modal('hide');
+            });
+        }
     });
+
 }
 
 function combine_light(kappa, lambda) {
@@ -418,17 +448,16 @@ function render_d3_bar(obj, total, selector) {
                 return "12px";
             return "15px";
         }).on("click", function(d, i) {// 图表标签点击事件,再此可判断有无重复元素
-			var name = trim($(this).text());
-			var type = name[3];
-			var exist = $(".random_list a");
-			$.each(exist, function(i, e){
-				var text = $(e).text();
-				if(text[3]==type)
-				{
-					$(e).remove();
-					removeab(trim(text));
-				}
-			})
+            var name = trim($(this).text());
+            var type = name[3];
+            var exist = $(".random_list a");
+            $.each(exist, function(i, e) {
+                var text = $(e).text();
+                if (text[3] == type) {
+                    $(e).remove();
+                    removeab(trim(text));
+                }
+            })
             $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');
             abs_list.push(name);
         }).text(function(d, i) {

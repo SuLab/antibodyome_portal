@@ -6,3 +6,5 @@ Werkzeug==0.9.4
 python-social-auth==0.1.17
 psycopg2==2.5.2
 rpyc==3.2.3
+djorm-ext-pgfulltext==0.10
+CairoSVG==1.0.7
