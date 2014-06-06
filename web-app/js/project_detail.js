@@ -61,7 +61,7 @@ function renderProjectDetail(abp_id) {
                     analyze.text("analyze failed");
                     analyze.addClass('disabled');
             }
-            if (res.user != res.owner) {
+            if ((res.user != res.owner) || (res.status!=0)) {
                 $("#edit-project").hide();
             }
             $('#notification').attr('href', 'project_detail.html?abp_id=' + abp_id);

@@ -304,7 +304,7 @@ def random_ab(request, abs_id):
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 def list_ab(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
@@ -312,11 +312,11 @@ def list_ab(request, abs_id):
         return HttpResponse('no such sample', status=400, content_type="application/json")
     #job_id = s.job_id
     job_id = '52d42f1b9baecf05bfddffed'
-    filters = request.POST.get('filters', '')
+    filters = request.GET.get('filters', '')
     if filters != '':
         filters = json.loads(filters)
-    start = request.POST.get('start', 0)
-    limit = request.POST.get('limit', 50)
+    start = request.GET.get('start', 0)
+    limit = request.GET.get('limit', 50)
     ab_li = get_ab_list(job_id, filters=filters, start=start, limit=limit)
     return HttpResponse(json.dumps(ab_li, cls=ComplexEncoder), content_type="application/json")
 

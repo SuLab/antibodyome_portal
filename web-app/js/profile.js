@@ -148,7 +148,7 @@ function refresh_ab_list(p) {
 
     $.ajax({
         url : '/upload/list-ab/' + abs_id + '/',
-        type : 'POST',
+        type : 'GET',
         data : {
             'filters' : filter,
             'start' : p * PAGE_SIZE,
