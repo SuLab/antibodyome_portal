@@ -118,10 +118,11 @@ class Analysis(threading.Thread):
             for s in samples:
                 if s.status == Project.STATUS_FAILED:
                     p.status = Project.STATUS_FAILED
+                    send_mail('analyze failed', 'your project "%s" failed in analyze.'%p.title, 'localhost@example.com', [p.owner.email], fail_silently=False)
             p.save()
             if p.status == Project.STATUS_ANALYZED:
                 '''python -m smtpd -n -c DebuggingServer localhost:1025'''
-                #send_mail('hello', 'welcome to register.', 'localhost@example.com', [p.owner.email], fail_silently=False)
+                send_mail('analyze success', 'your project "%s" has been analyzed successfully.'%p.title, 'localhost@example.com', [p.owner.email], fail_silently=False)
 
     def get_status(self):
         return self.status
