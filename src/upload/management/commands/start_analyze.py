@@ -98,8 +98,14 @@ class Analysis(threading.Thread):
                         s.save()
                         break
                     else:
-                        print "progress  " + str(100*pro['SUCCESS']/total) + "%"
-                        self.status[2] = 100*pro['SUCCESS']/total
+                        if 'FAIL'  in pro:
+                            print 'progress failed'
+                            s.status = Project.STATUS_FAILED
+                            s.save()
+                            break
+                        else:
+                            print "progress  " + str(100*pro['SUCCESS']/total) + "%"
+                            self.status[2] = 100*pro['SUCCESS']/total
                     # sleep a while before next check
                     time.sleep(self.SLEEP_TIME)
 
