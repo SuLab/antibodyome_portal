@@ -87,6 +87,10 @@ class Analysis(threading.Thread):
                     print 'job_id: %s' %job_id
                     pro = ab.check_progress(job_id)
                     print pro
+                    if pro is None:
+                        s.status = Project.STATUS_FAILED
+                        s.save()
+                        break
                     pro = dict(pro)
                     total = 0
                     for k in pro:
