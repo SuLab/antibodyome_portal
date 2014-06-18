@@ -55,6 +55,14 @@ class Project(models.Model):
     def __str__(self):
         return '"{}" by "{}"'.format(self.title, self.owner.username)
     
+    #reset status of proj and its smpl to 'ready', 
+    def reset_status(self):
+        self.status = self.STATUS_EDITING
+        self.save()
+        for s in self.sample_set.all():
+            s.status = self.STATUS_EDITING
+            s.save()
+    
     objects = ProjectManager()
 
     search_manager = SearchManager(
