@@ -112,7 +112,8 @@
                     $(".project-search-list").click(function(event) {
                         /* Act on the event */
                         var id = $(this).attr('id')
-                        window.location.href = '/web-app/project_detail.html?id='+id;
+                        window.location.href = '/web-app/project_detail.html?abp_id='+id;
+                        ///web-app/project_detail.html?abp_id=ABP00011
                     });
                     if(data.prev == true){
                         $('.search_previous').removeClass('disabled');
@@ -160,7 +161,7 @@
 
                     </tr>
                         {{each(i,project) projects.detail}}
-                            <tr class="project-search-list" style="cursor: pointer;" id=${project.id}>
+                            <tr class="project-search-list" style="cursor: pointer;" id=${project.ab_id}>
                                 <td>${project.ab_id}</td>
                                 <td>${project.title}</td>
                                 <td>${project.summary}</td>

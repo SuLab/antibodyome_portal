@@ -241,7 +241,7 @@ function submit_download_form(selector, output_format) {
 function removeab(text) {
     var removeByValue = function(array, val) {
         for (var i = 0; i < array.length; i++) {
-            if (array[i] == val) {
+            if (array[i].name == val) {
                 array.splice(i, 1);
                 break;
             }
@@ -449,20 +449,62 @@ function render_d3_bar(obj, total, selector) {
             return "15px";
         }).on("click", function(d, i) {// 图表标签点击事件,再此可判断有无重复元素
             var name = trim($(this).text());
-            var type = name[3];
-            var exist = $(".random_list a");
-            $.each(exist, function(i, e) {
-                var text = $(e).text();
-                if (text[3] == type) {
-                    $(e).remove();
-                    removeab(trim(text));
-                }
-            })
-            $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');
-            abs_list.push(name);
+            var type;
+            if(d.family != null && d.family != "null" && d.family != "")
+                type = d.family[3];
+            else if(d.gene != null && d.gene != "null" && d.gene != "")
+                type = d.gene[3];
+            else
+                type = d.name[3];
+            var remove_name = null;
+            var remove_index = -1;
+            for (var i = 0; i < abs_list.length; i++) {
+                if (abs_list[i].family != null && abs_list[i].family != "null" && abs_list[i].family != "") {
+                    if(type == (abs_list[i].family)[3]){
+                        remove_name = abs_list[i].name;
+                        remove_index = i;
+                                                       }
+                } else if(abs_list[i].gene != null && abs_list[i].gene != "null" && abs_list[i].gene != ""){
+                    if(type == (abs_list[i].gene)[3]){
+                        remove_name = abs_list[i].name;
+                        remove_index = i;
+                                                      }
+                } else {
+                    if(type == (abs_list[i].name)[3]){
+                        remove_name = abs_list[i].name;
+                        remove_index = i;
+                                           }}
+                                 }
+            if(remove_name != null){
+                removeab(remove_name);
+                                 }
+            
+            if(remove_index != -1){
+                var exist = $(".random_list a");
+                $.each(exist, function(i, e) {
+                    if(i == remove_index)
+                        $(e).remove();
+                                           })
+                                }
+            var data = null;
+            if(d.family != null && d.gene != null && d.gene != "null"  && d.family != "null"){
+                data = {name: d.name, type: d.type, family: d.family, gene: d.gene};
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + "family:" + data.family + " gene:" + data.gene + " "  + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
+            if((d.family == null || d.family == "null")&& d.gene != null && d.gene != "null"){
+                data = {name: d.name, type: d.type, gene: d.gene};
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + " gene:" + data.gene + " " + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
+            if(d.family != null && d.family != "null" && (d.gene == null || d.gene == "null") ){
+                data = {name: d.name, type: d.type, family: d.family};
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + "family:" + data.family + " " + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
+            if((d.family == null || d.family == "null") && (d.gene == null || d.gene == "null")){
+                data = {name: d.name, type: d.type};
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + data.name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
+            if(data != null)
+                abs_list.push(data);
+            console.log(abs_list);
         }).text(function(d, i) {
             return d.name;
-        });
+                     });
 
         chart.append("line").attr("x1", x_trans - 1).attr("y1", 0).attr("x2", x_trans - 1).attr("y2", y_trans).attr("stroke-width", 1).attr("stroke", "black");
 
@@ -544,13 +586,15 @@ function gene_parse(k) {
     if (t != -1) {
         s = k.substring(t + 1, k.length);
         res['family'] = k.substring(0, t);
-        // res['gene'] = s.split('*')[0];
-        res['gene'] = res['family'] + '-' + s.split('*')[0];
-        res['allele'] = k;
+        res['gene'] = s.split('*')[0];
+        res['allele'] = s.split('*')[1];
+        //res['gene'] = res['family'] + '-' + s.split('*')[0];
+        //res['allele'] = k;
     } else {
-        res['family'] = k.split('*')[0];
-        // res['allele'] = k.split('*')[1];
-        res['allele'] = k;
+        //j gene has no family
+        res['gene'] = k.split('*')[0];
+        res['allele'] = k.split('*')[1];
+        //res['allele'] = k;
     }
     return res;
 }
@@ -630,6 +674,7 @@ function map_to_array(origin_data) {
             for (var key in alleles_items) {
                 f['children'][alleles_items[key].index].color = i;
                 f['children'][alleles_items[key].index].clicked = false;
+                f['children'][alleles_items[key].index].gene = value1;
                 new_alleles.push(f.children[alleles_items[key].index]);
             }
             f.children = new_alleles;
@@ -643,6 +688,9 @@ function map_to_array(origin_data) {
                 for (var key in alleles_items) {
                     g['children'][alleles_items[key].index].color = i;
                     g['children'][alleles_items[key].index].clicked = false;
+                    g['children'][alleles_items[key].index].gene = value2;
+                    g['children'][alleles_items[key].index].family = value1;
+                    g.family = value1;
                     new_alleles.push(g.children[alleles_items[key].index]);
                 }
                 g.color = i;
@@ -650,10 +698,12 @@ function map_to_array(origin_data) {
                 g.clicked = false;
                 new_genes.push(g);
             });
+            origin_data[value1]['children'].parent_name = value1;
             origin_data[value1]['children'] = new_genes;
         }
         origin_data[value1].color = i;
         origin_data[value1].clicked = false;
+        //origin_data[value1].parent_name = value1;
         new_data.push(origin_data[value1]);
         i = i + 1;
     });
@@ -684,44 +734,56 @@ function data_process(raw) {
             allele['name'] = alleles[k2]['allele'];
             allele['count'] = v;
             allele['type'] = 'alleles';
-            if ( f in tree) {
-                tree[f]['count'] += v;
-                if (g != null) {
-                    if ( g in tree[f]['children']) {
-                        tree[f]['children'][g]['count'] += v;
-                        tree[f]['children'][g]['type'] = 'genes';
-                        tree[f]['children'][g]['name'] = g;
-                        tree[f]['children'][g]['children'].push(allele);
+            var root = f;
+            if(f==null)
+                root=g
+            if ( root in tree) {
+                tree[root]['count'] += v;
+                //root is family
+                if (f != null) {
+                    if ( g in tree[root]['children']) {
+                        tree[root]['children'][g]['count'] += v;
+                        tree[root]['children'][g]['type'] = 'genes';
+                        tree[root]['children'][g]['name'] = g;
+                        tree[root]['children'][g]['children'].push(allele);
                     } else {
                         tree[f]['children'][g] = {
                             'count' : v,
                             'type' : 'genes',
                             'name' : g,
                             'children' : [allele]
-                        };
-                    }
-                } else {
-                    tree[f]['children'].push(allele);
-                }
+                                                                };
+                                                      }
+                } else {//root is gene
+                    tree[root]['children'].push(allele);
+                                           }
             } else {
-                tree[f] = {
-                    'count' : v,
-                    'name' : f,
-                    'type' : 'family'
-                };
-                if (g != null) {
-                    tree[f]['children'] = {};
-                    tree[f]['children'][g] = {
+                if (f!=null)
+                                           {
+                    tree[root] = {
+                        'count' : v,
+                        'name' : f,
+                        'type' : 'family'
+                                            };                
+                    tree[root]['children'] = {};
+                    tree[root]['children'][g] = {
                         'count' : v,
                         'type' : 'genes',
                         'name' : g,
                         'children' : [allele]
-                    };
-                } else {
-                    tree[f]['children'] = [allele];
-                }
-            }
-        }
+                                                     };
+                                           }
+               else//no family only gene, for j gene
+                                        {
+                   tree[root] = {
+                        'count' : v,
+                        'name' : f,
+                        'type' : 'genes',
+                        'children' : [allele]
+                                                   };
+                                          }
+                             }
+                 }
         trees[key] = tree;
     }
     return trees;
