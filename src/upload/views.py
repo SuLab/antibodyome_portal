@@ -281,8 +281,8 @@ def sample_ab(request, abs_id):
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
-    job_id = s.job_id
-    #job_id = '52d42f1b9baecf05bfddffed'
+#     job_id = s.job_id
+    job_id = 'jxf_test_table'
     if job_id is not None:
         res = get_ab_data(job_id)
         res['sample'] = {'name':s.name, 'desc':s.description, 'file':s.filename}
@@ -298,27 +298,32 @@ def random_ab(request, abs_id):
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
-    job_id = s.job_id
-    #job_id = '52d42f1b9baecf05bfddffed'
+    #job_id = s.job_id
+    job_id = '52d42f1b9baecf05bfddffed'
     abs = get_random_ab(job_id)
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
 
 
 @require_http_methods(["GET"])
 def list_ab(request, abs_id):
-    try:
-        s = Sample.objects.get(ab_id=abs_id)
-    except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, content_type="application/json")
+#     try:
+#         s = Sample.objects.get(ab_id=abs_id)
+#     except ObjectDoesNotExist:
+#         return HttpResponse('no such sample', status=400, content_type="application/json")
     #job_id = s.job_id
-    job_id = '52d42f1b9baecf05bfddffed'
+    #job_id = '52d42f1b9baecf05bfddffed'
+    job_id = 'jxf_test_tabled'
     filters = request.GET.get('filters', '')
     if filters != '':
         filters = json.loads(filters)
     start = request.GET.get('start', 0)
     limit = request.GET.get('limit', 50)
     ab_li = get_ab_list(job_id, filters=filters, start=start, limit=limit)
-    return HttpResponse(json.dumps(ab_li, cls=ComplexEncoder), content_type="application/json")
+    res = []
+    keys = ['id','v_gene_full', 'd_gene_full', 'j_gene_full']
+    for e in ab_li['details']:
+        res.append(dict(zip(keys, e)))
+    return HttpResponse(json.dumps({'count':ab_li['count'],'details':res}, cls=ComplexEncoder), content_type="application/json")
 
 
 @require_http_methods(["GET"])
