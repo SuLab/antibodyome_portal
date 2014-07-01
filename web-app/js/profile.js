@@ -23,8 +23,6 @@ var bar_gap = {
 var PAGE_SIZE = 100;
 var pagination_init = false;
 
-var abs_list = new Array();
-
 var getRGBColorFromHex = function(color_num, type) {
     color_codes = ['9400D3', '2F4F4F', '483D8B', '8FBC8B', 'E9967A', '8B0000', '9932CC', 'FF8C00', '556B2F', '8B008B', 'BDB76B', '7FFFD4', 'A9A9A9', 'B8860B', '008B8B', '00008B', '00FFFF', 'DC143C', '6495ED', 'FF7F50', 'D2691E', '7FFF00', '5F9EA0', 'DEB887', 'A52A2A', '8A2BE2', '0000FF', '000000', 'FFE4C4', '006400', '00FFFF'];
     if (color_num > color_codes.length) {
@@ -92,16 +90,16 @@ $(document).ready(function() {
         type : 'GET',
         success : function(res) {
             $('#title').append(res.sample.name);
-	    $('#desc').append(res.sample.name);
-	    $('#file').append(res.sample.file);
-	    p_h = data_process(res['heavy']);
-	    render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
+            $('#desc').append(res.sample.name);
+            $('#file').append(res.sample.file);
+            p_h = data_process(res['heavy']);
+            render_d3_bar(p_h['v'], res['heavy']['total'], '.profile_v_h');
             render_d3_bar(p_h['d'], res['heavy']['total'], '.profile_d_h');
-	    render_d3_bar(p_h['j'], res['heavy']['total'], '.profile_j_h');
-	    light = combine_light(res['kappa'], res['lambda']);
-	    p_l = data_process(light);
-	    render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
-	    render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
+            render_d3_bar(p_h['j'], res['heavy']['total'], '.profile_j_h');
+            light = combine_light(res['kappa'], res['lambda']);
+            p_l = data_process(light);
+            render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
+            render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
         },
         error : function(res) {
             $('#samp-ab-modal').modal('show');
@@ -137,11 +135,35 @@ function refresh_ab_list(p) {
     };
 
     $('.ab_list').html('');
-    if (abs_list.length > 0) {
-        var filter = new Object;
-        for (var i in abs_list) {
-            var obj = gene_parse_4_ab_filter(abs_list[i]);
-            extend(filter, obj);
+    var is = $(".random_list a i");
+    if (is.length > 0) {
+        var filter = {};
+        for (var i = 0; i < is.length; i++) {
+            var e = is.eq(i).text().split(' ');
+            var s = e[0][0];
+            var f = {};
+            var es = e[2].split('_');
+            for (var j in es) {
+                if (es[j] != '*') {
+                    if (j == 0) {
+                        extend(f, {
+                            'fam' : es[j]
+                        });
+                    } else if (j == 1) {
+                        extend(f, {
+                            'gene' : es[j]
+                        });
+                    } else {
+                        extend(f, {
+                            'all' : es[j]
+                        });
+                    }
+                }
+            }
+            var key = s + '_gene';
+            var dict = {};
+            dict[key] = f;
+            extend(filter, dict);
         }
         filter = JSON.stringify(filter);
     }
@@ -154,18 +176,8 @@ function refresh_ab_list(p) {
             'start' : p * PAGE_SIZE,
             'limit' : PAGE_SIZE,
         },
-        dataType : 'application/json',
-        timeout : 1000,
+        dataType : 'json',
         success : function(res) {
-            console.log("success");
-            if (res.count <= 0)
-                return;
-            var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
-            $.each(res.details, function(i, e) {
-                html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id=' + abs_id + '&abp_id=' + abp_id + '&ab=' + e._id + '\'"><td>' + e._id + '</td><td>' + e.v_gene.full + '</td><td>' + e.d_gene.full + '</td><td>' + e.j_gene.full + '</td></tr>';
-            });
-            html += '</tbody></table>';
-            $('.ab_list').html(html);
             if (pagination_init == false) {
                 $("#pagination").pagination({
                     items : res.count,
@@ -177,6 +189,14 @@ function refresh_ab_list(p) {
                 });
                 pagination_init = true;
             }
+            if (res.count <= 0)
+                return;
+            var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
+            $.each(res.details, function(i, e) {
+                html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id=' + abs_id + '&abp_id=' + abp_id + '&ab=' + e.id + '\'"><td>' + e.id + '</td><td>' + e.v_gene_full + '</td><td>' + e.d_gene_full + '</td><td>' + e.j_gene_full + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            $('.ab_list').html(html);
         },
         error : function(res) {
             $('#list-ab-modal').modal('show');
@@ -236,18 +256,6 @@ function submit_download_form(selector, output_format) {
     $.post('/upload/convert-svg/', data, function(res) {
         downloadURL(res);
     });
-}
-
-function removeab(text) {
-    var removeByValue = function(array, val) {
-        for (var i = 0; i < array.length; i++) {
-            if (array[i].name == val) {
-                array.splice(i, 1);
-                break;
-            }
-        }
-    };
-    removeByValue(abs_list, text);
 }
 
 function trim(str) {//删除左右两端的空格
@@ -448,63 +456,48 @@ function render_d3_bar(obj, total, selector) {
                 return "12px";
             return "15px";
         }).on("click", function(d, i) {// 图表标签点击事件,再此可判断有无重复元素
-            var name = trim($(this).text());
-            var type;
-            if(d.family != null && d.family != "null" && d.family != "")
-                type = d.family[3];
-            else if(d.gene != null && d.gene != "null" && d.gene != "")
-                type = d.gene[3];
-            else
-                type = d.name[3];
-            var remove_name = null;
-            var remove_index = -1;
-            for (var i = 0; i < abs_list.length; i++) {
-                if (abs_list[i].family != null && abs_list[i].family != "null" && abs_list[i].family != "") {
-                    if(type == (abs_list[i].family)[3]){
-                        remove_name = abs_list[i].name;
-                        remove_index = i;
-                                                       }
-                } else if(abs_list[i].gene != null && abs_list[i].gene != "null" && abs_list[i].gene != ""){
-                    if(type == (abs_list[i].gene)[3]){
-                        remove_name = abs_list[i].name;
-                        remove_index = i;
-                                                      }
+            var f = g = a = '*', t, type;
+            //t -- f, g, a; type--v,d,j
+            t = d.type;
+            if (d.type == 'family') {
+                f = d.name.substring(4);
+                type = d.name[3].toLowerCase();
+            } else {
+                if (d.family == null)//j gene
+                {
+                    type = 'j';
+                    if (d.type == 'genes') {
+                        g = d.name;
+                    } else {
+                        g = d.gene;
+                        a = d.name;
+                    }
                 } else {
-                    if(type == (abs_list[i].name)[3]){
-                        remove_name = abs_list[i].name;
-                        remove_index = i;
-                                           }}
-                                 }
-            if(remove_name != null){
-                removeab(remove_name);
-                                 }
-            
-            if(remove_index != -1){
-                var exist = $(".random_list a");
-                $.each(exist, function(i, e) {
-                    if(i == remove_index)
-                        $(e).remove();
-                                           })
-                                }
-            var data = null;
-            if(d.family != null && d.gene != null && d.gene != "null"  && d.family != "null"){
-                data = {name: d.name, type: d.type, family: d.family, gene: d.gene};
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + "family:" + data.family + " gene:" + data.gene + " "  + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
-            if((d.family == null || d.family == "null")&& d.gene != null && d.gene != "null"){
-                data = {name: d.name, type: d.type, gene: d.gene};
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + " gene:" + data.gene + " " + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
-            if(d.family != null && d.family != "null" && (d.gene == null || d.gene == "null") ){
-                data = {name: d.name, type: d.type, family: d.family};
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + "family:" + data.family + " " + name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
-            if((d.family == null || d.family == "null") && (d.gene == null || d.gene == "null")){
-                data = {name: d.name, type: d.type};
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="console.log($(this).text());$(this).remove();removeab(trim($(this).text()));console.log(abs_list);" href=' + 'javascript:void();' + '>' + data.name + '&nbsp<span class="glyphicon glyphicon-remove"></span>' + '</a>');}
-            if(data != null)
-                abs_list.push(data);
-            console.log(abs_list);
+                    f = d.family.substring(4);
+                    type = d.family[3].toLowerCase();
+                    if (d.type == 'genes') {
+                        g = d.name;
+                    } else {
+                        g = d.gene;
+                        a = d.name;
+                    }
+                }
+            }
+            var txt = type + ':  ' + f + '_' + g + '_' + a;
+            var is = $(".random_list a i");
+            var i = 0;
+            for (; i < is.length; i++) {
+                if (type == is.eq(i).text()[0]) {
+                    is.eq(i).text(txt);
+                    break;
+                }
+            }
+            if (i >= is.length) {
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void();><i>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
+            }
         }).text(function(d, i) {
             return d.name;
-                     });
+        });
 
         chart.append("line").attr("x1", x_trans - 1).attr("y1", 0).attr("x2", x_trans - 1).attr("y2", y_trans).attr("stroke-width", 1).attr("stroke", "black");
 
@@ -735,8 +728,8 @@ function data_process(raw) {
             allele['count'] = v;
             allele['type'] = 'alleles';
             var root = f;
-            if(f==null)
-                root=g
+            if (f == null)
+                root = g
             if ( root in tree) {
                 tree[root]['count'] += v;
                 //root is family
@@ -752,38 +745,36 @@ function data_process(raw) {
                             'type' : 'genes',
                             'name' : g,
                             'children' : [allele]
-                                                                };
-                                                      }
+                        };
+                    }
                 } else {//root is gene
                     tree[root]['children'].push(allele);
-                                           }
+                }
             } else {
-                if (f!=null)
-                                           {
+                if (f != null) {
                     tree[root] = {
                         'count' : v,
                         'name' : f,
                         'type' : 'family'
-                                            };                
+                    };
                     tree[root]['children'] = {};
                     tree[root]['children'][g] = {
                         'count' : v,
                         'type' : 'genes',
                         'name' : g,
                         'children' : [allele]
-                                                     };
-                                           }
-               else//no family only gene, for j gene
-                                        {
-                   tree[root] = {
+                    };
+                } else//no family only gene, for j gene
+                {
+                    tree[root] = {
                         'count' : v,
-                        'name' : f,
+                        'name' : g,
                         'type' : 'genes',
                         'children' : [allele]
-                                                   };
-                                          }
-                             }
-                 }
+                    };
+                }
+            }
+        }
         trees[key] = tree;
     }
     return trees;
