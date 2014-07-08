@@ -28,6 +28,15 @@
         <script type="text/javascript" src="3rd/paginator/jquery.simplePagination.js"></script>
         <script type="text/javascript" src="3rd/d3/d3.v3.js"></script>
         <link rel="stylesheet" href="3rd/paginator/simplePagination.css" />
+        <style type="text/css"> 
+ 
+            #fullbg{background-color: Gray;display:none;z-index:3;position:absolute;left:0px;top:0px;filter:Alpha(Opacity=30);/* IE */-moz-opacity:0.4;/* Moz + FF */opacity: 0.4;}  
+ 
+            #dialog {position:absolute;width:200px;height:200px;display: none;z-index: 5;}  
+ 
+            
+        </style>
+        
     </head>
     <body>
         <script>
@@ -135,12 +144,16 @@
                 <div class="col-lg-12">
                     <div class="well">
                         <p id='ab_count_total'>
-                            click F,G,A to filter
+                            Click chart label(s) to filter antibodies:
                         </p>
-                        <button type="button" id="go" class="btn btn-default btn-xs zoom-in" style="position: relative;left: 95%;margin-top: -65px;">
+                        
+                        <div class='random_list' style="padding-right: 20px"></div>
+                        <div style="position: relative;left: 90%;">
+                        Go
+                        <button type="button" id="go" class="btn btn-default btn-sm zoom-in" >
                             <span class="glyphicon glyphicon-search"></span>
                         </button>
-                        <div class='random_list' style="padding-right: 20px"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-12">
@@ -400,7 +413,7 @@
         <div class="container">
             <footer>
                 <p>
-                    &copy; Company 2013
+                    &copy; 2014 The Scripps Research Institute
                 </p>
             </footer>
         </div>
@@ -438,6 +451,13 @@
                     </div>
                 </div>
             </div>
+            <!-- JS遮罩层 --> 
+        <div id="fullbg"></div> 
+        <!-- end JS遮罩层 --> 
+        <!-- 对话框 --> 
+        <div id="dialog"> 
+            <div id="dialog_content" style="position: relative;top: 45%;"></div> 
+        </div> 
         <script src="js/profile.js"></script>
     </body>
 </html>

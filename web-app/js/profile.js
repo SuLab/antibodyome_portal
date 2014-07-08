@@ -76,6 +76,48 @@ function on_page_changed(pageNumber, event) {
     //处理点击事件
 }
 
+//显示灰色JS遮罩层  
+            function showBg(ct,content){  
+                var bH=$("body").height();  
+                var bW=$("body").width()+16;  
+                var objWH=getObjWh(ct);  
+                $("#fullbg").css({width:bW,height:bH,display:"block"});  
+                var tbT=objWH.split("|")[0]+"px";  
+                var tbL=objWH.split("|")[1]+"px";  
+                $("#"+ct).css({top:tbT,left:tbL,display:"block"});  
+                $("#"+content).html("<div style='text-align:center'><img src='3rd/icon/load4.gif' alt='Loading' style='width: 50px;'></div>");  
+                $(window).scroll(function(){resetBg()});  
+                $(window).resize(function(){resetBg()});  
+            }  
+            function getObjWh(obj){  
+                var st=document.documentElement.scrollTop;//滚动条距顶部的距离  
+                var sl=document.documentElement.scrollLeft;//滚动条距左边的距离  
+                var ch=document.documentElement.clientHeight;//屏幕的高度  
+                var cw=document.documentElement.clientWidth;//屏幕的宽度  
+                var objH=$("#"+obj).height();//浮动对象的高度  
+                var objW=$("#"+obj).width();//浮动对象的宽度  
+                var objT=Number(st)+(Number(ch)-Number(objH))/2;  
+                var objL=Number(sl)+(Number(cw)-Number(objW))/2;  
+                return objT+"|"+objL;  
+            }  
+            function resetBg(){  
+                var fullbg=$("#fullbg").css("display");  
+                if(fullbg=="block"){  
+                    var bH2=$("body").height();  
+                    var bW2=$("body").width()+16;  
+                    $("#fullbg").css({width:bW2,height:bH2});  
+                    var objV=getObjWh("dialog");  
+                    var tbT=objV.split("|")[0]+"px";  
+                    var tbL=objV.split("|")[1]+"px";  
+                    $("#dialog").css({top:tbT,left:tbL});  
+                }  
+            }  
+ 
+            //关闭灰色JS遮罩层和操作窗口  
+            function closeBg(){  
+                $("#fullbg").css("display","none");  
+                $("#dialog").css("display","none");  
+            }  
 
 $(document).ready(function() {
     var abs_id = $.urlParam('abs_id');
@@ -85,6 +127,7 @@ $(document).ready(function() {
     $("#svg-div").css("overflow", "hidden");
 
     refresh_ab_list(0);
+    showBg('dialog','dialog_content');
     $.ajax({
         url : '/upload/sample-ab/' + abs_id + '/',
         type : 'GET',
@@ -100,6 +143,7 @@ $(document).ready(function() {
             p_l = data_process(light);
             render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
             render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
+            closeBg();
         },
         error : function(res) {
             $('#samp-ab-modal').modal('show');
@@ -431,9 +475,20 @@ function render_d3_bar(obj, total, selector) {
 
         bar.append("text").attr("x", function(d, i) {
             if (d.type == 'alleles')
-                return -90;
+            {
+                return -40;
+            }
             if (d.type == 'genes')
-                return -95;
+            {
+                 if(d.family != null)
+                 {
+                     return -60;
+                 }
+                 else
+                 {
+                     return -100;
+                 }
+            }                
             return -100;
         }).attr("y", function(d, i) {
             return bar_height[d.type] / 2;
@@ -456,11 +511,11 @@ function render_d3_bar(obj, total, selector) {
                 return "12px";
             return "15px";
         }).on("click", function(d, i) {// 图表标签点击事件,再此可判断有无重复元素
-            var f = g = a = '*', t, type;
+            var f = g = a = '', t, type;
             //t -- f, g, a; type--v,d,j
             t = d.type;
             if (d.type == 'family') {
-                f = d.name.substring(4);
+                f = d.name;
                 type = d.name[3].toLowerCase();
             } else {
                 if (d.family == null)//j gene
@@ -473,7 +528,7 @@ function render_d3_bar(obj, total, selector) {
                         a = d.name;
                     }
                 } else {
-                    f = d.family.substring(4);
+                    f = d.family;
                     type = d.family[3].toLowerCase();
                     if (d.type == 'genes') {
                         g = d.name;
@@ -483,11 +538,30 @@ function render_d3_bar(obj, total, selector) {
                     }
                 }
             }
-            var txt = type + ':  ' + f + '_' + g + '_' + a;
+            if(type=='v')
+                type = 'Variable: ';
+            else if(type=='d')
+                type = 'Diversity: ';
+            else
+                type = 'Joining: ';
+            if(type=='Joining: ')
+            {
+                var txt = type + g;
+                if(a!='')
+                    txt = txt + '*' + a;
+            }
+            else
+            {
+                var txt = type + f;
+                if(g!='')
+                    txt = txt + '-' + g;
+                if(a!='')
+                    txt = txt +'*' + a;
+            }
             var is = $(".random_list a i");
             var i = 0;
             for (; i < is.length; i++) {
-                if (type == is.eq(i).text()[0]) {
+                if (type[0] == is.eq(i).text()[0]) {
                     is.eq(i).text(txt);
                     break;
                 }
@@ -496,31 +570,21 @@ function render_d3_bar(obj, total, selector) {
                 $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void();><i>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
             }
         }).text(function(d, i) {
+            if (d.type == 'alleles')
+            {
+                return '*'+d.name;
+            }
+            if (d.type == 'genes')
+            {
+                 if(d.family != null)
+                 {
+                     return '-'+d.name;
+                 }
+            }
             return d.name;
         });
 
         chart.append("line").attr("x1", x_trans - 1).attr("y1", 0).attr("x2", x_trans - 1).attr("y2", y_trans).attr("stroke-width", 1).attr("stroke", "black");
-
-        /*
-         bar.on("click", function(d, i) {
-         console.log(d);
-         console.log(i);
-         if (d.type=='alleles')
-         return
-         if (!d.clicked) {
-         data = array_join_at(data, d.children, i);
-         }else{
-         data_pop_at(data, i);
-         }
-         d3.select(selector+' svg')
-         .selectAll("g")
-         .remove();
-         d3.select(selector+' svg')
-         .selectAll("line")
-         .remove();
-         bar_render(zoom, tick);
-         });*/
-
     }
 
 }
