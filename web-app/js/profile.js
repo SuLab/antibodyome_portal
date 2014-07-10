@@ -150,7 +150,6 @@ $(document).ready(function() {
 
             $('#samp-ab-modal #cancel_modal').click(function(event) {
                 /* Act on the event */
-                console.log("Click event");
                 $('#samp-ab-modal').modal('hide');
             });
         }
@@ -183,35 +182,11 @@ function refresh_ab_list(p) {
     if (is.length > 0) {
         var filter = {};
         for (var i = 0; i < is.length; i++) {
-            var e = is.eq(i).text().split(' ');
-            var s = e[0][0];
-            var f = {};
-            var es = e[2].split('_');
-            for (var j in es) {
-                if (es[j] != '*') {
-                    if (j == 0) {
-                        extend(f, {
-                            'fam' : es[j]
-                        });
-                    } else if (j == 1) {
-                        extend(f, {
-                            'gene' : es[j]
-                        });
-                    } else {
-                        extend(f, {
-                            'all' : es[j]
-                        });
-                    }
-                }
-            }
-            var key = s + '_gene';
-            var dict = {};
-            dict[key] = f;
-            extend(filter, dict);
+            extend(filter, JSON.parse(is.eq(i).attr('filter')));
         }
         filter = JSON.stringify(filter);
     }
-
+    showBg('dialog','dialog_content');
     $.ajax({
         url : '/upload/list-ab/' + abs_id + '/',
         type : 'GET',
@@ -241,6 +216,7 @@ function refresh_ab_list(p) {
             });
             html += '</tbody></table>';
             $('.ab_list').html(html);
+            closeBg();
         },
         error : function(res) {
             $('#list-ab-modal').modal('show');
@@ -253,6 +229,7 @@ function refresh_ab_list(p) {
                 console.log("Click event");
                 $('#list-ab-modal').modal('hide');
             });
+            closeBg();
         }
     });
 
@@ -558,16 +535,42 @@ function render_d3_bar(obj, total, selector) {
                 if(a!='')
                     txt = txt +'*' + a;
             }
+            //construct filter {'v_gene':{'fam':'xx', 'gene':'xx', 'all':'xx'}}
+            var filter = {};
+            var key = type[0].toLowerCase()+'_gene';
+            filter[key] = {};
+            if (type=='j')
+            {
+                filter[key].gene =g.substring(4);
+                if(a!='')
+                {
+                    filter[key].all = a;
+                }
+            }
+            else
+            {
+                filter[key].fam = f.substring(4);
+                if(g!='')
+                {
+                    filter[key].gene = g;
+                }
+                if(a!='')
+                {
+                    filter[key].all =a;
+                }
+            }
+            filter_str = JSON.stringify(filter);
             var is = $(".random_list a i");
             var i = 0;
             for (; i < is.length; i++) {
                 if (type[0] == is.eq(i).text()[0]) {
                     is.eq(i).text(txt);
+                    is.eq(i).attr({'filter':filter_str});
                     break;
                 }
             }
             if (i >= is.length) {
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void();><i>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void();><i filter='+filter_str+'>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
             }
         }).text(function(d, i) {
             if (d.type == 'alleles')
