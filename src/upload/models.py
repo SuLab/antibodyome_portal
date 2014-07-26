@@ -60,7 +60,7 @@ class Project(models.Model):
         self.status = self.STATUS_EDITING
         self.save()
         for s in self.sample_set.all():
-            s.status = self.STATUS_EDITING
+            s.status = self.STATUS_READY
             s.save()
     
     objects = ProjectManager()

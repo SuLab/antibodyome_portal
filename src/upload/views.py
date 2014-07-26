@@ -281,8 +281,7 @@ def sample_ab(request, abs_id):
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
-#     job_id = s.job_id
-    job_id = 'jxf_test_table'
+    job_id = s.job_id
     if job_id is not None:
         res = get_ab_data(job_id)
         res['sample'] = {'name':s.name, 'desc':s.description, 'file':s.filename}
@@ -293,26 +292,23 @@ def sample_ab(request, abs_id):
 
 @require_http_methods(["GET"])
 def random_ab(request, abs_id):
-    #res = get_ab_data(id)
+    res = get_ab_data(id)
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return HttpResponse('no such sample', status=400, content_type="application/json")
-    #job_id = s.job_id
-    job_id = '52d42f1b9baecf05bfddffed'
+    job_id = s.job_id
     abs = get_random_ab(job_id)
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
 
 
 @require_http_methods(["GET"])
 def list_ab(request, abs_id):
-#     try:
-#         s = Sample.objects.get(ab_id=abs_id)
-#     except ObjectDoesNotExist:
-#         return HttpResponse('no such sample', status=400, content_type="application/json")
-    #job_id = s.job_id
-    #job_id = '52d42f1b9baecf05bfddffed'
-    job_id = 'jxf_test_tabled'
+    try:
+        s = Sample.objects.get(ab_id=abs_id)
+    except ObjectDoesNotExist:
+        return HttpResponse('no such sample', status=400, content_type="application/json")
+    job_id = s.job_id
     filters = request.GET.get('filters', '')
     if filters != '':
         filters = json.loads(filters)
@@ -320,7 +316,7 @@ def list_ab(request, abs_id):
     limit = request.GET.get('limit', 50)
     ab_li = get_ab_list(job_id, filters=filters, start=start, limit=limit)
     res = []
-    keys = ['id','v_gene_full', 'd_gene_full', 'j_gene_full']
+    keys = ['_id','v_gene_full', 'd_gene_full', 'j_gene_full']
     for e in ab_li['details']:
         res.append(dict(zip(keys, e)))
     return HttpResponse(json.dumps({'count':ab_li['count'],'details':res}, cls=ComplexEncoder), content_type="application/json")
@@ -335,7 +331,6 @@ def ab_detail(request):
         return HttpResponse('no such sample', status=400, content_type="application/json")
     ab = request.GET.get('ab')
     job_id = s.job_id
-    #job_id = '52d42f1b9baecf05bfddffed'
     abs = get_ab(job_id, ab)
     return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
 
