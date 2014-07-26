@@ -316,7 +316,7 @@ def list_ab(request, abs_id):
     limit = request.GET.get('limit', 50)
     ab_li = get_ab_list(job_id, filters=filters, start=start, limit=limit)
     res = []
-    keys = ['_id','v_gene_full', 'd_gene_full', 'j_gene_full']
+    keys = ['id','v_gene_full', 'd_gene_full', 'j_gene_full']
     for e in ab_li['details']:
         res.append(dict(zip(keys, e)))
     return HttpResponse(json.dumps({'count':ab_li['count'],'details':res}, cls=ComplexEncoder), content_type="application/json")
