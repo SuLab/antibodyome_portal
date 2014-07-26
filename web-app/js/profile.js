@@ -119,10 +119,12 @@ function closeBg(){
     if (bg_req>0) 
     {
         bg_req--;
-        return;
     }
-    $("#fullbg").css("display","none");  
-    $("#dialog").css("display","none");  
+    if (bg_req == 0)
+    {
+        $("#fullbg").css("display","none");  
+        $("#dialog").css("display","none");
+    }  
 }  
 
 $(document).ready(function() {
