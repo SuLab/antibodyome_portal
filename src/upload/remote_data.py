@@ -68,7 +68,7 @@ def get_ab_list(job_id, filters=None, start=0, limit=20):
     except Exception, e:
         return None
     ab_count = ab.get_ab_list(job['result_store'], filters=filters, count_only=True)
-    ab_li = ab.get_ab_list(job['result_store'], select='id_str, v_gene_full, d_gene_full, j_gene_full', filters=filters, start=start, limit=limit, as_str=True)
+    ab_li = ab.get_ab_list(job['result_store'], select='_id, v_gene_full, d_gene_full, j_gene_full', filters=filters, start=start, limit=limit, as_str=True)
     ret = {'count':ab_count, 'details':json.loads(ab_li)}
     return ret
 
