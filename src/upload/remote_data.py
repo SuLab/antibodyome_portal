@@ -63,26 +63,23 @@ def get_random_ab(job_id):
 def get_ab_list(job_id, filters=None, start=0, limit=20):
     rr = RemoteRoot()
     ab = rr.conn.root
-#     try:
-#         job = ab.get_job(job_id)
-#     except Exception, e:
-#         return None
-    result_id = 'jxf_test'
-    ab_count = ab.get_ab_list(result_id, filters=filters, count_only=True)
-    ab_li = ab.get_ab_list(result_id, select='id_str, v_gene_full, d_gene_full, j_gene_full', filters=filters, start=start, limit=limit, as_str=True)
+    try:
+        job = ab.get_job(job_id)
+    except Exception, e:
+        return None
+    ab_count = ab.get_ab_list(job['result_store'], filters=filters, count_only=True)
+    ab_li = ab.get_ab_list(job['result_store'], select='id_str, v_gene_full, d_gene_full, j_gene_full', filters=filters, start=start, limit=limit, as_str=True)
     ret = {'count':ab_count, 'details':json.loads(ab_li)}
-    #ret = {'count':ab_count, 'details':'detail'}
     return ret
 
 def get_ab(job_id, ab_id):
     rr = RemoteRoot()
     ab = rr.conn.root
-#     try:
-#         job = ab.get_job(job_id)
-#     except Exception, e:
-#         print e
-#         return None
-#     ab_doc = ab.get_ab(job['result_store'], ab_id, as_str=True)
-    ab_doc = ab.get_ab('abome_data_20140109_buhpajlm', ab_id, as_str=True)
+    try:
+        job = ab.get_job(job_id)
+    except Exception, e:
+        print e
+        return None
+    ab_doc = ab.get_ab(job['result_store'], ab_id, as_str=True)
     print ab_doc
     return json.loads(ab_doc)
