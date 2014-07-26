@@ -95,16 +95,16 @@ class Analysis(threading.Thread):
                     total = 0
                     for k in pro:
                          total = total + pro[k]
-                    if total == pro['SUCCESS']:
-                        print "progress 100%"
-                        s.status = Project.STATUS_ANALYZED
-                        self.status[2] = 100
-                        s.save()
-                        break
-                    else:
-                        if 'FAIL'  in pro:
+                    if 'FAIL'  in pro:
                             print 'progress failed'
                             s.status = Project.STATUS_FAILED
+                            s.save()
+                            break
+                    elif 'SUCCESS' in pro:
+                        if total == pro['SUCCESS']:
+                            print "progress 100%"
+                            s.status = Project.STATUS_ANALYZED
+                            self.status[2] = 100
                             s.save()
                             break
                         else:
