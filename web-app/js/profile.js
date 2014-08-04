@@ -116,6 +116,7 @@ function resetBg(){
 //关闭灰色JS遮罩层和操作窗口
 function closeBg(){
     $("#dialog").css("display","none");
+    $("#fullbg").css("display","none");
 }
 
 $(document).ready(function() {
