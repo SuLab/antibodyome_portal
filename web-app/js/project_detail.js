@@ -9,9 +9,6 @@ $(document).ready(function() {
     var str_value = "";
     var abp_id = $.urlParam('abp_id');
     renderProjectDetail(abp_id);
-    $('#edit-project').bind('click', function() {
-        window.location.href = 'project_edit.html?abp_id=' + abp_id;
-    });
 
     $('#analyze').click(function() {
         // var id = $('#project-form').attr('data');
@@ -19,7 +16,7 @@ $(document).ready(function() {
         $.ajax({
             url:"/upload/project-analysis/"+abp_id+'/',
             type:'POST',
-            dataType:'json',    
+            dataType:'json',
             success: function(data, status)
             {
                     $('#notification-modal').modal('show');
@@ -61,9 +58,13 @@ function renderProjectDetail(abp_id) {
                     analyze.text("analyze failed");
                     analyze.addClass('disabled');
             }
-            if ((res.user != res.owner) || (res.status!=0)) {
-                $("#edit-project").hide();
+            if ((res.user == res.owner) && (res.status == 0)) {
+                $("#edit-project").show();
+                $('#edit-project').bind('click', function() {
+                    window.location.href = 'project_edit.html?abp_id=' + abp_id;
+                });
             }
+
             $('#notification').attr('href', 'project_detail.html?abp_id=' + abp_id);
             // $('#project-title').text(res.title);
             // $('#title').text("title: "+res.title);
