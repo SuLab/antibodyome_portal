@@ -29,15 +29,11 @@
         <script type="text/javascript" src="3rd/paginator/jquery.simplePagination.js"></script>
         <script type="text/javascript" src="3rd/d3/d3.v3.js"></script>
         <link rel="stylesheet" href="3rd/paginator/simplePagination.css" />
-        <style type="text/css"> 
- 
-            #fullbg{background-color: Gray;display:none;z-index:3;position:absolute;left:0px;top:0px;filter:Alpha(Opacity=30);/* IE */-moz-opacity:0.4;/* Moz + FF */opacity: 0.4;}  
- 
-            #dialog {position:absolute;width:200px;height:200px;display: none;z-index: 5;}  
- 
-            
+        <style type="text/css">
+            #fullbg{background-color: Gray;display:none;z-index:3;position:absolute;left:0px;top:0px;filter:Alpha(Opacity=30);/* IE */-moz-opacity:0.4;/* Moz + FF */opacity: 0.4;}
+            #dialog {position:absolute;width:200px;height:200px;display: none;z-index: 5;}
         </style>
-        
+
     </head>
     <body>
         <script>
@@ -147,7 +143,7 @@
                         <p id='ab_count_total'>
                             Click chart label(s) to filter antibodies:
                         </p>
-                        
+
                         <div class='random_list' style="padding-right: 20px"></div>
                         <div style="position: relative;left: 90%;">
                         Go
@@ -166,7 +162,7 @@
                             <a href="#table" data-toggle="tab">Light</a>
                         </li>
                         <li id="antibodyome_tab">
-                            <a href="#antibodyome" data-toggle="tab">Antibodyome</a>
+                            <a href="#antibodyome" data-toggle="tab" onclick='show_ab_list()'>Antibodyome</a>
                         </li>
                     </ul>
                     <!-- <div align="right">
@@ -452,13 +448,13 @@
                     </div>
                 </div>
             </div>
-            <!-- JS遮罩层 --> 
-        <div id="fullbg"></div> 
-        <!-- end JS遮罩层 --> 
-        <!-- 对话框 --> 
-        <div id="dialog"> 
-            <div id="dialog_content" style="position: relative;top: 45%;"></div> 
-        </div> 
+            <!-- JS遮罩层 -->
+        <div id="fullbg"></div>
+        <!-- end JS遮罩层 -->
+        <!-- 对话框 -->
+        <div id="dialog">
+            <div id="dialog_content" style="position: relative;top: 45%;"></div>
+        </div>
         <script src="js/profile.js"></script>
     </body>
 </html>
