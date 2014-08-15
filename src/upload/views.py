@@ -337,7 +337,7 @@ def list_ab(request, abs_id):
     res = []
     keys = ['id', 'v_gene_full', 'd_gene_full', \
             'j_gene_full']
-    for e in ab_li['details']:
+    for e in ab_li:
         res.append(dict(zip(keys, e)))
     return HttpResponse(json.dumps({'details': res}, \
                 cls=ComplexEncoder), content_type="application/json")
