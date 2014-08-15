@@ -127,7 +127,7 @@ $(document).ready(function() {
     $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
     $("#svg-div").css("overflow", "hidden");
 
-    refresh_ab_list(0);
+    refresh_ab_list(current_page);
     showBg('dialog','dialog_content');
     $.ajax({
         url : '/upload/sample-ab/' + abs_id + '/',
@@ -163,8 +163,8 @@ $(document).ready(function() {
         $("#heavy_tab, #light_tab").removeClass("active");
         $("#antibodyome_tab").addClass("active");
         //
-        pagination_init = false;
-        refresh_ab_list(0);
+        current_page = 0;
+        refresh_ab_list(current_page);
         showBg('dialog','dialog_content');
     });
 
@@ -215,15 +215,25 @@ function refresh_ab_list(p) {
         },
         dataType : 'json',
         success : function(res) {
-            var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
             var l = res.details.length;
+            if (l == 0)
+                return;
+            var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
             if(l==PAGE_SIZE)
             {
                 $('.next_page').removeClass('disabled');
             }
+            else
+            {
+                $('.next_page').addClass('disabled');
+            }
             if(current_page > 0)
             {
                 $('.prev_page').removeClass('disabled');
+            }
+            else
+            {
+                $('.prev_page').addClass('disabled');
             }
             show_res = res.details.slice(0, PAGE_SIZE-1);
             $.each(res.details, function(i, e) {
