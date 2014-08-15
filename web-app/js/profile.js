@@ -225,7 +225,7 @@ function refresh_ab_list(p) {
             {
                 $('.prev_page').removeClass('disabled');
             }
-            show_res = res.slice(0, PAGE_SIZE-1);
+            show_res = res.details.slice(0, PAGE_SIZE-1);
             $.each(res.details, function(i, e) {
                 html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id=' + abs_id + '&abp_id=' + abp_id + '&ab=' + e.id + '\'"><td>' + e.id + '</td><td>' + e.v_gene_full + '</td><td>' + e.d_gene_full + '</td><td>' + e.j_gene_full + '</td></tr>';
             });
