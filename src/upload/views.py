@@ -335,10 +335,11 @@ def list_ab(request, abs_id):
     ab_li = rr.get_ab_list_no_count(job_id, filters=filters, \
                                 start=start, limit=limit)
     res = []
-    keys = ['id', 'v_gene_full', 'd_gene_full', \
-            'j_gene_full']
-    for e in ab_li:
-        res.append(dict(zip(keys, e)))
+    if ab_li is not None:
+        keys = ['id', 'v_gene_full', 'd_gene_full', \
+                'j_gene_full']
+        for e in ab_li:
+            res.append(dict(zip(keys, e)))
     return HttpResponse(json.dumps({'details': res}, \
                 cls=ComplexEncoder), content_type="application/json")
 
