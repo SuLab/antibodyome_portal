@@ -21,7 +21,7 @@ var bar_gap = {
     'alleles' : 1
 };
 
-var PAGE_SIZE = 31;
+var PAGE_SIZE = 21;
 var current_page = 0;
 var next_page = false;
 //var pagination_init = false;
@@ -210,7 +210,7 @@ function refresh_ab_list(p) {
         type : 'GET',
         data : {
             'filters' : filter,
-            'start' : p * PAGE_SIZE,
+            'start' : p * (PAGE_SIZE-1),
             'limit' : PAGE_SIZE,
         },
         dataType : 'json',
