@@ -4,24 +4,27 @@ var bar_color = [{
     'family' : "rgba(0, 0, 0, 1.0)",
     'genes' : "rgba(0, 0, 0, 0.5)",
     'alleles' : "rgba(0, 0, 0, 0.3)"
-}, {
-    'family' : "rgba(0, 0, 0, 1.0)",
-    'genes' : "rgba(0, 0, 0, 0.5)",
-    'alleles' : "rgba(0, 0, 0, 0.3)"
-}]
+    }, {
+        'family' : "rgba(0, 0, 0, 1.0)",
+        'genes' : "rgba(0, 0, 0, 0.5)",
+        'alleles' : "rgba(0, 0, 0, 0.3)"
+    }
+];
 var bar_height = {
     'family' : 24,
     'genes' : 12,
     'alleles' : 10
-}
+};
 var bar_gap = {
     'family' : 10,
     'genes' : 2,
     'alleles' : 1
-}
+};
 
-var PAGE_SIZE = 100;
-var pagination_init = false;
+var PAGE_SIZE = 31;
+var current_page = 0;
+var next_page = false;
+//var pagination_init = false;
 
 var getRGBColorFromHex = function(color_num, type) {
     color_codes = ['9400D3', '2F4F4F', '483D8B', '8FBC8B', 'E9967A', '8B0000', '9932CC', 'FF8C00', '556B2F', '8B008B', 'BDB76B', '7FFFD4', 'A9A9A9', 'B8860B', '008B8B', '00008B', '00FFFF', 'DC143C', '6495ED', 'FF7F50', 'D2691E', '7FFF00', '5F9EA0', 'DEB887', 'A52A2A', '8A2BE2', '0000FF', '000000', 'FFE4C4', '006400', '00FFFF'];
@@ -47,7 +50,8 @@ var getRGBColorFromHex = function(color_num, type) {
         return "rgba(" + r + ", " + g + ", " + b + ", 0.3)";
     }
 
-}
+};
+
 function clone(obj) {
     var objClone;
     if (obj.constructor == Object) {
@@ -70,11 +74,8 @@ function clone(obj) {
 $.urlParam = function(name) {
     var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
     return results[1] || 0;
-}
-function on_page_changed(pageNumber, event) {
-    refresh_ab_list(pageNumber - 1);
-    //处理点击事件
-}
+};
+
 
 //显示灰色JS遮罩层
 function showBg(ct,content){
@@ -86,8 +87,8 @@ function showBg(ct,content){
     var tbL=objWH.split("|")[1]+"px";
     $("#"+ct).css({top:tbT,left:tbL,display:"block"});
     $("#"+content).html("<div style='text-align:center'><img src='3rd/icon/load4.gif' alt='Loading' style='width: 50px;'></div>");
-    $(window).scroll(function(){resetBg()});
-    $(window).resize(function(){resetBg()});
+    $(window).scroll(function(){resetBg();});
+    $(window).resize(function(){resetBg();});
 }
 function getObjWh(obj){
     var st=document.documentElement.scrollTop;//滚动条距顶部的距离
@@ -166,6 +167,16 @@ $(document).ready(function() {
         refresh_ab_list(0);
         showBg('dialog','dialog_content');
     });
+
+    $('.prev_page').click(function(){
+        current_page = current_page-1;
+        refresh_ab_list(current_page);
+    });
+
+    $('.next_page').click(function(){
+        current_page = current_page+1;
+        refresh_ab_list(current_page);
+    });
 });
 
 function show_ab_list(){
@@ -204,20 +215,17 @@ function refresh_ab_list(p) {
         },
         dataType : 'json',
         success : function(res) {
-            if (pagination_init == false) {
-                $("#pagination").pagination({
-                    items : res.count,
-                    itemsOnPage : PAGE_SIZE,
-                    cssStyle : 'compact-theme',
-                    edges : 2,
-                    displayedPages : 3,
-                    onPageClick : on_page_changed
-                });
-                pagination_init = true;
-            }
-            if (res.count <= 0)
-                return;
             var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
+            var l = res.details.length;
+            if(l==PAGE_SIZE)
+            {
+                $('.next_page').removeClass('disabled');
+            }
+            if(current_page > 0)
+            {
+                $('.prev_page').removeClass('disabled');
+            }
+            show_res = res.slice(0, PAGE_SIZE-1);
             $.each(res.details, function(i, e) {
                 html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id=' + abs_id + '&abp_id=' + abp_id + '&ab=' + e.id + '\'"><td>' + e.id + '</td><td>' + e.v_gene_full + '</td><td>' + e.d_gene_full + '</td><td>' + e.j_gene_full + '</td></tr>';
             });
@@ -228,13 +236,7 @@ function refresh_ab_list(p) {
         error : function(res) {
             closeBg();
             $('#list-ab-modal').modal('show');
-            /*
-             self.text("Waiting for analyzing...");
-             self.addClass('disabled');*/
-
             $('#list-ab-modal #cancel_modal').click(function(event) {
-                /* Act on the event */
-                console.log("Click event");
                 $('#list-ab-modal').modal('hide');
             });
         }
