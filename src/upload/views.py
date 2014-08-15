@@ -3,19 +3,16 @@ import base64
 import hmac
 import hashlib
 import json
-
-from django.shortcuts import render_to_response
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseForbidden,HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from upload.models import Project, Sample
 from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
 from django.db.models.query_utils import Q
-from upload.remote_data import get_random_ab, get_ab, get_ab_data, get_ab_list
+from upload.remote_data import RemoteRoot
 from django.core.exceptions import ObjectDoesNotExist
-import copy
 from django.contrib.auth.models import User
 
 
@@ -31,10 +28,12 @@ try:
     import boto
     from boto.s3.connection import S3Connection, Key
     boto.set_stream_logger('boto')
-    S3 = S3Connection(settings.AMAZON_STORAGE['ACCESS_KEY'], settings.AMAZON_STORAGE['SECRET_KEY'])
+    S3 = S3Connection(settings.AMAZON_STORAGE['ACCESS_KEY'], \
+                      settings.AMAZON_STORAGE['SECRET_KEY'])
 except Exception, e:
     print("Trying connect to S3 by boto, but failed.")
-    print("Check if boto's installed and s3 keys are correct, keep on running migth encounter problems.")
+    print("Check if boto's installed and s3 keys are correct, \
+                 keep on running migth encounter problems.")
 
 
 @csrf_exempt
@@ -78,7 +77,9 @@ def delete_s3_file(request, key):
 
 def sign_policy_document(policy_document):
     policy = base64.b64encode(json.dumps(policy_document))
-    signature = base64.b64encode(hmac.new(settings.AMAZON_STORAGE['SECRET_KEY'], policy, hashlib.sha1).digest())
+    signature = base64.b64encode(hmac.new(
+                        settings.AMAZON_STORAGE['SECRET_KEY'],\
+                        policy, hashlib.sha1).digest())
     return {
         'policy': policy,
         'signature': signature
@@ -87,7 +88,9 @@ def sign_policy_document(policy_document):
 
 def sign_headers(headers):
     return {
-        'signature': base64.b64encode(hmac.new(settings.AMAZON_STORAGE['SECRET_KEY'], headers, hashlib.sha1).digest())
+        'signature': base64.b64encode(hmac.new(\
+                    settings.AMAZON_STORAGE['SECRET_KEY'], \
+                    headers, hashlib.sha1).digest())
     }
 
 
@@ -100,9 +103,11 @@ def make_response(status=200, content=None):
     response.content = content
     return response
 
+
 def set_ab_id(model, prefix):
-    model.__setattr__('ab_id','%s%05d' %(prefix,model.id))
+    model.__setattr__('ab_id', '%s%05d' % (prefix, model.id))
     model.save()
+
 
 def create_project(request):
     user = request.user
@@ -159,7 +164,8 @@ def update_project(request, abp_id):
                     except Sample.DoesNotExist:
                         sample = None
                 else:
-                    sample = Sample(project_id=p.id, uuid=sc['uuid'], filename=sc['filename'])
+                    sample = Sample(project_id=p.id, uuid=sc['uuid'],\
+                                 filename=sc['filename'])
                     p.status = 1
                     p.save()
                 sample.name = sc['name']
@@ -211,7 +217,8 @@ def submit_analyze(request, abp_id):
         return HttpResponse('{"result":"ok"}', content_type="application/json")
     except Exception, e:
         print e
-        return HttpResponse('{"result":"failed"}', status=404, content_type="application/json")
+        return HttpResponse('{"result":"failed"}', status=404, \
+                            content_type="application/json")
 
 
 class ProjectList(AbomeListView):
@@ -221,7 +228,8 @@ class ProjectList(AbomeListView):
         key = self.request.GET.get('key')
         user = self.request.user
         if key == 'all':
-            qs = Project.objects.filter(Q(owner=user) | Q(permission=0)).order_by('-lastmodified')
+            qs = Project.objects.filter(Q(owner=user) | Q(permission=0)).\
+                   order_by('-lastmodified')
         elif key == 'owner':
             qs = Project.objects.filter(owner=user).order_by('-created')
         self.queryset = qs
@@ -235,7 +243,8 @@ class ProjectList(AbomeListView):
             'next': context['page_obj'].has_next(),
             'count': self.queryset.count()
         }
-        return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
+        return HttpResponse(json.dumps(res, cls=ComplexEncoder),\
+                         content_type="application/json")
 
 
 class ProjectDetail(AbomeDetailView):
@@ -250,29 +259,29 @@ class ProjectDetail(AbomeDetailView):
         p_j['user'] = user.id
         s_qs = Sample.objects.filter(project=p).order_by('created')
         p_j['samples'] = list(s_qs.values())
-        return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), content_type="application/json")
-    
+        return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), \
+                               content_type="application/json")
+
     def get_object(self, queryset=None):
         obj = super(AbomeDetailView, self).get_object()
-        if obj.owner != self.request.user and obj.permission==1:
+        if obj.owner != self.request.user and obj.permission == 1:
             raise HttpResponseForbidden('private project can not access')
         return obj
 
 
-def ABProjectDetail(request, abp_id):    
+def ABProjectDetail(request, abp_id):
     try:
         p = Project.objects.get(ab_id=abp_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such project', status=400, content_type="application/json")
-    p_j = json.loads(serialize('json', [p])[1:-1])['fields']
+        return HttpResponse('no such project', status=400, \
+                            content_type="application/json")
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     user = request.user
     p_j['user'] = user.id
     s_qs = Sample.objects.filter(project=p).order_by('created')
     p_j['samples'] = list(s_qs.values())
-    return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), content_type="application/json")
-
-
+    return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), \
+                        content_type="application/json")
 
 
 @require_http_methods(["GET"])
@@ -280,26 +289,33 @@ def sample_ab(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, content_type="application/json")
+        return HttpResponse('no such sample', status=400, \
+                            content_type="application/json")
     job_id = s.job_id
     if job_id is not None:
-        res = get_ab_data(job_id)
-        res['sample'] = {'name':s.name, 'desc':s.description, 'file':s.filename}
-        return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
+        rr = RemoteRoot()
+        res = rr.get_ab_data(job_id)
+        res['sample'] = {'name': s.name, 'desc': s.description, \
+                         'file': s.filename}
+        return HttpResponse(json.dumps(res, cls=ComplexEncoder), \
+                            content_type="application/json")
     else:
-        return HttpResponse('fail', status=400, content_type="application/json")
+        return HttpResponse('fail', status=400, \
+                            content_type="application/json")
 
 
 @require_http_methods(["GET"])
 def random_ab(request, abs_id):
-    res = get_ab_data(id)
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, content_type="application/json")
+        return HttpResponse('no such sample', status=400, \
+                            content_type="application/json")
     job_id = s.job_id
-    abs = get_random_ab(job_id)
-    return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
+    rr = RemoteRoot()
+    res = rr.get_random_ab(job_id)
+    return HttpResponse(json.dumps(res, cls=ComplexEncoder), \
+                        content_type="application/json")
 
 
 @require_http_methods(["GET"])
@@ -307,19 +323,41 @@ def list_ab(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, content_type="application/json")
+        return HttpResponse('no such sample', status=400, \
+                            content_type="application/json")
     job_id = s.job_id
     filters = request.GET.get('filters', '')
     if filters != '':
         filters = json.loads(filters)
     start = request.GET.get('start', 0)
     limit = request.GET.get('limit', 50)
-    ab_li = get_ab_list(job_id, filters=filters, start=start, limit=limit)
+    rr = RemoteRoot()
+    ab_li = rr.get_ab_list_no_count(job_id, filters=filters, \
+                                start=start, limit=limit)
     res = []
-    keys = ['id','v_gene_full', 'd_gene_full', 'j_gene_full']
+    keys = ['id', 'v_gene_full', 'd_gene_full', \
+            'j_gene_full']
     for e in ab_li['details']:
         res.append(dict(zip(keys, e)))
-    return HttpResponse(json.dumps({'count':ab_li['count'],'details':res}, cls=ComplexEncoder), content_type="application/json")
+    return HttpResponse(json.dumps({'details': res}, \
+                cls=ComplexEncoder), content_type="application/json")
+
+
+@require_http_methods(["GET"])
+def count_ab(request, abs_id):
+    try:
+        s = Sample.objects.get(ab_id=abs_id)
+    except ObjectDoesNotExist:
+        return HttpResponse('no such sample', status=400, \
+                            content_type="application/json")
+    job_id = s.job_id
+    filters = request.GET.get('filters', '')
+    if filters != '':
+        filters = json.loads(filters)
+    rr = RemoteRoot()
+    count = rr.get_ab_list_count(job_id, filters=filters)
+    return HttpResponse(json.dumps({'details': count}, \
+                cls=ComplexEncoder), content_type="application/json")    
 
 
 @require_http_methods(["GET"])
@@ -328,17 +366,22 @@ def ab_detail(request):
     try:
         s = Sample.objects.get(ab_id=ab_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, content_type="application/json")
+        return HttpResponse('no such sample', status=400, \
+                            content_type="application/json")
     ab = request.GET.get('ab')
     job_id = s.job_id
-    abs = get_ab(job_id, ab)
-    return HttpResponse(json.dumps(abs, cls=ComplexEncoder), content_type="application/json")
+    rr = RemoteRoot()
+    res = rr.get_ab_detail(job_id, ab)
+    return HttpResponse(json.dumps(res, cls=ComplexEncoder), \
+                        content_type="application/json")
 
 
 import cairosvg
 import uuid
 from django.core.servers.basehttp import FileWrapper
 import os
+
+
 @require_http_methods(["POST"])
 def convert_svg(request):
     svg = request.POST.get('svg')
@@ -346,32 +389,34 @@ def convert_svg(request):
 
     file_name = str(uuid.uuid1())
     if output_format == 'png':
-        file_name = file_name+'.png'
-        f = open('../web-app/media/'+file_name,'w')
-        cairosvg.svg2png(bytestring=svg,write_to=f)
+        file_name = file_name + '.png'
+        f = open('../web-app/media/' + file_name, 'w')
+        cairosvg.svg2png(bytestring=svg, write_to=f)
         f.close()
     elif output_format == 'pdf':
-        file_name = file_name+'.pdf'
-        f = open('../web-app/media/'+file_name,'w')
-        cairosvg.svg2pdf(bytestring=svg,write_to=f)
+        file_name = file_name + '.pdf'
+        f = open('../web-app/media/' + file_name, 'w')
+        cairosvg.svg2pdf(bytestring=svg, write_to=f)
         f.close()
     else:
-        file_name = file_name+'.svg'
-        f=open('../web-app/media/'+file_name, 'w')
+        file_name = file_name + '.svg'
+        f = open('../web-app/media/' + file_name, 'w')
         f.write(svg)
         f.close()
 
-    return HttpResponse(json.dumps('/upload/file-down/?name='+file_name, cls=ComplexEncoder), content_type="application/json")
+    return HttpResponse(json.dumps('/upload/file-down/?name=' + file_name,\
+                         cls=ComplexEncoder), content_type="application/json")
+
 
 def file_download(request):
     file_name = request.GET.get('name')
-    file_path = '../web-app/media/'+file_name
-    wrapper = FileWrapper(file('../web-app/media/'+file_name))
+    file_path = '../web-app/media/' + file_name
+    wrapper = FileWrapper(file('../web-app/media/' + file_name))
     response = HttpResponse(wrapper, mimetype='application/octetstream')
     response['Content-Length'] = os.path.getsize(file_path)
-    response['Content-Disposition'] = 'attachment; filename=%s' % file_path.split('/')[-1]
+    response['Content-Disposition'] = \
+             'attachment; filename=%s' % file_path.split('/')[-1]
     return response
-
 
 
 class ProjectSearch(AbomeListView):
@@ -382,18 +427,18 @@ class ProjectSearch(AbomeListView):
         if query is None:
             self.queryset = Project.objects.none()
             return self.queryset
-        projects = Project.search_manager.search(query)# raw=True)
+        projects = Project.search_manager.search(query)
         samples = Sample.search_manager.search(query)
         ids_p = projects.values_list('id', flat=True)
         ids_s = samples.values_list('project', flat=True)
         ids_p = list(ids_p)
         #match user's username
         ids_u = User.objects.filter(username__icontains=query)
-        if ids_u.count()>0:
+        if ids_u.count() > 0:
             p2 = Project.objects.filter(owner__in=ids_u)
             ids_p2 = p2.values_list('id', flat=True)
             ids_p.extend(list(ids_p2))
-        if ids_s.count()>0:
+        if ids_s.count() > 0:
             ids_p.extend(list(ids_s))
         self.queryset = Project.objects.filter(id__in=ids_p)
         return self.queryset
@@ -406,5 +451,6 @@ class ProjectSearch(AbomeListView):
             'next': context['page_obj'].has_next(),
             'count': self.queryset.count()
         }
-        return HttpResponse(json.dumps(res, cls=ComplexEncoder), content_type="application/json")
+        return HttpResponse(json.dumps(res, cls=ComplexEncoder), \
+                            content_type="application/json")
 

@@ -21,65 +21,101 @@ class RemoteRoot(object):
 
     def __init__(self, x=0):
         try:
-            print 'connect to remote'
-            #sshctx = SshContext("54.200.130.110", user="ubuntu", keyfile=settings.SSH_KEY_PATH)
-            sshctx = SshContext(**settings.RPYC_TUNNEL)
-            self.conn = rpyc.ssh_connect(sshctx, 18861, config={"allow_public_attrs": True})
+            print 'connect to remote...'
+            self.connect()
+            self.job_map = []
         except Exception, e:
             print e
             print 'Connection with remote host fail....'
-            self.remote_root = None
+            self.conn = None
+            self.root = None
 
+    def connect(self):
+        print 'connect to remote...'
+        sshctx = SshContext(**settings.RPYC_TUNNEL)
+        self.conn = rpyc.ssh_connect(sshctx, 18861, \
+                                config={"allow_public_attrs": True})
+        self.root = self.conn.root
 
-def get_ab_data(job_id):
-    rr = RemoteRoot()
-    ab = rr.conn.root
+    def job_to_result(self, job_id):
+        try:
+            job = self.root.get_job(job_id)
+            return job['result_store']
+        except Exception:
+            return None
 
-#     try:
-#         job = ab.get_job(job_id)
-#     except Exception:
-#         return None
-    data = ab.get_post_processed_result('abome_data_20140109_buhpajlm', as_str=True)
+    #get job from remote server with job id
+    def get_result_by_job(self, job_id):
+        #cache job in memory
+        if job_id in self.job_map:
+            return self.job_map[job_id]
+        try:
+            job = self.root.get_job(job_id)
+            return job['result_store']
+        #may process connection exception and do reconnect
+        except EOFError:
+            print 'connection broken, reconnect'
+            self.connect()
+            return self.job_to_result(job_id)
+        except Exception:
+            return None
 
-#     res = {}
-#     res['variable'] = dict(data['v'])
-#     res['joining'] = dict(data['j'])
-#     res['diversity'] = dict(data['d'])
-    return json.loads(data)['ab_counts']
+    def get_ab_data(self, job_id):
+        try:
+            data = self.root.get_post_processed_result(\
+                    self.get_result_by_job(job_id), as_str=True)
+            return json.loads(data)['ab_counts']
+        except Exception, e:
+            print e
+            return None
 
+    def get_random_ab(self, job_id):
+        try:
+            data = self.root.get_random_ab_ids(\
+                    self.get_result_by_job(job_id))
+            return list(data)
+        except Exception, e:
+            print e
+            return None
 
-def get_random_ab(job_id):
-    rr = RemoteRoot()
-    ab = rr.conn.root
-    try:
-        job = ab.get_job(job_id)
-    except Exception, e:
-        print e
-        return None
-    ab_li = ab.get_random_ab_ids(job['result_store'])
-    return list(ab_li)
+    def get_ab_list(self, job_id, filters=None, start=0, limit=20):
+        try:
+            result = self.get_result_by_job(job_id)
+            ab_count = self.root.get_ab_list(result, \
+                        filters=filters, count_only=True)
 
+            ab_li = self.conn.root.get_ab_list(result, \
+                select='sn, v_gene_full, d_gene_full, j_gene_full', \
+                filters=filters, start=start, limit=limit, as_str=True)
+            return {'count': ab_count, 'details': json.loads(ab_li)}
+        except Exception:
+            return None
 
-def get_ab_list(job_id, filters=None, start=0, limit=20):
-    rr = RemoteRoot()
-    ab = rr.conn.root
-    try:
-        job = ab.get_job(job_id)
-    except Exception, e:
-        return None
-    ab_count = ab.get_ab_list(job['result_store'], filters=filters, count_only=True)
-    ab_li = ab.get_ab_list(job['result_store'], select='sn, v_gene_full, d_gene_full, j_gene_full', filters=filters, start=start, limit=limit, as_str=True)
-    ret = {'count':ab_count, 'details':json.loads(ab_li)}
-    return ret
+    def get_ab_list_no_count(self, job_id, filters=None, start=0, limit=20):
+        try:
+            result = self.get_result_by_job(job_id)
+            ab_li = self.conn.root.get_ab_list(result, \
+                select='sn, v_gene_full, d_gene_full, j_gene_full', \
+                filters=filters, start=start, limit=limit, as_str=True)
+            return json.loads(ab_li)
+        except Exception:
+            return None
 
-def get_ab(job_id, ab_id):
-    rr = RemoteRoot()
-    ab = rr.conn.root
-    try:
-        job = ab.get_job(job_id)
-    except Exception, e:
-        print e
-        return None
-    ab_doc = ab.get_ab(job['result_store'], ab_id, as_str=True)
-    print ab_doc
-    return json.loads(ab_doc)
+    def get_ab_list_count(self, job_id, filters=None):
+        try:
+            result = self.get_result_by_job(job_id)
+            count = self.conn.root.get_ab_list(result, \
+                select='sn, v_gene_full, d_gene_full, j_gene_full', \
+                filters=filters, count_only=True)
+            return count
+        except Exception:
+            return None
+
+    def get_ab_detail(self, job_id, ab_id):
+        try:
+            data = self.root.get_ab(self.get_result_by_job(job_id),\
+                                     ab_id, as_str=True)
+            return json.loads(data)
+        except Exception, e:
+            print e
+            return None
