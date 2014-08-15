@@ -149,11 +149,6 @@ $(document).ready(function() {
         error : function(res) {
             closeBg();
             $('#samp-ab-modal').modal('show');
-
-            $('#samp-ab-modal #cancel_modal').click(function(event) {
-                /* Act on the event */
-                $('#samp-ab-modal').modal('hide');
-            });
         }
     });
 
@@ -176,6 +171,13 @@ $(document).ready(function() {
     $('.next_page').click(function(){
         current_page = current_page+1;
         refresh_ab_list(current_page);
+    });
+
+    $('#list-ab-modal #cancel_modal').click(function(event) {
+        $('#list-ab-modal').modal('hide');
+    });
+    $('#samp-ab-modal #cancel_modal').click(function(event) {
+        $('#samp-ab-modal').modal('hide');
     });
 });
 
@@ -217,7 +219,13 @@ function refresh_ab_list(p) {
         success : function(res) {
             var l = res.details.length;
             if (l == 0)
+            {
+                closeBg();
+                $('.prev_page').addClass('disabled');
+                $('.next_page').addClass('disabled');
+                $('#list-ab-modal').modal('show');
                 return;
+            }
             var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
             if(l==PAGE_SIZE)
             {
