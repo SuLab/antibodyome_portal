@@ -42,7 +42,8 @@ class AbomeListView(BaseListView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
-            return HttpResponse('login please', content_type="application/json", status=401)
+            return HttpResponse('login please', \
+                        content_type="application/json", status=401)
         return super(AbomeListView, self).get(request, *args, **kwargs)
 
 
@@ -51,7 +52,35 @@ class AbomeDetailView(BaseDetailView):
         detail view that returns JSON data
     """
     def get(self, request, *args, **kwargs):
-#         if not request.user.is_authenticated():
-#             return HttpResponse('login please', content_type="application/json", status=401)
         return super(AbomeDetailView, self).get(request, *args, **kwargs)
 
+
+class GENERAL_ERRORS:
+    ERROR_SUCCESS = 0
+    ERROR_BAD_ARGS = 4000
+    ERROR_NO_PERMISSION = 4001
+    ERROR_INTERNAL = 4002
+    ERROR_NOT_FOUND = 4004
+
+    ERRO_STRING = {
+        ERROR_SUCCESS: 'success',
+        ERROR_BAD_ARGS: 'argument wrong',
+        ERROR_NO_PERMISSION: 'not permitted',
+        ERROR_INTERNAL: 'internal error',
+        ERROR_NOT_FOUND: 'object not found',
+    }
+
+    @classmethod
+    def default_error_message(cls, code):
+        try:
+            return GENERAL_ERRORS.ERRO_STRING[code]
+        except:
+            return 'unknown error'
+
+
+def general_json_response(code=0, detail=None):
+    if detail is None:
+        detail = GENERAL_ERRORS.default_error_message()
+    res = {'code': code, detail: detail}
+    return HttpResponse(json.dumps(res, cls=ComplexEncoder),\
+                         content_type="application/json")

@@ -24,7 +24,6 @@ var bar_gap = {
 var PAGE_SIZE = 21;
 var current_page = 0;
 var next_page = false;
-var set_waiting = false;
 //var pagination_init = false;
 
 var getRGBColorFromHex = function(color_num, type) {
@@ -128,7 +127,6 @@ $(document).ready(function() {
     $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
     $("#svg-div").css("overflow", "hidden");
 
-    refresh_ab_list(current_page);
     //showBg('dialog','dialog_content');
     $.ajax({
         url : '/upload/sample-ab/' + abs_id + '/',
@@ -146,6 +144,7 @@ $(document).ready(function() {
             render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
             render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
           //  closeBg();
+            refresh_ab_list(current_page);
         },
         error : function(res) {
         //    closeBg();
@@ -204,7 +203,7 @@ function refresh_ab_list(p) {
         filter = JSON.stringify(filter);
     }
     $.ajax({
-        url : '/upload/list-ab/' + abs_id + '/',
+        url : '/upload/ab-list/' + abs_id + '/',
         type : 'GET',
         data : {
             'filters' : filter,
@@ -213,15 +212,16 @@ function refresh_ab_list(p) {
         },
         dataType : 'json',
         success : function(res) {
-            var l = res.details.length;
-            if (l == 0)
+            closeBg();
+            if (res.code != 0)
             {
-                closeBg();
                 $('.prev_page').addClass('disabled');
                 $('.next_page').addClass('disabled');
+                $('#list-ab-modal .modal-body').text(res.detail);
                 $('#list-ab-modal').modal('show');
                 return;
             }
+            var l = res.details.length;
             var html = '<table class="table table-striped table-hover table-bordered"><tbody><tr><th>id</th><th>v-gene</th><th>d-gene</th><th>j-gene</th></tr>';
             if(l==PAGE_SIZE)
             {
@@ -245,27 +245,16 @@ function refresh_ab_list(p) {
             });
             html += '</tbody></table>';
             $('.ab_list').html(html);
-            if (set_waiting == true)
-            {
-                closeBg();
-                set_waiting = false;
-            }
+
             $.ajax({
-                url : '/upload/count-ab/' + abs_id + '/',
+                url : '/upload/ab-count/' + abs_id + '/',
                 type : 'GET',
                 dataType : 'json',
                 success : function(res) {
-                    $('#abs_count').text(res.details+'Abs in total');
+                    if (res.code == 0)
+                        $('#abs_count').text(res.details+' Abs in total');
                 }
             });
-        },
-        error : function(res) {
-            if (set_waiting == true)
-            {
-                closeBg();
-                set_waiting = false;
-            }
-            $('#list-ab-modal').modal('show');
         }
     });
 }

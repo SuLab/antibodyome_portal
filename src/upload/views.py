@@ -1,13 +1,9 @@
 # Create your views here.
-import base64
-import hmac
-import hashlib
 import json
-from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
-from django.views.decorators.csrf import csrf_exempt
 from upload.models import Project, Sample
-from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder
+from upload.util import AbomeListView, AbomeDetailView, ComplexEncoder,\
+    general_json_response, GENERAL_ERRORS
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
 from django.db.models.query_utils import Q
@@ -23,89 +19,8 @@ CREATE_FAILURE = 0
 SUCCESS = 1
 FAILURE = 0
 
-S3 = None
 
-try:
-    import boto
-    from boto.s3.connection import S3Connection, Key
-    boto.set_stream_logger('boto')
-    S3 = S3Connection(settings.AMAZON_STORAGE['ACCESS_KEY'], \
-                      settings.AMAZON_STORAGE['SECRET_KEY'])
-except Exception, e:
-    print("Trying connect to S3 by boto, but failed.")
-    print("Check if boto's installed and s3 keys are correct, \
-                 keep on running migth encounter problems.")
-
-
-@csrf_exempt
-def success_redirect_endpoint(request):
-    """ This is where the upload will snd a POST request after the
-    file has been stored in S3.
-    """
-    return make_response(200)
-
-
-@csrf_exempt
-def handle_s3_POST(request):
-    """ Sign and return the policy doucument for a simple upload.
-    http://aws.amazon.com/articles/1434/#signyours3postform
-    """
-    request_payload = json.loads(request.body)
-    headers = request_payload.get('headers', None)
-    if headers:
-        response_data = sign_headers(headers)
-    else:
-        response_data = sign_policy_document(request_payload)
-    response_payload = json.dumps(response_data)
-    return make_response(200, response_payload)
-
-
-def delete_s3_file(request, key):
-    """
-    Handle file deletion requests. For this, we use the Amazon Python SDK,
-    boto.
-    """
-    if S3:
-        bucket_name = request.REQUEST.get('bucket')
-        key_name = request.REQUEST.get('key')
-        aws_bucket = S3.get_bucket(bucket_name, validate=False)
-        aws_key = Key(aws_bucket, key_name)
-        aws_key.delete()
-        return make_response(200)
-    else:
-        return make_response(500)
-
-
-def sign_policy_document(policy_document):
-    policy = base64.b64encode(json.dumps(policy_document))
-    signature = base64.b64encode(hmac.new(
-                        settings.AMAZON_STORAGE['SECRET_KEY'],\
-                        policy, hashlib.sha1).digest())
-    return {
-        'policy': policy,
-        'signature': signature
-    }
-
-
-def sign_headers(headers):
-    return {
-        'signature': base64.b64encode(hmac.new(\
-                    settings.AMAZON_STORAGE['SECRET_KEY'], \
-                    headers, hashlib.sha1).digest())
-    }
-
-
-def make_response(status=200, content=None):
-    """ Construct an HTTP response. Fine Uploader expects 'application/json'.
-    """
-    response = HttpResponse()
-    response.status_code = status
-    response['Content-Type'] = "application/json"
-    response.content = content
-    return response
-
-
-def set_ab_id(model, prefix):
+def _set_ab_id(model, prefix):
     model.__setattr__('ab_id', '%s%05d' % (prefix, model.id))
     model.save()
 
@@ -124,7 +39,7 @@ def create_project(request):
     try:
         print project
         project.save()
-        set_ab_id(project, 'ABP')
+        _set_ab_id(project, 'ABP')
         data['status'] = CREATE_SUCCESS
         for sample_content in sample_contents:
             try:
@@ -135,7 +50,7 @@ def create_project(request):
                     filename=sample_content['filename'],
                     description=sample_content['description'])
                 sample.save()
-                set_ab_id(sample, 'ABS')
+                _set_ab_id(sample, 'ABS')
             except Exception, e:
                 data['status'] = CREATE_FAILURE
                 data['error'] = "Create Sample error! please try again."
@@ -172,7 +87,7 @@ def update_project(request, abp_id):
                 sample.name = sc['name']
                 sample.description = sc['description']
                 sample.save()
-                set_ab_id(sample, 'ABS')
+                _set_ab_id(sample, 'ABS')
             except Exception as e:
                 raise e
                 data['status'] = CREATE_FAILURE
@@ -256,7 +171,6 @@ class ProjectDetail(AbomeDetailView):
 
         p = context['object']
         p_j = json.loads(serialize('json', [p])[1:-1])['fields']
-        p_j = json.loads(serialize('json', [p])[1:-1])['fields']
         user = self.request.user
         p_j['user'] = user.id
         s_qs = Sample.objects.filter(project=p).order_by('created')
@@ -320,21 +234,22 @@ def random_ab(request, abs_id):
                         content_type="application/json")
 
 
+#query matched antibodyomes(Ab) in this sample
 @require_http_methods(["GET"])
 def list_ab(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, \
-                            content_type="application/json")
-    job_id = s.job_id
+        return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
+                'specified sample: %s not exist' % abs_id)
+
     filters = request.GET.get('filters', '')
     if filters != '':
         filters = json.loads(filters)
     start = request.GET.get('start', 0)
     limit = request.GET.get('limit', 50)
     rr = RemoteRoot()
-    ab_li = rr.get_ab_list_no_count(job_id, filters=filters, \
+    ab_li = rr.get_ab_list_no_count(s.job_id, filters=filters, \
                                 start=start, limit=limit)
     res = []
     if ab_li is not None:
@@ -342,25 +257,27 @@ def list_ab(request, abs_id):
                 'j_gene_full']
         for e in ab_li:
             res.append(dict(zip(keys, e)))
-    return HttpResponse(json.dumps({'details': res}, \
-                cls=ComplexEncoder), content_type="application/json")
+        return general_json_response(res)
+    else:
+        return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
+                'No Abs matching your query, please try again.')
 
 
+#similar with list_ab, just that, it returns only count
 @require_http_methods(["GET"])
 def count_ab(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, \
-                            content_type="application/json")
-    job_id = s.job_id
+        return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
+                'specified sample: %s not exist' % abs_id)
+
     filters = request.GET.get('filters', '')
     if filters != '':
         filters = json.loads(filters)
     rr = RemoteRoot()
-    count = rr.get_ab_list_count(job_id, filters=filters)
-    return HttpResponse(json.dumps({'details': count}, \
-                cls=ComplexEncoder), content_type="application/json")
+    count = rr.get_ab_list_count(s.job_id, filters=filters)
+    return general_json_response(detail=count)
 
 
 @require_http_methods(["GET"])
