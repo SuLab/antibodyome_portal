@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django_extensions.db.fields import AutoSlugField
 import jsonfield
-from django.core.serializers import serialize
 from djorm_pgfulltext.fields import VectorField
 from djorm_pgfulltext.models import SearchManager
 
@@ -23,7 +22,7 @@ class Project(models.Model):
     lastmodified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     slug = AutoSlugField(populate_from='title')
-    
+
     STATUS_EDITING = 0
     STATUS_READY = 1
     STATUS_ANALYZING = 2
@@ -37,15 +36,16 @@ class Project(models.Model):
         (STATUS_ANALYZED, 'analyzed'),
         (STATUS_FAILED, 'analyze failed'),
     )
-    
     PERMISSION_PUBLIC = 0
     PERMISSION_PRIVATE = 1
     PERMISSION_OPTIONS = (
         (PERMISSION_PUBLIC, 'public'),
         (PERMISSION_PRIVATE, 'private'),
     )
-    permission = models.IntegerField(null=False, default=PERMISSION_PUBLIC, choices=PERMISSION_OPTIONS)
-    status = models.IntegerField(null=False, default=STATUS_EDITING, choices=STATUS_OPTIONS)
+    permission = models.IntegerField(null=False, default=PERMISSION_PUBLIC,\
+                                      choices=PERMISSION_OPTIONS)
+    status = models.IntegerField(null=False, default=STATUS_EDITING,\
+                                      choices=STATUS_OPTIONS)
     ready = models.BooleanField(default=False)
     search_index = VectorField()
 
@@ -54,15 +54,15 @@ class Project(models.Model):
 
     def __str__(self):
         return '"{}" by "{}"'.format(self.title, self.owner.username)
-    
-    #reset status of proj and its smpl to 'ready', 
+
+    #reset status of proj and its smpl to 'ready',
     def reset_status(self):
         self.status = self.STATUS_EDITING
         self.save()
         for s in self.sample_set.all():
             s.status = self.STATUS_READY
             s.save()
-    
+
     objects = ProjectManager()
 
     search_manager = SearchManager(
@@ -71,6 +71,7 @@ class Project(models.Model):
             search_field='search_index',
             auto_update_search_field=True
         )
+
 
 class Sample(models.Model):
     ab_id = models.CharField(max_length=20)
@@ -82,7 +83,8 @@ class Sample(models.Model):
     lastmodified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     uuid = models.CharField(max_length=256)
-    status = models.IntegerField(null=False, default=1, choices=Project.STATUS_OPTIONS)
+    status = models.IntegerField(null=False, default=1, \
+                                 choices=Project.STATUS_OPTIONS)
     job_id = models.CharField(max_length=256)
     search_index = VectorField()
 
@@ -94,5 +96,6 @@ class Sample(models.Model):
         search_field='search_index',
         auto_update_search_field=True
     )
+
     def __str__(self):
         return '"{}" for project "{}"'.format(self.name, self.project.title)
