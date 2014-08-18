@@ -250,6 +250,14 @@ function refresh_ab_list(p) {
                 closeBg();
                 set_waiting = false;
             }
+            $.ajax({
+                url : '/upload/count-ab/' + abs_id + '/',
+                type : 'GET',
+                dataType : 'json',
+                success : function(res) {
+                    $('#abs_count').text(res.details+'Abs in total');
+                }
+            });
         },
         error : function(res) {
             if (set_waiting == true)
@@ -260,16 +268,6 @@ function refresh_ab_list(p) {
             $('#list-ab-modal').modal('show');
         }
     });
-
-    $.ajax({
-        url : '/upload/count-ab/' + abs_id + '/',
-        type : 'GET',
-        dataType : 'json',
-        success : function(res) {
-            $('.abs_count').text(res.details);
-        }
-    });
-
 }
 
 function combine_light(kappa, lambda) {
