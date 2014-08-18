@@ -14,6 +14,7 @@ from django.db.models.query_utils import Q
 from upload.remote_data import RemoteRoot
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.views.generic.list import BaseListView
 
 
 CREATE_SUCCESS = 1
@@ -228,7 +229,8 @@ class ProjectList(AbomeListView):
         key = self.request.GET.get('key')
         user = self.request.user
         if key == 'all':
-            qs = Project.objects.filter(Q(owner=user) | Q(permission=0)).\
+            qs = Project.objects.filter(Q(owner=user) | \
+                            Q(permission=Project.PERMISSION_PUBLIC)).\
                    order_by('-lastmodified')
         elif key == 'owner':
             qs = Project.objects.filter(owner=user).order_by('-created')
@@ -358,7 +360,7 @@ def count_ab(request, abs_id):
     rr = RemoteRoot()
     count = rr.get_ab_list_count(job_id, filters=filters)
     return HttpResponse(json.dumps({'details': count}, \
-                cls=ComplexEncoder), content_type="application/json")    
+                cls=ComplexEncoder), content_type="application/json")
 
 
 @require_http_methods(["GET"])
@@ -420,11 +422,12 @@ def file_download(request):
     return response
 
 
-class ProjectSearch(AbomeListView):
+class ProjectSearch(BaseListView):
     model = Project
+    paginate_by = 10
 
     def get_queryset(self):
-        query = self.request.GET.get('q',None)
+        query = self.request.GET.get('q', None)
         if query is None:
             self.queryset = Project.objects.none()
             return self.queryset
@@ -441,11 +444,17 @@ class ProjectSearch(AbomeListView):
             ids_p.extend(list(ids_p2))
         if ids_s.count() > 0:
             ids_p.extend(list(ids_s))
-        self.queryset = Project.objects.filter(id__in=ids_p)
+        qs = Project.objects.filter(id__in=ids_p)
+        if self.request.user.is_authenticated():
+            self.queryset = qs.filter(Q(owner=self.request.user) | \
+                            Q(permission=Project.PERMISSION_PUBLIC)).\
+                   order_by('-id')
+        else:
+            self.queryset = qs.filter(Q(\
+              permission=Project.PERMISSION_PUBLIC)).order_by('-id')
         return self.queryset
 
     def render_to_response(self, context):
-
         res = {
             'detail': context['object_list'],
             'prev': context['page_obj'].has_previous(),
@@ -454,4 +463,3 @@ class ProjectSearch(AbomeListView):
         }
         return HttpResponse(json.dumps(res, cls=ComplexEncoder), \
                             content_type="application/json")
-

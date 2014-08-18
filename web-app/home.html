@@ -147,7 +147,7 @@
         <script type="text/x-jquery-tmpl" id="project-search-list-tmpl">
             <div>
                 <div style="background:#DDDDF2;padding:7px;">
-                    <a class="back-to-home" href="/web-app/home.html">&larr; back</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a class="back-to-home" href="/web-app/home.html">back</a>&nbsp;&nbsp;&nbsp;&nbsp;
                     Your query returns ${projects.count} records
                 </div>
                 <br>
@@ -158,7 +158,6 @@
                         <th>summary</th>
                         <th>platform</th>
                         <th>created time</th>
-
                     </tr>
                         {{each(i,project) projects.detail}}
                             <tr class="project-search-list" style="cursor: pointer;" id=${project.ab_id}>
@@ -170,10 +169,14 @@
                             </tr>
                         {{/each}}
                 </table>
-                <ul class="pager">
-                    <li class="search_previous disabled previous"><a href="#">&larr; Prev</a></li>
-                    <li class="search_next next"><a href="#">Next &rarr;</a></li>
-                </ul>
+                <div class="row">
+                    <div class="col-md-1 col-md-offset-5">
+                        <button type="button" class="btn btn-default disabled previous">prev</button>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-default disabled next">next</button>
+                    </div>
+                </div>
             </div>
         </script>
 </html>
