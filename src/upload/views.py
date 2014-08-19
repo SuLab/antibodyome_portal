@@ -220,6 +220,7 @@ def sample_ab(request, abs_id):
                             content_type="application/json")
 
 
+#get some Abs by random from this sample
 @require_http_methods(["GET"])
 def random_ab(request, abs_id):
     try:
@@ -236,7 +237,7 @@ def random_ab(request, abs_id):
 
 #query matched antibodyomes(Ab) in this sample
 @require_http_methods(["GET"])
-def list_ab(request, abs_id):
+def ab_list(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
@@ -257,7 +258,7 @@ def list_ab(request, abs_id):
                 'j_gene_full']
         for e in ab_li:
             res.append(dict(zip(keys, e)))
-        return general_json_response(res)
+        return general_json_response(detail=res)
     else:
         return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
                 'No Abs matching your query, please try again.')
@@ -265,7 +266,7 @@ def list_ab(request, abs_id):
 
 #similar with list_ab, just that, it returns only count
 @require_http_methods(["GET"])
-def count_ab(request, abs_id):
+def ab_count(request, abs_id):
     try:
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
