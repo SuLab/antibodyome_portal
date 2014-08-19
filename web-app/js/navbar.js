@@ -13,7 +13,7 @@ $.ajaxSetup({
     }
 });
 
-function onKeyDown() {
+function login_key_down() {
     if (event.keyCode == 13) {
         var username = $('#username').val();
         var password = $('#password').val();
@@ -123,14 +123,13 @@ $('#login-button').click(function() {
                 }
                 $('#error-login').removeClass('hide');
             }
-        })
+        });
     }
 });
 
 $.formUtils.addValidator({
     name : 'custom-confirm',
     validatorFunction : function(value, $el, config, language, $form) {
-        console.log($("#id_password1").text())
         return $("#id_password1").val() == $("#id_password2").val();
     },
     errorMessage : 'Values could not be confirmed',
@@ -194,13 +193,12 @@ $('#user-login').click(function() {
                     }
                     $('#error-login').removeClass('hide');
                 }
-            })
+            });
         }
     });
     $.formUtils.addValidator({
         name : 'custom-confirm',
         validatorFunction : function(value, $el, config, language, $form) {
-            console.log($("#id_password1").text())
             return $("#id_password1").val() == $("#id_password2").val();
         },
         errorMessage : 'Values could not be confirmed',
