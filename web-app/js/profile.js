@@ -157,20 +157,23 @@ $(document).ready(function() {
         $("#chart,#table").removeClass("active in");
         $("#heavy_tab, #light_tab").removeClass("active");
         $("#antibodyome_tab").addClass("active");
-        //
+
         current_page = 0;
         refresh_ab_list(current_page);
-        showBg('dialog','dialog_content');
     });
 
     $('.prev_page').click(function(){
         current_page = current_page-1;
         refresh_ab_list(current_page);
+        $('.prev_page').addClass('disabled');
+        $('.next_page').addClass('disabled');
     });
 
     $('.next_page').click(function(){
         current_page = current_page+1;
         refresh_ab_list(current_page);
+        $('.prev_page').addClass('disabled');
+        $('.next_page').addClass('disabled');
     });
 
     $('#list-ab-modal #cancel_modal').click(function(event) {
@@ -215,8 +218,6 @@ function refresh_ab_list(p) {
             closeBg();
             if (res.code != 0)
             {
-                $('.prev_page').addClass('disabled');
-                $('.next_page').addClass('disabled');
                 $('#list-ab-modal .modal-body').text(res.detail);
                 $('#list-ab-modal').modal('show');
                 return;
@@ -227,18 +228,12 @@ function refresh_ab_list(p) {
             {
                 $('.next_page').removeClass('disabled');
             }
-            else
-            {
-                $('.next_page').addClass('disabled');
-            }
+
             if(current_page > 0)
             {
                 $('.prev_page').removeClass('disabled');
             }
-            else
-            {
-                $('.prev_page').addClass('disabled');
-            }
+
             show_res = res.details.slice(0, PAGE_SIZE-1);
             $.each(res.details, function(i, e) {
                 html += '<tr class="ab_item" style="cursor: pointer;" onclick="window.location.href=\'abome_ab.html?abs_id=' + abs_id + '&abp_id=' + abp_id + '&ab=' + e.id + '\'"><td>' + e.id + '</td><td>' + e.v_gene_full + '</td><td>' + e.d_gene_full + '</td><td>' + e.j_gene_full + '</td></tr>';
