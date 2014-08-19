@@ -132,7 +132,7 @@ $(document).ready(function() {
         success : function(res) {
             if (res.code != 0)
             {
-                $('#list-ab-modal .modal-body').text(res.detail);
+                $('#list-ab-modal .modal-body').text(res.details);
                 $('#list-ab-modal').modal('show');
                 return;
             }
@@ -216,7 +216,7 @@ function refresh_ab_list(p) {
             closeBg();
             if (res.code != 0)
             {
-                $('#list-ab-modal .modal-body').text(res.detail);
+                $('#list-ab-modal .modal-body').text(res.details);
                 $('#list-ab-modal').modal('show');
                 return;
             }
@@ -556,7 +556,7 @@ function render_d3_bar(obj, total, selector) {
             var filter = {};
             var key = type[0].toLowerCase()+'_gene';
             filter[key] = {};
-            if (type=='j')
+            if (type=='Joining: ')
             {
                 filter[key].gene =g.substring(4);
                 if(a!='')
