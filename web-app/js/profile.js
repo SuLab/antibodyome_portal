@@ -242,6 +242,9 @@ function refresh_ab_list(p) {
             $.ajax({
                 url : '/upload/ab-count/' + abs_id + '/',
                 type : 'GET',
+                data : {
+                    'filters' : filter,
+                },
                 dataType : 'json',
                 success : function(res) {
                     if (res.code == 0)
@@ -587,7 +590,7 @@ function render_d3_bar(obj, total, selector) {
                 }
             }
             if (i >= is.length) {
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void();><i filter='+filter_str+'>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void(0);><i filter='+filter_str+'>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
             }
         }).text(function(d, i) {
             if (d.type == 'alleles')
