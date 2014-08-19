@@ -200,26 +200,6 @@ def ABProjectDetail(request, abp_id):
                         content_type="application/json")
 
 
-@require_http_methods(["GET"])
-def sample_ab(request, abs_id):
-    try:
-        s = Sample.objects.get(ab_id=abs_id)
-    except ObjectDoesNotExist:
-        return HttpResponse('no such sample', status=400, \
-                            content_type="application/json")
-    job_id = s.job_id
-    if job_id is not None:
-        rr = RemoteRoot()
-        res = rr.get_ab_data(job_id)
-        res['sample'] = {'name': s.name, 'desc': s.description, \
-                         'file': s.filename}
-        return HttpResponse(json.dumps(res, cls=ComplexEncoder), \
-                            content_type="application/json")
-    else:
-        return HttpResponse('fail', status=400, \
-                            content_type="application/json")
-
-
 #get some Abs by random from this sample
 @require_http_methods(["GET"])
 def random_ab(request, abs_id):
@@ -235,6 +215,22 @@ def random_ab(request, abs_id):
                         content_type="application/json")
 
 
+#return all Abs count info in this sample, for render the bar chart
+@require_http_methods(["GET"])
+def sample_ab(request, abs_id):
+    try:
+        s = Sample.objects.get(ab_id=abs_id)
+    except ObjectDoesNotExist:
+        return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
+                'Specified sample: %s not exist.' % abs_id)
+
+    rr = RemoteRoot()
+    res = rr.get_ab_data(s.job_id)
+    res['sample'] = {'name': s.name, 'desc': s.description, \
+                     'file': s.filename}
+    return general_json_response(detail=res)
+
+
 #query matched antibodyomes(Ab) in this sample
 @require_http_methods(["GET"])
 def ab_list(request, abs_id):
@@ -242,7 +238,7 @@ def ab_list(request, abs_id):
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
-                'specified sample: %s not exist' % abs_id)
+                'Specified sample: %s not exist.' % abs_id)
 
     filters = request.GET.get('filters', '')
     if filters != '':
@@ -271,7 +267,7 @@ def ab_count(request, abs_id):
         s = Sample.objects.get(ab_id=abs_id)
     except ObjectDoesNotExist:
         return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
-                'specified sample: %s not exist' % abs_id)
+                'Specified sample: %s not exist' % abs_id)
 
     filters = request.GET.get('filters', '')
     if filters != '':

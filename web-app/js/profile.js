@@ -126,12 +126,17 @@ $(document).ready(function() {
 
     $('#project-link').attr('href', '/web-app/project_detail.html?abp_id=' + abp_id);
     $("#svg-div").css("overflow", "hidden");
-
-    //showBg('dialog','dialog_content');
     $.ajax({
         url : '/upload/sample-ab/' + abs_id + '/',
         type : 'GET',
         success : function(res) {
+            if (res.code != 0)
+            {
+                $('#list-ab-modal .modal-body').text(res.detail);
+                $('#list-ab-modal').modal('show');
+                return;
+            }
+            res = res.details;
             $('#title').append(res.sample.name);
             $('#desc').append(res.sample.name);
             $('#file').append(res.sample.file);
@@ -143,12 +148,7 @@ $(document).ready(function() {
             p_l = data_process(light);
             render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
             render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
-          //  closeBg();
             refresh_ab_list(current_page);
-        },
-        error : function(res) {
-        //    closeBg();
-            $('#samp-ab-modal').modal('show');
         }
     });
 
@@ -160,6 +160,7 @@ $(document).ready(function() {
 
         current_page = 0;
         refresh_ab_list(current_page);
+        $('#abs_count').text('counting total Abs number...');
     });
 
     $('.prev_page').click(function(){
@@ -178,9 +179,6 @@ $(document).ready(function() {
 
     $('#list-ab-modal #cancel_modal').click(function(event) {
         $('#list-ab-modal').modal('hide');
-    });
-    $('#samp-ab-modal #cancel_modal').click(function(event) {
-        $('#samp-ab-modal').modal('hide');
     });
 });
 
