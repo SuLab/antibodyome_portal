@@ -81,6 +81,6 @@ class GENERAL_ERRORS:
 def general_json_response(code=0, detail=None):
     if detail is None:
         detail = GENERAL_ERRORS.default_error_message(code)
-    res = {'code': code, detail: detail}
+    res = {'code': code, 'detail': detail}
     return HttpResponse(json.dumps(res, cls=ComplexEncoder),\
                          content_type="application/json")
