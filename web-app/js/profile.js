@@ -149,9 +149,8 @@ $(document).ready(function() {
             p_l = data_process(light);
             render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
             render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
-            refresh_ab_list(current_page);
-            var total = res.heavy.total + res.kappa.total + res.lambda.total;
-            $('#abs_count').text(total+' Abs in total');
+            total_ab = res.heavy.total + res.kappa.total + res.lambda.total;
+            refresh_ab_list(current_page, true);
         }
     });
 
@@ -163,18 +162,18 @@ $(document).ready(function() {
 
         current_page = 0;
         update_filter();
-        refresh_ab_list(current_page);
+        refresh_ab_list(current_page, true);
         $('#abs_count').text('counting total Abs number...');
     });
 
     $('.prev_page').click(function(){
         current_page = current_page-1;
-        refresh_ab_list(current_page);
+        refresh_ab_list(current_page, false);
     });
 
     $('.next_page').click(function(){
         current_page = current_page+1;
-        refresh_ab_list(current_page);
+        refresh_ab_list(current_page, false);
     });
 
     $('#list-ab-modal #cancel_modal').click(function(event) {
@@ -206,7 +205,7 @@ function update_filter()
     }
 }
 
-function refresh_ab_list(p) {
+function refresh_ab_list(p, update_count) {
     var abs_id = $.urlParam('abs_id');
     var abp_id = $.urlParam('abp_id');
 
@@ -215,7 +214,7 @@ function refresh_ab_list(p) {
     $('.ab_list').html('');
     $('.prev_page').addClass('disabled');
     $('.next_page').addClass('disabled');
-    if (count_xhr != null)
+    if (count_xhr != null && update_count)
     {
         count_xhr.abort();
     }
@@ -254,7 +253,21 @@ function refresh_ab_list(p) {
             });
             html += '</tbody></table>';
             $('.ab_list').html(html);
+            if(!update_count)
+            {
+                return;
+            }
+            if (filter=='')
+            {
+                $('#abs_count').text(total_ab+' Abs in total');
+                return;
+            }
 
+            if(l<PAGE_SIZE)
+            {
+                $('#abs_count').text(l+' Abs in total');
+                return;
+            }
             count_xhr = $.ajax({
                 url : '/upload/ab-count/' + abs_id + '/',
                 type : 'GET',
