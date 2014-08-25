@@ -24,6 +24,7 @@ var bar_gap = {
 var PAGE_SIZE = 21;
 var current_page = 0;
 var next_page = false;
+var filter = '';
 //var pagination_init = false;
 
 var getRGBColorFromHex = function(color_num, type) {
@@ -111,8 +112,8 @@ function resetBg(){
         var tbT=objV.split("|")[0]+"px";
         var tbL=objV.split("|")[1]+"px";
         $("#dialog").css({top:tbT,left:tbL});
-                }
-            }
+    }
+}
 
 //关闭灰色JS遮罩层和操作窗口
 function closeBg(){
@@ -149,6 +150,8 @@ $(document).ready(function() {
             render_d3_bar(p_l['v'], light['total'], '.profile_v_l');
             render_d3_bar(p_l['j'], light['total'], '.profile_j_l');
             refresh_ab_list(current_page);
+            var total = res.heavy.total + res.kappa.total + res.lambda.total;
+            $('#abs_count').text(total+' Abs in total');
         }
     });
 
@@ -159,6 +162,7 @@ $(document).ready(function() {
         $("#antibodyome_tab").addClass("active");
 
         current_page = 0;
+        update_filter();
         refresh_ab_list(current_page);
         $('#abs_count').text('counting total Abs number...');
     });
@@ -184,27 +188,38 @@ $(document).ready(function() {
 
 var count_xhr=null;
 
-function refresh_ab_list(p) {
-    var abs_id = $.urlParam('abs_id');
-    var abp_id = $.urlParam('abp_id');
-    var filter = '';
+var extend = function(o, n, override) {
+    for (var p in n)
+    if (n.hasOwnProperty(p) && (!o.hasOwnProperty(p) || override))
+        o[p] = n[p];
+};
 
-    var extend = function(o, n, override) {
-        for (var p in n)
-        if (n.hasOwnProperty(p) && (!o.hasOwnProperty(p) || override))
-            o[p] = n[p];
-    };
-    $('.ab_list').html('');
+function update_filter()
+{
     var is = $(".random_list a i");
     if (is.length > 0) {
         var filter = {};
         for (var i = 0; i < is.length; i++) {
             extend(filter, JSON.parse(is.eq(i).attr('filter')));
         }
-        showBg('dialog','dialog_content');
-        set_waiting = true;
         filter = JSON.stringify(filter);
     }
+    else
+    {
+        filter='';
+    }
+}
+
+function refresh_ab_list(p) {
+    var abs_id = $.urlParam('abs_id');
+    var abp_id = $.urlParam('abp_id');
+
+    if(filter != '')
+    {
+        showBg('dialog','dialog_content');
+    }
+
+    $('.ab_list').html('');
     $.ajax({
         url : '/upload/ab-list/' + abs_id + '/',
         type : 'GET',
