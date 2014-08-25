@@ -198,11 +198,11 @@ function update_filter()
 {
     var is = $(".random_list a i");
     if (is.length > 0) {
-        var filter = {};
+        var dict = {};
         for (var i = 0; i < is.length; i++) {
-            extend(filter, JSON.parse(is.eq(i).attr('filter')));
+            extend(dict, JSON.parse(is.eq(i).attr('filter')));
         }
-        filter = JSON.stringify(filter);
+        filter = JSON.stringify(dict);
     }
     else
     {
