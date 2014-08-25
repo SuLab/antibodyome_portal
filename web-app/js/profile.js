@@ -182,6 +182,8 @@ $(document).ready(function() {
     });
 });
 
+var count_xhr=null;
+
 function refresh_ab_list(p) {
     var abs_id = $.urlParam('abs_id');
     var abp_id = $.urlParam('abp_id');
@@ -239,7 +241,11 @@ function refresh_ab_list(p) {
             html += '</tbody></table>';
             $('.ab_list').html(html);
 
-            $.ajax({
+            if (count_xhr != null)
+            {
+                count_xhr.abort();
+            }
+            count_xhr = $.ajax({
                 url : '/upload/ab-count/' + abs_id + '/',
                 type : 'GET',
                 data : {
@@ -247,6 +253,7 @@ function refresh_ab_list(p) {
                 },
                 dataType : 'json',
                 success : function(res) {
+                    count_xhr = null;
                     if (res.code == 0)
                         $('#abs_count').text(res.details+' Abs in total');
                 }
@@ -589,8 +596,15 @@ function render_d3_bar(obj, total, selector) {
                     break;
                 }
             }
+
+            if (type == 'Variable: ')
+                color = "#5cb85c";
+            else if(type=='Diversity: ')
+                color = "#f0ad4e";
+            else if(type=='Joining: ')
+                color = "#d9534f";
             if (i >= is.length) {
-                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px;" onclick="$(this).remove();" href=' + 'javascript:void(0);><i filter='+filter_str+'>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
+                $(".random_list").append('<a class="btn btn-default btn-xs" role="button" style="margin: 2px; background-color:'+color+';" onclick="$(this).remove();" href=' + 'javascript:void(0);><i filter='+filter_str+'>' + txt + '</i>&nbsp<span class="glyphicon glyphicon-remove"></span></a>');
             }
         }).text(function(d, i) {
             if (d.type == 'alleles')

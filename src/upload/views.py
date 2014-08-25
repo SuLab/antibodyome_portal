@@ -194,6 +194,7 @@ def ABProjectDetail(request, abp_id):
     p_j = json.loads(serialize('json', [p])[1:-1])['fields']
     user = request.user
     p_j['user'] = user.id
+    p_j['owner_name'] = p.owner.username
     s_qs = Sample.objects.filter(project=p).order_by('created')
     p_j['samples'] = list(s_qs.values())
     return HttpResponse(json.dumps(p_j, cls=ComplexEncoder), \

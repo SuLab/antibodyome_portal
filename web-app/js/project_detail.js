@@ -80,6 +80,7 @@ function renderProjectDetail(abp_id) {
             $('#platform').append(meta['platform']);
             $('#keywords').append(meta['keywords']);
             $('#summary').append(res.summary);
+            $('#owner').append(res.owner_name);
             var html2 = $("#sample-list-tmpl").tmpl({
                 'samples' : res.samples
             });
