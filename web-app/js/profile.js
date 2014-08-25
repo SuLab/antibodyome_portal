@@ -170,15 +170,11 @@ $(document).ready(function() {
     $('.prev_page').click(function(){
         current_page = current_page-1;
         refresh_ab_list(current_page);
-        $('.prev_page').addClass('disabled');
-        $('.next_page').addClass('disabled');
     });
 
     $('.next_page').click(function(){
         current_page = current_page+1;
         refresh_ab_list(current_page);
-        $('.prev_page').addClass('disabled');
-        $('.next_page').addClass('disabled');
     });
 
     $('#list-ab-modal #cancel_modal').click(function(event) {
@@ -214,12 +210,15 @@ function refresh_ab_list(p) {
     var abs_id = $.urlParam('abs_id');
     var abp_id = $.urlParam('abp_id');
 
-    if(filter != '')
-    {
-        showBg('dialog','dialog_content');
-    }
+    showBg('dialog','dialog_content');
 
     $('.ab_list').html('');
+    $('.prev_page').addClass('disabled');
+    $('.next_page').addClass('disabled');
+    if (count_xhr != null)
+    {
+        count_xhr.abort();
+    }
     $.ajax({
         url : '/upload/ab-list/' + abs_id + '/',
         type : 'GET',
@@ -256,10 +255,6 @@ function refresh_ab_list(p) {
             html += '</tbody></table>';
             $('.ab_list').html(html);
 
-            if (count_xhr != null)
-            {
-                count_xhr.abort();
-            }
             count_xhr = $.ajax({
                 url : '/upload/ab-count/' + abs_id + '/',
                 type : 'GET',
