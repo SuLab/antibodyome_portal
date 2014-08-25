@@ -251,6 +251,9 @@ def ab_list(request, abs_id):
                                 start=start, limit=limit)
     res = []
     if ab_li is not None:
+        if len(ab_li) == 0:
+            return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
+                'No Abs matching your query, please try again.')
         keys = ['id', 'v_gene_full', 'd_gene_full', \
                 'j_gene_full']
         for e in ab_li:
@@ -258,7 +261,7 @@ def ab_list(request, abs_id):
         return general_json_response(detail=res)
     else:
         return general_json_response(GENERAL_ERRORS.ERROR_NOT_FOUND,\
-                'No Abs matching your query, please try again.')
+                'Failed in query, please try again.')
 
 
 #similar with list_ab, just that, it returns only count
