@@ -526,9 +526,7 @@ function render_d3_bar(obj, total, selector) {
                 return ".5em";
             return ".7em";
         }).style("cursor", function(d, i) {
-            if (d.type == "family" || d.type == "genes")
-                return "pointer";
-            return "default";
+            return "pointer";
         }).style("fill", function(d) {
             return bar_color[0][d.type];
         }).style("font-size", function(d) {
